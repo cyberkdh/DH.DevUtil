@@ -4,6 +4,10 @@
 
 HMAC 시뮬레이터 (Base)는 메시지 바이트에 대한 HMAC을 계산하고, 생성 과정을 단계별로 확인할 수 있는 독립 학습 도구입니다.
 
+![HMAC Simulator (Base)](./images/DH.DevUtil.hmac-simulator-base.png)
+
+스크린샷에는 설명을 위한 예제 값만 사용했습니다. 실제 도구에서는 Client와 Server의 shared secret 입력이 기본적으로 숨겨집니다.
+
 ## 기능
 
 - HMAC-SHA-256, HMAC-SHA-384, HMAC-SHA-512 계산

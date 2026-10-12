@@ -4,6 +4,10 @@
 
 HMAC Simulator (Base) is a standalone, browser-based learning tool that calculates HMAC values over message bytes and exposes the construction steps for inspection.
 
+![HMAC Simulator (Base)](./images/DH.DevUtil.hmac-simulator-base.png)
+
+The screenshot uses synthetic sample values. Both shared-secret inputs are masked by default in the tool.
+
 ## Features
 
 - Calculate HMAC-SHA-256, HMAC-SHA-384, and HMAC-SHA-512.

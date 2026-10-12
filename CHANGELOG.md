@@ -9,9 +9,11 @@ Notable changes to DH.DevUtil are listed here. The newest changes appear first.
 ### Added
 
 - HMAC Simulator (Base), a browser-based learning tool for HMAC-SHA-256/384/512 with construction details and a Client → in-transit data → Server verification flow.
+- HMAC Simulator (Base) screenshot in the English and Korean tool guides.
 
 ### Improved
 
+- README labels tool links as source and explains that GitHub's code viewer does not run the HTML files.
 - JSON Parser recognizes valid Base64 values without trailing padding and reports why malformed Base64 data cannot be decoded.
 - JSON Parser validates embedded image data before reporting a successful preview and displays errors for corrupt or unsupported images.
 
