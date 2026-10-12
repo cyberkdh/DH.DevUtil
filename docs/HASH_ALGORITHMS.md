@@ -4,6 +4,8 @@
 
 [한국어 안내](./HASH_ALGORITHMS.ko.md)
 
+![File Hash Calculator](./images/file-hash-calculator.png)
+
 ## Cryptographic Hashes and XOFs
 
 | Family | Algorithm | Output | Description |

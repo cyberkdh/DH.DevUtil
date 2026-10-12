@@ -4,6 +4,8 @@
 
 [한국어 안내](./JSON_PARSER.ko.md)
 
+![JSON Parser](./images/json-parser-overview.png)
+
 ## Getting Started
 
 1. Open the HTML file in a web browser.
@@ -30,6 +32,8 @@ When a value is recognized as Base64, the `View as` menu lets you inspect and co
 - Hex
 - C# `byte[]` initializer
 - C++ `unsigned char` array
+
+![View as menu](./images/json-parser-view-as-menu.png)
 
 Base64 values without trailing `=` padding are also recognized. If a `data:...;base64,` value cannot be decoded, the `View as` menu shows the reason, such as invalid length, misplaced padding, or unexpected characters.
 

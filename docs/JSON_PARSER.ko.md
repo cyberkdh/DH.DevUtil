@@ -4,6 +4,8 @@
 
 [English](./JSON_PARSER.md)
 
+![JSON Parser](./images/json-parser-overview.png)
+
 ## 기본 사용법
 
 1. HTML 파일을 브라우저에서 엽니다.
@@ -30,6 +32,8 @@
 - Hex
 - C# `byte[]` initializer
 - C++ `unsigned char` array
+
+![View as 메뉴](./images/json-parser-view-as-menu.png)
 
 끝의 `=` 패딩(padding)이 없는 Base64 값도 인식합니다. `data:...;base64,` 값을 디코딩할 수 없으면 `View as` 메뉴에 잘못된 길이, 잘못된 패딩 위치, 허용되지 않는 문자 등 원인을 표시합니다.
 

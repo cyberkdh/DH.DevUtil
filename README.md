@@ -11,6 +11,16 @@ DH.DevUtil is a collection of lightweight utilities for everyday development tas
 | [JSON Parser](./tools/DH.DevUtil.json.html) | Validate and explore JSON as a tree or raw text. Supports formatting, minification, Base64 decoding, and image preview. See the [JSON Parser guide](./docs/JSON_PARSER.md). |
 | [File Hash Calculator](./tools/DH.DevUtil.hash.html) | Calculate cryptographic hashes, checksums, and non-cryptographic hashes for local files. Supports per-file results, copy, delete, output format selection, and download. See the [algorithm guide](./docs/HASH_ALGORITHMS.md). |
 
+## Screenshots
+
+**JSON Parser**
+
+![JSON Parser](./docs/images/json-parser-overview.png)
+
+**File Hash Calculator**
+
+![File Hash Calculator](./docs/images/file-hash-calculator.png)
+
 ## Getting Started
 
 1. Clone the repository or download the HTML file for the tool you want to use.

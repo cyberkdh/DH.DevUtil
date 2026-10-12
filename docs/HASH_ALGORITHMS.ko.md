@@ -4,6 +4,8 @@
 
 [English](./HASH_ALGORITHMS.md)
 
+![File Hash Calculator](./images/file-hash-calculator.png)
+
 ## 암호학적 해시 및 XOF
 
 | 계열 | 알고리즘 | 출력 길이 | 설명 |
