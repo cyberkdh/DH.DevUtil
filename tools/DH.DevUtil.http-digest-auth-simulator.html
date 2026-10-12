@@ -1,0 +1,734 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>HTTP Digest Authentication Simulator | DH.DevUtil</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #182230;
+      --muted: #5d6b7a;
+      --line: #d9e1e8;
+      --surface: #fff;
+      --canvas: #f3f6f9;
+      --blue: #155eef;
+      --blue-dark: #1249bd;
+      --green: #067647;
+      --red: #b42318;
+      --amber-bg: #fffaeb;
+      --amber-line: #fedf89;
+      --code: #f6f8fa;
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: var(--ink); background: var(--canvas); }
+    button, input, select, textarea { font: inherit; }
+    .shell { max-width: 1440px; margin: 0 auto; padding: 24px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+    .brand { display: inline-flex; gap: 10px; align-items: center; color: var(--ink); font-weight: 700; text-decoration: none; }
+    .brand-mark { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 9px; color: #fff; background: var(--blue); }
+    .topbar-note, .intro-copy, .hint, .footer-note { color: var(--muted); }
+    .intro { display: flex; justify-content: space-between; gap: 24px; align-items: end; margin-bottom: 20px; }
+    .eyebrow { margin: 0 0 8px; color: var(--blue); font-size: .78rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(1.8rem, 4vw, 2.5rem); letter-spacing: -.04em; }
+    .intro-copy { max-width: 520px; line-height: 1.55; }
+    .warning { display: flex; gap: 8px; padding: 13px 16px; border: 1px solid var(--amber-line); border-radius: 10px; background: var(--amber-bg); line-height: 1.5; }
+    .workspace { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 18px; align-items: start; }
+    .pane { min-width: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); box-shadow: 0 2px 6px #1822300a; }
+    .pane-head { display: flex; min-height: 64px; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+    .pane-title { margin: 0; font-size: 1rem; }
+    .pane-index { color: var(--muted); font-size: .75rem; font-weight: 700; }
+    .pane-content { display: grid; gap: 16px; padding: 18px; }
+    .field { display: grid; gap: 7px; min-width: 0; }
+    label, .field-label { font-size: .86rem; font-weight: 650; }
+    .checkbox-label { display: flex; align-items: center; gap: 8px; }
+    .checkbox-label input { width: auto; margin: 0; }
+    input, select, textarea { width: 100%; min-width: 0; padding: 10px 11px; border: 1px solid #c9d2dc; border-radius: 7px; color: var(--ink); background: #fff; }
+    input:focus, select:focus, textarea:focus, button:focus-visible { outline: 3px solid #84adff80; outline-offset: 1px; border-color: var(--blue); }
+    textarea { min-height: 112px; resize: vertical; }
+    .mono, textarea { font-family: Consolas, "Courier New", monospace; font-size: .82rem; }
+    .hint, .footer-note { margin: 0; font-size: .78rem; line-height: 1.5; }
+    .secret-row { display: flex; gap: 8px; }
+    .secret-row input { flex: 1; }
+    .button { min-height: 38px; padding: 8px 12px; border: 1px solid #c9d2dc; border-radius: 7px; color: var(--ink); background: #fff; cursor: pointer; font-weight: 650; }
+    .button:hover:not(:disabled) { background: #f3f6f9; }
+    .button:disabled { opacity: .55; cursor: not-allowed; }
+    .button-primary { border-color: var(--blue); color: #fff; background: var(--blue); }
+    .button-primary:hover:not(:disabled) { background: var(--blue-dark); }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .status { min-width: 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: 7px; color: var(--muted); background: #fafbfc; font-size: .83rem; line-height: 1.45; overflow-wrap: anywhere; }
+    .status[data-kind="success"] { color: var(--green); border-color: #abefc6; background: #ecfdf3; }
+    .status[data-kind="error"] { color: var(--red); border-color: #fecdca; background: #fef3f2; }
+    .result { padding: 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--code); }
+    .result-label { margin: 0 0 7px; color: var(--muted); font-size: .76rem; font-weight: 700; }
+    .result-value { overflow-wrap: anywhere; font-family: Consolas, "Courier New", monospace; font-size: .8rem; line-height: 1.5; }
+    details { border-top: 1px solid var(--line); padding-top: 12px; }
+    summary { cursor: pointer; font-size: .84rem; font-weight: 650; }
+    .steps { display: grid; gap: 10px; margin-top: 12px; }
+    .step { display: grid; gap: 5px; }
+    .step strong { font-size: .77rem; }
+    .step code { display: block; padding: 8px; border-radius: 6px; background: var(--code); overflow-wrap: anywhere; white-space: pre-wrap; }
+    .footer-note { padding: 0 18px 18px; }
+    .bottom-actions { display: flex; justify-content: flex-end; margin-top: 14px; }
+    .page-footer { display: flex; justify-content: space-between; gap: 20px; margin-top: 18px; padding: 13px 1px 0; border-top: 1px solid var(--line); color: var(--muted); font-size: .78rem; line-height: 1.5; }
+    @media (max-width: 1000px) { .workspace { grid-template-columns: 1fr 1fr; } .pane:last-child { grid-column: 1 / -1; } }
+    @media (max-width: 700px) { .shell { padding: 16px; } .intro { display: block; } .intro-copy { margin-bottom: 0; } .workspace { grid-template-columns: 1fr; } .pane:last-child { grid-column: auto; } .warning { display: block; } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="../README.md" aria-label="DH.DevUtil home">
+        <span class="brand-mark" aria-hidden="true">DH</span><span>DH.DevUtil</span>
+      </a>
+      <span class="topbar-note">HTTP authentication · Local simulator</span>
+    </header>
+    <main>
+      <section class="intro" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">RFC 7616 · Digest Access Authentication</p>
+          <h1 id="page-title">HTTP Digest Authentication Simulator</h1>
+        </div>
+        <p class="intro-copy">Explore the server challenge, client response, and server verification. Supported hash algorithms follow the RFC 7616 algorithm tokens.</p>
+      </section>
+      <aside class="warning" role="note">
+        <strong>Learning tool only.</strong>
+        <span>Use synthetic credentials only. Digest responses can expose password-derived material; this simulator is not a production authentication implementation and makes no network requests.</span>
+      </aside>
+      <section class="workspace" aria-label="HTTP Digest Authentication flow">
+        <section class="pane" aria-labelledby="challenge-title">
+          <header class="pane-head">
+            <h2 class="pane-title" id="challenge-title"><span class="pane-index">01</span> Server · Challenge</h2>
+            <span class="pane-index">WWW-Authenticate</span>
+          </header>
+          <div class="pane-content">
+            <div class="field">
+              <label for="algorithm">Hash algorithm</label>
+              <select id="algorithm">
+                <option value="MD5">MD5</option>
+                <option value="MD5-sess">MD5-sess</option>
+                <option value="SHA-256">SHA-256</option>
+                <option value="SHA-256-sess">SHA-256-sess</option>
+                <option value="SHA-512-256">SHA-512-256</option>
+                <option value="SHA-512-256-sess">SHA-512-256-sess</option>
+              </select>
+            </div>
+            <div class="field">
+              <span class="field-label">Character encoding</span>
+              <div class="status">UTF-8; username and password are normalized to Unicode NFC.</div>
+            </div>
+            <div class="field">
+              <label for="realm">Realm</label>
+              <input id="realm" autocomplete="off" value="http-auth@example.org">
+            </div>
+            <div class="field">
+              <label for="nonce">Nonce</label>
+              <input class="mono" id="nonce" autocomplete="off" value="7ypf/xlj9XXwfDPEoM4URrv/xwf94BcCAzFZH4GiTo0v">
+              <p class="hint">A challenge nonce is generated locally or can be edited for experiments.</p>
+            </div>
+            <div class="field">
+              <label for="opaque">Opaque (optional)</label>
+              <input class="mono" id="opaque" autocomplete="off" value="FQhe/qaU925kfnzjCev0ciny7QMkPqMAFRtzCUYo5tdS">
+            </div>
+            <div class="field">
+              <label class="checkbox-label" for="userhash"><input id="userhash" type="checkbox"> Enable username hashing (userhash=true)</label>
+              <p class="hint">The Authorization header sends H(username:realm) instead of the User ID.</p>
+            </div>
+            <div class="field">
+              <label for="qop">Quality of protection (qop)</label>
+              <select id="qop" aria-describedby="qop-hint">
+                <option value="auth">auth</option>
+              </select>
+              <p class="hint" id="qop-hint">This version implements qop=auth. qop=auth-int is not supported.</p>
+            </div>
+            <div class="actions">
+              <button class="button" id="load-example" type="button">Load RFC 7616 example</button>
+              <button class="button" id="new-nonce" type="button">Generate nonce</button>
+            </div>
+            <div class="result">
+              <p class="result-label">WWW-Authenticate challenge</p>
+              <div class="result-value" id="challenge-header"></div>
+            </div>
+            <div class="status" id="challenge-status" role="status" aria-live="polite">Configure the challenge, then calculate a Client response.</div>
+          </div>
+        </section>
+
+        <section class="pane" aria-labelledby="client-title">
+          <header class="pane-head">
+            <h2 class="pane-title" id="client-title"><span class="pane-index">02</span> Client · Response</h2>
+            <span class="pane-index">Authorization</span>
+          </header>
+          <div class="pane-content">
+            <div class="field">
+              <label for="username">User ID</label>
+              <input id="username" autocomplete="off" value="Mufasa">
+            </div>
+            <div class="field">
+              <label for="client-password">Password</label>
+              <div class="secret-row">
+                <input id="client-password" type="password" autocomplete="new-password">
+                <button class="button" id="toggle-client-password" type="button" aria-pressed="false">Show</button>
+              </div>
+            </div>
+            <div class="field">
+              <label for="method">HTTP method</label>
+              <input id="method" autocomplete="off" value="GET">
+            </div>
+            <div class="field">
+              <label for="uri">Request URI</label>
+              <input id="uri" autocomplete="off" value="/dir/index.html">
+            </div>
+            <div class="field">
+              <label for="nc">Nonce count (nc)</label>
+              <input id="nc" class="mono" autocomplete="off" value="00000001" maxlength="8">
+            </div>
+            <div class="field">
+              <label for="cnonce">Client nonce (cnonce)</label>
+              <input id="cnonce" class="mono" autocomplete="off" value="f2/wE4q74E6zIJEtWaHKaf5wv/H5QzzpXusqGemxURZJ">
+            </div>
+            <div class="actions">
+              <button class="button button-primary" id="calculate" type="button">Calculate response</button>
+            </div>
+            <div class="status" id="client-status" role="status" aria-live="polite">The selected challenge algorithm is used by the Client.</div>
+            <div id="client-result" hidden>
+              <div class="result">
+                <p class="result-label">Digest response</p>
+                <div class="result-value" id="response-value"></div>
+              </div>
+              <div class="result">
+                <p class="result-label">Authorization header</p>
+                <div class="result-value" id="header-value"></div>
+              </div>
+              <details>
+                <summary>Show Digest calculation steps</summary>
+                <div class="steps" id="steps"></div>
+              </details>
+            </div>
+          </div>
+          <p class="footer-note">The password is masked by default. Calculation steps show password-derived hashes; use sample credentials only.</p>
+        </section>
+
+        <section class="pane" aria-labelledby="server-title">
+          <header class="pane-head">
+            <h2 class="pane-title" id="server-title"><span class="pane-index">03</span> Server · Verify</h2>
+            <span class="pane-index">Local verifier</span>
+          </header>
+          <div class="pane-content">
+            <div class="field">
+              <label for="packet">Received Authorization data (editable)</label>
+              <textarea id="packet" spellcheck="false" placeholder="Calculate the Client response to populate this packet."></textarea>
+              <p class="hint">Edit fields to simulate changes in transit. Challenge parameters must match the current Server challenge.</p>
+            </div>
+            <div class="field">
+              <label for="server-username">Server account User ID</label>
+              <input id="server-username" autocomplete="off" placeholder="Defaults to the received username">
+              <p class="hint">Optional account lookup simulation. Leave blank to verify using the received username.</p>
+            </div>
+            <div class="field">
+              <label for="server-password">Server account password</label>
+              <div class="secret-row">
+                <input id="server-password" type="password" autocomplete="new-password">
+                <button class="button" id="toggle-server-password" type="button" aria-pressed="false">Show</button>
+              </div>
+              <p class="hint">Entered independently from the Client password; used only for local verification.</p>
+            </div>
+            <div class="actions">
+              <button class="button button-primary" id="verify" type="button">Verify response</button>
+            </div>
+            <div class="status" id="verify-status" role="status" aria-live="polite">No response received.</div>
+            <div id="server-result" hidden>
+              <div class="result">
+                <p class="result-label">Server calculation</p>
+                <div class="result-value" id="server-response-value"></div>
+              </div>
+              <details>
+                <summary>Show Server verification calculation steps</summary>
+                <div class="steps" id="server-steps"></div>
+              </details>
+            </div>
+          </div>
+          <p class="footer-note">The verification detail contains password-derived values. Use sample credentials only.</p>
+        </section>
+      </section>
+      <div class="bottom-actions">
+        <button class="button" id="clear" type="button">Clear all</button>
+      </div>
+    </main>
+    <footer class="page-footer">
+      <span>All Digest calculations and verification happen locally in your browser. No data is uploaded or stored.</span>
+      <span>HTTP Digest Authentication does not replace TLS or protect against offline password guessing. Use sample credentials only.</span>
+    </footer>
+  </div>
+  <script>
+    'use strict';
+
+    const SHA512_256_IV = [
+      '22312194fc2bf72c', '9f555fa3c84c64c2', '2393b86b6f53b151', '963877195940eabd',
+      '96283ee2a88effe3', 'be5e1e2553863992', '2b0199fc2c85b8aa', '0eb72ddc81c52ca2'
+    ].map(value => BigInt(`0x${value}`));
+    const SHA512_K = [
+      '428a2f98d728ae22', '7137449123ef65cd', 'b5c0fbcfec4d3b2f', 'e9b5dba58189dbbc',
+      '3956c25bf348b538', '59f111f1b605d019', '923f82a4af194f9b', 'ab1c5ed5da6d8118',
+      'd807aa98a3030242', '12835b0145706fbe', '243185be4ee4b28c', '550c7dc3d5ffb4e2',
+      '72be5d74f27b896f', '80deb1fe3b1696b1', '9bdc06a725c71235', 'c19bf174cf692694',
+      'e49b69c19ef14ad2', 'efbe4786384f25e3', '0fc19dc68b8cd5b5', '240ca1cc77ac9c65',
+      '2de92c6f592b0275', '4a7484aa6ea6e483', '5cb0a9dcbd41fbd4', '76f988da831153b5',
+      '983e5152ee66dfab', 'a831c66d2db43210', 'b00327c898fb213f', 'bf597fc7beef0ee4',
+      'c6e00bf33da88fc2', 'd5a79147930aa725', '06ca6351e003826f', '142929670a0e6e70',
+      '27b70a8546d22ffc', '2e1b21385c26c926', '4d2c6dfc5ac42aed', '53380d139d95b3df',
+      '650a73548baf63de', '766a0abb3c77b2a8', '81c2c92e47edaee6', '92722c851482353b',
+      'a2bfe8a14cf10364', 'a81a664bbc423001', 'c24b8b70d0f89791', 'c76c51a30654be30',
+      'd192e819d6ef5218', 'd69906245565a910', 'f40e35855771202a', '106aa07032bbd1b8',
+      '19a4c116b8d2d0c8', '1e376c085141ab53', '2748774cdf8eeb99', '34b0bcb5e19b48a8',
+      '391c0cb3c5c95a63', '4ed8aa4ae3418acb', '5b9cca4f7763e373', '682e6ff3d6b2b8a3',
+      '748f82ee5defb2fc', '78a5636f43172f60', '84c87814a1f0ab72', '8cc702081a6439ec',
+      '90befffa23631e28', 'a4506cebde82bde9', 'bef9a3f7b2c67915', 'c67178f2e372532b',
+      'ca273eceea26619c', 'd186b8c721c0c207', 'eada7dd6cde0eb1e', 'f57d4f7fee6ed178',
+      '06f067aa72176fba', '0a637dc5a2c898a6', '113f9804bef90dae', '1b710b35131c471b',
+      '28db77f523047d84', '32caab7b40c72493', '3c9ebe0a15c9bebc', '431d67c49c100d4c',
+      '4cc5d4becb3e42b6', '597f299cfc657e2a', '5fcb6fab3ad6faec', '6c44198c4a475817'
+    ].map(value => BigInt(`0x${value}`));
+
+    const el = id => document.getElementById(id);
+    const toHex = bytes => Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
+
+    function md5(bytes) {
+      const shifts = [7, 12, 17, 22, 5, 9, 14, 20, 4, 11, 16, 23, 6, 10, 15, 21];
+      const constants = Array.from({ length: 64 }, (_, index) => Math.floor(Math.abs(Math.sin(index + 1)) * 0x100000000) >>> 0);
+      const paddedLength = Math.ceil((bytes.length + 9) / 64) * 64;
+      const padded = new Uint8Array(paddedLength);
+      padded.set(bytes);
+      padded[bytes.length] = 0x80;
+      let bitLength = BigInt(bytes.length) * 8n;
+      for (let i = 0; i < 8; i += 1) {
+        padded[paddedLength - 8 + i] = Number(bitLength & 0xffn);
+        bitLength >>= 8n;
+      }
+      let a0 = 0x67452301, b0 = 0xefcdab89, c0 = 0x98badcfe, d0 = 0x10325476;
+      const words = new Uint32Array(16);
+      for (let offset = 0; offset < padded.length; offset += 64) {
+        for (let i = 0; i < 16; i += 1) {
+          const p = offset + i * 4;
+          words[i] = (padded[p] | padded[p + 1] << 8 | padded[p + 2] << 16 | padded[p + 3] << 24) >>> 0;
+        }
+        let a = a0, b = b0, c = c0, d = d0;
+        for (let i = 0; i < 64; i += 1) {
+          let f, g, shift;
+          if (i < 16) { f = (b & c) | (~b & d); g = i; shift = shifts[i % 4]; }
+          else if (i < 32) { f = (d & b) | (~d & c); g = (5 * i + 1) % 16; shift = shifts[4 + i % 4]; }
+          else if (i < 48) { f = b ^ c ^ d; g = (3 * i + 5) % 16; shift = shifts[8 + i % 4]; }
+          else { f = c ^ (b | ~d); g = (7 * i) % 16; shift = shifts[12 + i % 4]; }
+          const sum = (a + f + constants[i] + words[g]) >>> 0;
+          const rotated = (sum << shift | sum >>> (32 - shift)) >>> 0;
+          [a, d, c, b] = [d, c, b, (b + rotated) >>> 0];
+        }
+        a0 = (a0 + a) >>> 0; b0 = (b0 + b) >>> 0; c0 = (c0 + c) >>> 0; d0 = (d0 + d) >>> 0;
+      }
+      const output = new Uint8Array(16);
+      [a0, b0, c0, d0].forEach((word, index) => {
+        for (let i = 0; i < 4; i += 1) output[index * 4 + i] = word >>> (i * 8) & 0xff;
+      });
+      return output;
+    }
+
+    function sha512_256(bytes) {
+      const paddedLength = Math.ceil((bytes.length + 17) / 128) * 128;
+      const padded = new Uint8Array(paddedLength);
+      padded.set(bytes);
+      padded[bytes.length] = 0x80;
+      let bitLength = BigInt(bytes.length) * 8n;
+      for (let i = 0; i < 16; i += 1) {
+        padded[paddedLength - 1 - i] = Number(bitLength & 0xffn);
+        bitLength >>= 8n;
+      }
+      const mask = 0xffffffffffffffffn;
+      const rotr = (value, count) => (value >> BigInt(count) | value << BigInt(64 - count)) & mask;
+      const state = SHA512_256_IV.slice();
+      const schedule = new Array(80);
+      for (let offset = 0; offset < padded.length; offset += 128) {
+        for (let i = 0; i < 16; i += 1) {
+          let word = 0n;
+          for (let j = 0; j < 8; j += 1) word = word << 8n | BigInt(padded[offset + i * 8 + j]);
+          schedule[i] = word;
+        }
+        for (let i = 16; i < 80; i += 1) {
+          const x = schedule[i - 15], y = schedule[i - 2];
+          const s0 = rotr(x, 1) ^ rotr(x, 8) ^ (x >> 7n);
+          const s1 = rotr(y, 19) ^ rotr(y, 61) ^ (y >> 6n);
+          schedule[i] = (schedule[i - 16] + s0 + schedule[i - 7] + s1) & mask;
+        }
+        let [a, b, c, d, e, f, g, h] = state;
+        for (let i = 0; i < 80; i += 1) {
+          const sum1 = rotr(e, 14) ^ rotr(e, 18) ^ rotr(e, 41);
+          const choice = (e & f) ^ (~e & g);
+          const t1 = (h + sum1 + choice + SHA512_K[i] + schedule[i]) & mask;
+          const sum0 = rotr(a, 28) ^ rotr(a, 34) ^ rotr(a, 39);
+          const majority = (a & b) ^ (a & c) ^ (b & c);
+          const t2 = (sum0 + majority) & mask;
+          [h, g, f, e, d, c, b, a] = [g, f, e, (d + t1) & mask, c, b, a, (t1 + t2) & mask];
+        }
+        const working = [a, b, c, d, e, f, g, h];
+        for (let i = 0; i < 8; i += 1) state[i] = (state[i] + working[i]) & mask;
+      }
+      return state.slice(0, 4).map(word => word.toString(16).padStart(16, '0')).join('');
+    }
+
+    async function hashHex(algorithm, value) {
+      const bytes = new TextEncoder().encode(value);
+      if (algorithm.startsWith('MD5')) return toHex(md5(bytes));
+      if (algorithm.startsWith('SHA-512-256')) return sha512_256(bytes);
+      return toHex(new Uint8Array(await crypto.subtle.digest('SHA-256', bytes)));
+    }
+
+    async function makeDigest(fields, password) {
+      const isSession = fields.algorithm.endsWith('-sess');
+      const hashAlgorithm = fields.algorithm.replace(/-sess$/, '');
+      const username = fields.username.normalize('NFC');
+      const normalizedPassword = password.normalize('NFC');
+      const initialA1 = await hashHex(hashAlgorithm, `${username}:${fields.realm}:${normalizedPassword}`);
+      const a1 = isSession ? `${initialA1}:${fields.nonce}:${fields.cnonce}` : `${fields.username}:${fields.realm}:${password}`;
+      const ha1 = isSession ? await hashHex(hashAlgorithm, a1) : initialA1;
+      const a2 = `${fields.method}:${fields.uri}`;
+      const ha2 = await hashHex(hashAlgorithm, a2);
+      const responseSource = `${ha1}:${fields.nonce}:${fields.nc}:${fields.cnonce}:${fields.qop}:${ha2}`;
+      const response = await hashHex(hashAlgorithm, responseSource);
+      return { initialA1, a1, ha1, a2, ha2, responseSource, response };
+    }
+
+    function getChallengeFields() {
+      const fields = {
+        algorithm: el('algorithm').value,
+        realm: el('realm').value,
+        nonce: el('nonce').value,
+        opaque: el('opaque').value,
+          qop: el('qop').value,
+          userhash: el('userhash').checked
+      };
+      if (!fields.realm || !fields.nonce) throw new Error('Realm and nonce are required.');
+      if (fields.qop !== 'auth') throw new Error('Only qop=auth is supported.');
+      return fields;
+    }
+
+    function getClientFields() {
+      const fields = {
+        ...getChallengeFields(),
+        username: el('username').value.normalize('NFC'),
+        method: el('method').value.trim(),
+        uri: el('uri').value,
+        nc: el('nc').value,
+        cnonce: el('cnonce').value
+      };
+      if (!fields.username || fields.username.includes(':') || !fields.method || !fields.uri || !fields.cnonce) throw new Error('Username (without a colon), method, URI, and cnonce are required.');
+      if (!/^[0-9a-f]{8}$/i.test(fields.nc)) throw new Error('Nonce count must be exactly 8 hexadecimal digits.');
+      if (/[\r\n]/.test(fields.username + fields.realm + fields.nonce + fields.opaque + fields.method + fields.uri + fields.cnonce)) {
+        throw new Error('Line breaks are not allowed in Digest fields.');
+      }
+      return fields;
+    }
+
+    function quote(value) {
+      return `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+    }
+
+    function makeHeader(fields, response, transmittedUsername = fields.username) {
+      const pairs = [
+        `username=${quote(transmittedUsername)}`,
+        `realm=${quote(fields.realm)}`,
+        `uri=${quote(fields.uri)}`,
+        `algorithm=${fields.algorithm}`,
+        `nonce=${quote(fields.nonce)}`,
+        `nc=${fields.nc}`,
+        `cnonce=${quote(fields.cnonce)}`,
+        `qop=${fields.qop}`,
+        `response=${quote(response)}`
+      ];
+      if (fields.opaque) pairs.push(`opaque=${quote(fields.opaque)}`);
+      if (fields.userhash) pairs.push('userhash=true');
+      return `Authorization: Digest ${pairs.join(', ')}`;
+    }
+
+    function makeChallengeHeader(fields) {
+      const pairs = [
+        `realm=${quote(fields.realm)}`,
+        `nonce=${quote(fields.nonce)}`,
+        `algorithm=${fields.algorithm}`,
+        `qop=${quote(fields.qop)}`
+      ];
+      if (fields.opaque) pairs.push(`opaque=${quote(fields.opaque)}`);
+      if (fields.userhash) pairs.push('userhash=true');
+      pairs.push('charset=UTF-8');
+      return `WWW-Authenticate: Digest ${pairs.join(', ')}`;
+    }
+
+    function renderChallengeHeader() {
+      try {
+        el('challenge-header').textContent = makeChallengeHeader(getChallengeFields());
+      } catch (error) {
+        el('challenge-header').textContent = error.message;
+      }
+    }
+
+    function setStatus(element, message, kind = '') {
+      element.textContent = message;
+      element.dataset.kind = kind;
+    }
+
+    function addStep(container, title, value) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'step';
+      const label = document.createElement('strong');
+      label.textContent = title;
+      const code = document.createElement('code');
+      code.textContent = value;
+      wrapper.append(label, code);
+      container.append(wrapper);
+    }
+
+    function clearClientResult() {
+      el('client-result').hidden = true;
+      el('steps').replaceChildren();
+      el('packet').value = '';
+      clearServerResult();
+      setStatus(el('verify-status'), 'No response received.');
+    }
+
+    function clearServerResult() {
+      el('server-result').hidden = true;
+      el('server-response-value').textContent = '';
+      el('server-steps').replaceChildren();
+    }
+
+    async function calculate() {
+      clearClientResult();
+      try {
+        const fields = getClientFields();
+        if (!el('client-password').value) throw new Error('Enter the Client password.');
+        const result = await makeDigest(fields, el('client-password').value);
+        const transmittedUsername = fields.userhash
+          ? await hashHex(fields.algorithm.replace(/-sess$/, ''), `${fields.username}:${fields.realm}`)
+          : fields.username;
+        el('response-value').textContent = result.response;
+        el('header-value').textContent = makeHeader(fields, result.response, transmittedUsername);
+        const steps = el('steps');
+        addStep(steps, 'HA1 input', `${fields.username}:${fields.realm}:<password>`);
+        addStep(steps, 'Initial H(username:realm:password)', result.initialA1);
+        if (fields.algorithm.endsWith('-sess')) {
+          addStep(steps, 'Session A1 input', `${result.initialA1}:${fields.nonce}:${fields.cnonce}`);
+          addStep(steps, 'HA1 = H(session A1)', result.ha1);
+        } else {
+          addStep(steps, 'HA1', result.ha1);
+        }
+        addStep(steps, 'A2 = method:uri', result.a2);
+        addStep(steps, 'HA2 = H(A2)', result.ha2);
+        addStep(steps, 'Response input = HA1:nonce:nc:cnonce:qop:HA2', result.responseSource);
+        addStep(steps, 'Response', result.response);
+        if (fields.userhash) {
+          addStep(steps, 'Transmitted username = H(username:realm)', transmittedUsername);
+        }
+        el('client-result').hidden = false;
+        el('packet').value = JSON.stringify({ ...fields, username: transmittedUsername, response: result.response }, null, 2);
+        const rfcExpected = getRfcExampleExpected(fields, el('client-password').value);
+        if (rfcExpected && result.response !== rfcExpected) {
+          setStatus(el('client-status'), `RFC 7616 example mismatch. Expected ${rfcExpected}, calculated ${result.response}.`, 'error');
+        } else {
+          const suffix = rfcExpected ? ' Matches the published RFC 7616 example.' : '';
+          setStatus(el('client-status'), `Response calculated with ${fields.algorithm} and qop=${fields.qop}.${suffix}`, 'success');
+        }
+        setStatus(el('verify-status'), 'Client response copied into the editable received-data panel.');
+      } catch (error) {
+        setStatus(el('client-status'), error.message, 'error');
+      }
+    }
+
+    function safeEqual(left, right) {
+      let difference = left.length ^ right.length;
+      const max = Math.max(left.length, right.length);
+      for (let i = 0; i < max; i += 1) difference |= (left.charCodeAt(i) || 0) ^ (right.charCodeAt(i) || 0);
+      return difference === 0;
+    }
+
+    function getRfcExampleExpected(fields, password) {
+      if (fields.username !== 'Mufasa' || password !== 'Circle of Life' ||
+          fields.realm !== 'http-auth@example.org' ||
+          fields.nonce !== '7ypf/xlj9XXwfDPEoM4URrv/xwf94BcCAzFZH4GiTo0v' ||
+          fields.opaque !== 'FQhe/qaU925kfnzjCev0ciny7QMkPqMAFRtzCUYo5tdS' ||
+          fields.method !== 'GET' || fields.uri !== '/dir/index.html' ||
+          fields.nc !== '00000001' || fields.cnonce !== 'f2/wE4q74E6zIJEtWaHKaf5wv/H5QzzpXusqGemxURZJ' ||
+          fields.qop !== 'auth') return '';
+      if (fields.algorithm === 'MD5') return '8ca523f5e9506fed4657c9700eebdbec';
+      if (fields.algorithm === 'SHA-256') return '753927fa0e85d155564e2e272a28d1802ca10daf4496794697cf8db5856cb6c1';
+      return '';
+    }
+
+    async function verify() {
+      clearServerResult();
+      try {
+        const packet = JSON.parse(el('packet').value);
+        if (!packet || typeof packet !== 'object' || Array.isArray(packet)) throw new Error('Received data must be a JSON object.');
+        const challenge = getChallengeFields();
+        for (const key of ['algorithm', 'realm', 'nonce', 'opaque', 'qop', 'userhash']) {
+          if (packet[key] !== challenge[key]) throw new Error(`Received ${key} does not match the current Server challenge.`);
+        }
+        if (!['MD5', 'MD5-sess', 'SHA-256', 'SHA-256-sess', 'SHA-512-256', 'SHA-512-256-sess'].includes(packet.algorithm)) {
+          throw new Error('The received algorithm is not supported.');
+        }
+        if (typeof packet.username !== 'string' || !packet.username || packet.username.includes(':') || typeof packet.method !== 'string' || !packet.method ||
+            typeof packet.uri !== 'string' || !packet.uri || typeof packet.nc !== 'string' ||
+            !/^[0-9a-f]{8}$/i.test(packet.nc) || typeof packet.cnonce !== 'string' || !packet.cnonce ||
+            typeof packet.response !== 'string' || !/^[0-9a-f]+$/i.test(packet.response)) {
+          throw new Error('Received username, method, URI, nonce count, cnonce, or response is invalid.');
+        }
+        if (packet.username !== packet.username.normalize('NFC')) throw new Error('Received username must be Unicode NFC normalized for charset=UTF-8.');
+        if (/[\r\n]/.test(packet.username + packet.method + packet.uri + packet.cnonce)) throw new Error('Line breaks are not allowed in received fields.');
+        const serverUsername = el('server-username').value.normalize('NFC');
+        if (packet.userhash && !serverUsername) throw new Error('Enter the Server account User ID to verify a userhash response.');
+        const accountUsername = serverUsername || packet.username;
+        if (packet.userhash) {
+          const expectedUserhash = await hashHex(packet.algorithm.replace(/-sess$/, ''), `${accountUsername}:${packet.realm}`);
+          if (!safeEqual(packet.username.toLowerCase(), expectedUserhash.toLowerCase())) {
+            throw new Error('Received userhash does not match the Server account User ID and realm.');
+          }
+        } else if (serverUsername && serverUsername !== packet.username) {
+          throw new Error('Received username does not match the Server account User ID.');
+        }
+        if (!el('server-password').value) throw new Error('Enter the Server account password.');
+        const result = await makeDigest({ ...packet, username: accountUsername }, el('server-password').value);
+        el('server-response-value').textContent = result.response;
+        const steps = el('server-steps');
+        addStep(steps, 'Server account User ID', accountUsername);
+        if (packet.userhash) {
+          addStep(steps, 'Received username hash', packet.username);
+          addStep(steps, 'Server-calculated H(username:realm)', await hashHex(packet.algorithm.replace(/-sess$/, ''), `${accountUsername}:${packet.realm}`));
+        }
+        addStep(steps, 'Received response', packet.response);
+        addStep(steps, 'HA1 input', `${accountUsername}:${packet.realm}:<server password>`);
+        addStep(steps, 'Initial H(username:realm:password)', result.initialA1);
+        if (packet.algorithm.endsWith('-sess')) {
+          addStep(steps, 'Session A1 input', `${result.initialA1}:${packet.nonce}:${packet.cnonce}`);
+          addStep(steps, 'HA1 = H(session A1)', result.ha1);
+        } else {
+          addStep(steps, 'HA1', result.ha1);
+        }
+        addStep(steps, 'A2 = method:uri', result.a2);
+        addStep(steps, 'HA2 = H(A2)', result.ha2);
+        addStep(steps, 'Response input = HA1:nonce:nc:cnonce:qop:HA2', result.responseSource);
+        addStep(steps, 'Server-calculated response', result.response);
+        const isValid = safeEqual(packet.response.toLowerCase(), result.response.toLowerCase());
+        el('server-result').hidden = false;
+        setStatus(
+          el('verify-status'),
+          isValid
+            ? `Verified: received response matches the Server calculation (${packet.algorithm}, qop=${packet.qop}).`
+            : `Verification failed: received response does not match the Server calculation (${packet.algorithm}, qop=${packet.qop}).`,
+          isValid ? 'success' : 'error'
+        );
+      } catch (error) {
+        clearServerResult();
+        setStatus(el('verify-status'), error.message, 'error');
+      }
+    }
+
+    function setExample() {
+      el('algorithm').value = 'MD5';
+      el('userhash').checked = false;
+      el('realm').value = 'http-auth@example.org';
+      el('nonce').value = '7ypf/xlj9XXwfDPEoM4URrv/xwf94BcCAzFZH4GiTo0v';
+      el('opaque').value = 'FQhe/qaU925kfnzjCev0ciny7QMkPqMAFRtzCUYo5tdS';
+      el('qop').value = 'auth';
+      el('username').value = 'Mufasa';
+      el('server-username').value = 'Mufasa';
+      el('client-password').value = 'Circle of Life';
+      el('server-password').value = 'Circle of Life';
+      el('method').value = 'GET';
+      el('uri').value = '/dir/index.html';
+      el('nc').value = '00000001';
+      el('cnonce').value = 'f2/wE4q74E6zIJEtWaHKaf5wv/H5QzzpXusqGemxURZJ';
+      renderChallengeHeader();
+      clearClientResult();
+      setStatus(el('challenge-status'), 'RFC 7616 Section 3.9.1 example loaded. Calculate the response to compare it with the published value.');
+      setStatus(el('client-status'), 'RFC 7616 example values loaded; the password remains masked.');
+    }
+
+    function togglePassword(inputId, buttonId) {
+      const input = el(inputId), button = el(buttonId);
+      const showing = input.type === 'password';
+      input.type = showing ? 'text' : 'password';
+      button.textContent = showing ? 'Hide' : 'Show';
+      button.setAttribute('aria-pressed', String(showing));
+    }
+
+    el('calculate').addEventListener('click', calculate);
+    el('verify').addEventListener('click', verify);
+    el('load-example').addEventListener('click', setExample);
+    el('new-nonce').addEventListener('click', () => {
+      const bytes = crypto.getRandomValues(new Uint8Array(32));
+      el('nonce').value = btoa(String.fromCharCode(...bytes));
+      renderChallengeHeader();
+      clearClientResult();
+      setStatus(el('challenge-status'), 'Generated a new 256-bit nonce in this browser.');
+    });
+    el('toggle-client-password').addEventListener('click', () => togglePassword('client-password', 'toggle-client-password'));
+    el('toggle-server-password').addEventListener('click', () => togglePassword('server-password', 'toggle-server-password'));
+    for (const id of ['username', 'client-password', 'method', 'uri', 'nc', 'cnonce']) {
+      el(id).addEventListener('input', () => {
+        clearClientResult();
+        setStatus(el('client-status'), 'Client values changed. Calculate a new response.');
+      });
+    }
+    for (const id of ['packet', 'server-password', 'server-username']) {
+      el(id).addEventListener('input', () => {
+        clearServerResult();
+        setStatus(el('verify-status'), 'Received data or Server account values changed. Verify again.');
+      });
+    }
+    el('clear').addEventListener('click', () => {
+      for (const id of ['username', 'client-password', 'server-password', 'server-username', 'method', 'uri', 'nc', 'cnonce', 'packet']) el(id).value = '';
+      el('realm').value = '';
+      el('nonce').value = '';
+      el('opaque').value = '';
+      el('algorithm').value = 'MD5';
+      el('qop').value = 'auth';
+      el('userhash').checked = false;
+      renderChallengeHeader();
+      for (const [inputId, buttonId] of [['client-password', 'toggle-client-password'], ['server-password', 'toggle-server-password']]) {
+        el(inputId).type = 'password';
+        el(buttonId).textContent = 'Show';
+        el(buttonId).setAttribute('aria-pressed', 'false');
+      }
+      clearClientResult();
+      setStatus(el('challenge-status'), 'All inputs and results were cleared.');
+      setStatus(el('client-status'), 'Enter the challenge and Client values.');
+    });
+    for (const id of ['algorithm', 'realm', 'nonce', 'opaque', 'qop', 'userhash']) {
+      el(id).addEventListener('input', () => {
+        renderChallengeHeader();
+        clearClientResult();
+        setStatus(el('challenge-status'), 'Challenge changed. Calculate a new Client response.');
+      });
+      el(id).addEventListener('change', renderChallengeHeader);
+    }
+    renderChallengeHeader();
+
+    async function selfTest() {
+      const tests = [
+        ['MD5', 'abc', '900150983cd24fb0d6963f7d28e17f72'],
+        ['SHA-256', 'abc', 'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad'],
+        ['SHA-512-256', 'abc', '53048e2681941ef99b2e29b76b4c7dabe4c2d0c634fc6d46e0e2f13107e7af23']
+      ];
+      for (const [algorithm, input, expected] of tests) {
+        const actual = await hashHex(algorithm, input);
+        if (actual !== expected) throw new Error(`${algorithm} primitive self-test failed.`);
+      }
+    }
+
+    selfTest().catch(error => {
+      el('calculate').disabled = true;
+      el('verify').disabled = true;
+      setStatus(el('challenge-status'), error.message, 'error');
+      setStatus(el('client-status'), 'Cryptographic primitive self-test failed; calculations are disabled.', 'error');
+    });
+  </script>
+</body>
+</html>

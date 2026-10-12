@@ -8,11 +8,15 @@ Notable changes to DH.DevUtil are listed here. The newest changes appear first.
 
 ### Added
 
+- HTTP Digest Authentication Simulator, a local RFC 7616 challenge-response and verification learning tool supporting all six registered algorithm tokens with `qop=auth`.
+- HTTP Digest Authentication Simulator supports the RFC 7616 `userhash=true` option.
+- Add the HTTP Digest Simulator screenshot to the English and Korean READMEs and tool guides.
 - HMAC Simulator (Base), a browser-based learning tool for HMAC-SHA-256/384/512 with construction details and a Client → in-transit data → Server verification flow.
 - HMAC Simulator (Base) screenshot in the English and Korean tool guides.
 
 ### Improved
 
+- HTTP Digest Authentication Simulator shows Server-side calculation details for successful and failed response verification.
 - README notes that Ctrl-click opens GitHub Pages live demos in a new tab because GitHub strips custom link targets.
 - README distinguishes GitHub Pages live demos from source-code links.
 - README explains that GitHub's code viewer does not run the HTML files.
