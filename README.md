@@ -12,6 +12,7 @@ DH.DevUtil is a collection of lightweight utilities for everyday development tas
 | File Hash Calculator | Calculate cryptographic hashes, checksums, and non-cryptographic hashes for local files. | [Run (Ctrl-click for a new tab)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.hash.html) | [View source](./tools/DH.DevUtil.hash.html) | [Algorithms and guide](./docs/HASH_ALGORITHMS.md) |
 | HMAC Simulator (Base) | Calculate and verify HMAC tags and explore the Client → in-transit data → Server flow. | [Run (Ctrl-click for a new tab)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.hmac-simulator-base.html) | [View source](./tools/DH.DevUtil.hmac-simulator-base.html) | [Guide](./docs/HMAC_SIMULATOR.md) |
 | HTTP Digest Authentication Simulator | Simulate RFC 7616 challenges, Digest responses, and server verification. | [Run (Ctrl-click for a new tab)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.http-digest-auth-simulator.html) | [View source](./tools/DH.DevUtil.http-digest-auth-simulator.html) | [Guide](./docs/HTTP_DIGEST_AUTH_SIMULATOR.md) |
+| JWT Inspector | Generate demo JWTs with HS256, parse compact JWTs, and verify HS256 signatures. | [Run (Ctrl-click for a new tab)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.jwt-inspector.html) | [View source](./tools/DH.DevUtil.jwt-inspector.html) | [Guide](./docs/JWT_INSPECTOR.md) |
 
 Live demos run the static HTML tools on GitHub Pages. The source links open the HTML files in GitHub's code viewer; they do not run the tools. To use a tool offline, download its HTML file or clone the repository and open it in a browser.
 
@@ -21,11 +22,18 @@ Explore the RFC 7616 challenge, Client response calculation, Server verification
 
 ![HTTP Digest Authentication Simulator preview](./docs/images/DH.DevUtil.http-digest-auth-simulator.png)
 
+## JWT Inspector preview
+
+Generate demo JWTs, parse compact tokens, and inspect HS256 signature verification details. See the [JWT Inspector guide](./docs/JWT_INSPECTOR.md) for features and usage.
+
+![JWT Inspector preview](./docs/images/DH.DevUtil.jwt-inspector.png)
+
 ## Important
 
 - Tools process input in the current browser and do not upload it to a DH.DevUtil server.
 - Do not enter production secrets or credentials in HMAC Simulator (Base). It intentionally displays key-derived intermediate values.
 - Do not enter production passwords or credentials in HTTP Digest Authentication Simulator. Digest responses and calculation steps contain password-derived values.
+- Do not enter production JWTs, personally identifiable claims, or production signing keys in JWT Inspector.
 - Legacy hashes and non-cryptographic checksums are not suitable for security against malicious changes. See the [hash security notes](./docs/HASH_ALGORITHMS.md).
 - When using a downloaded copy or embedding a tool in another page, verify and trust its source and the surrounding browser environment.
 
