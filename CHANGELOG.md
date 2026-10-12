@@ -13,7 +13,7 @@ Notable changes to DH.DevUtil are listed here. The newest changes appear first.
 
 ### Improved
 
-- Live demo links in both READMEs open in a new tab.
+- README notes that Ctrl-click opens GitHub Pages live demos in a new tab because GitHub strips custom link targets.
 - README distinguishes GitHub Pages live demos from source-code links.
 - README explains that GitHub's code viewer does not run the HTML files.
 - JSON Parser recognizes valid Base64 values without trailing padding and reports why malformed Base64 data cannot be decoded.

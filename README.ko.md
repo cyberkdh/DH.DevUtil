@@ -8,9 +8,9 @@ DH.DevUtil은 일상적인 개발 작업에 사용하는 가벼운 유틸리티 
 
 | 도구 | 기능 | 온라인 실행 | 소스 | 안내 |
 |---|---|---|---|---|
-| JSON Parser | JSON 검증·탐색·형식화·축약, Base64 값 확인 및 내장 이미지 미리보기 | <a href="https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.json.html" target="_blank" rel="noopener noreferrer">실행</a> | [소스 보기](./tools/DH.DevUtil.json.html) | [사용 안내](./docs/JSON_PARSER.ko.md) |
-| File Hash Calculator | 로컬 파일의 암호학적 해시, 체크섬 및 비암호학 해시 계산 | <a href="https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.hash.html" target="_blank" rel="noopener noreferrer">실행</a> | [소스 보기](./tools/DH.DevUtil.hash.html) | [알고리즘 및 사용 안내](./docs/HASH_ALGORITHMS.ko.md) |
-| HMAC Simulator (Base) | HMAC 태그를 계산·검증하고 Client → 전달 데이터 → Server 흐름을 확인 | <a href="https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.hmac-simulator-base.html" target="_blank" rel="noopener noreferrer">실행</a> | [소스 보기](./tools/DH.DevUtil.hmac-simulator-base.html) | [사용 안내](./docs/HMAC_SIMULATOR.ko.md) |
+| JSON Parser | JSON 검증·탐색·형식화·축약, Base64 값 확인 및 내장 이미지 미리보기 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.json.html) | [소스 보기](./tools/DH.DevUtil.json.html) | [사용 안내](./docs/JSON_PARSER.ko.md) |
+| File Hash Calculator | 로컬 파일의 암호학적 해시, 체크섬 및 비암호학 해시 계산 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.hash.html) | [소스 보기](./tools/DH.DevUtil.hash.html) | [알고리즘 및 사용 안내](./docs/HASH_ALGORITHMS.ko.md) |
+| HMAC Simulator (Base) | HMAC 태그를 계산·검증하고 Client → 전달 데이터 → Server 흐름을 확인 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.hmac-simulator-base.html) | [소스 보기](./tools/DH.DevUtil.hmac-simulator-base.html) | [사용 안내](./docs/HMAC_SIMULATOR.ko.md) |
 
 온라인 데모는 GitHub Pages에서 정적 HTML 도구를 실행합니다. 소스 링크는 GitHub에서 HTML 코드를 보여줄 뿐 도구를 실행하지 않습니다. 오프라인으로 사용하려면 HTML 파일을 내려받거나 저장소를 clone한 뒤 브라우저에서 여세요.
 
