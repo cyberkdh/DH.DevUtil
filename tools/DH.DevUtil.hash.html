@@ -1,0 +1,1594 @@
+<!--
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//	Projects		: DH.DevUtil
+//	Author			: CYBERKDH
+//	Module			: File Hash Calculator
+//	History			: 2026-10-12 Initial implementation
+//	Copyrights		: Copyright (C)CYBERKDH. All Rights Reserved.
+//////////////////////////////////////////////////////////////////////////////////////////////////
+-->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f7f4">
+  <title>File Hash Calculator | DH.DevUtil</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --page: #f5f7f4;
+      --paper: #ffffff;
+      --ink: #172a24;
+      --muted: #71817a;
+      --line: #dce5df;
+      --green: #12694f;
+      --green-dark: #0d513d;
+      --green-soft: #e3f2e9;
+      --coral: #dc7254;
+      --coral-soft: #fff0e9;
+      --code: #f9fbf9;
+      --mono: "Cascadia Code", "Cascadia Mono", Consolas, monospace;
+      --sans: "Segoe UI Variable", "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      min-height: 100vh;
+      background:
+        radial-gradient(ellipse at 2% 5%, rgba(209, 232, 216, .52), transparent 31rem),
+        radial-gradient(ellipse at 100% 100%, rgba(255, 225, 210, .34), transparent 28rem),
+        var(--page);
+      color: var(--ink);
+      font-family: var(--sans);
+    }
+
+    button, input { font: inherit; }
+
+    .shell { width: min(1440px, 100%); min-height: 100vh; margin: 0 auto; padding: 0 36px 20px; }
+    .topbar { height: 68px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); }
+    .brand { display: inline-flex; align-items: center; gap: 11px; color: var(--ink); font-size: 14px; font-weight: 750; text-decoration: none; letter-spacing: .02em; }
+    .brand-mark { display: grid; width: 28px; height: 28px; place-items: center; border-radius: 6px; background: var(--green); color: white; font: 700 11px var(--mono); }
+    .topbar-note { color: var(--muted); font: 11px var(--mono); letter-spacing: .06em; text-transform: uppercase; }
+    main { display: flex; min-height: 0; flex-direction: column; padding-top: 24px; }
+    .intro { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 18px; }
+    .eyebrow { margin: 0 0 8px; color: var(--green); font: 700 11px var(--mono); letter-spacing: .09em; text-transform: uppercase; }
+    h1 { margin: 0; font: 650 30px/1.14 Georgia, "Times New Roman", serif; }
+    .intro-copy { max-width: 480px; margin: 0 0 2px; color: var(--muted); font-size: 13px; line-height: 1.65; }
+    .button { min-height: 34px; padding: 0 12px; border: 1px solid var(--line); border-radius: 5px; background: white; color: var(--ink); cursor: pointer; font-size: 12px; font-weight: 650; transition: background-color .16s ease, border-color .16s ease, transform .16s ease; }
+    .button:hover:not(:disabled) { border-color: #9ab6a6; background: #f7faf7; }
+    .button:active:not(:disabled) { transform: translateY(1px); }
+    .button:disabled { cursor: not-allowed; opacity: .5; }
+    .button:focus-visible, input:focus-visible { outline: 2px solid #70a98b; outline-offset: 2px; }
+    .button-primary { border-color: var(--green); background: var(--green); color: white; }
+    .button-primary:hover:not(:disabled) { border-color: var(--green-dark); background: var(--green-dark); }
+    .button-quiet { border-color: transparent; background: transparent; color: var(--muted); }
+    .button-quiet:hover:not(:disabled) { border-color: var(--line); color: var(--ink); }
+
+    .workspace { display: grid; grid-template-columns: minmax(260px, .72fr) minmax(0, 1.6fr); overflow: hidden; border: 1px solid var(--line); background: var(--paper); }
+    .pane { display: flex; min-width: 0; flex-direction: column; }
+    .pane + .pane { border-left: 1px solid var(--line); }
+    .pane-head { min-height: 49px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 16px; border-bottom: 1px solid var(--line); }
+    .pane-title { display: flex; align-items: center; gap: 9px; margin: 0; font-size: 12px; font-weight: 700; }
+    .pane-index { color: #93a199; font: 11px var(--mono); }
+    .pane-meta { color: var(--muted); font: 11px var(--mono); }
+    .drop-zone { display: grid; min-height: 196px; place-content: center; gap: 7px; margin: 16px; padding: 20px; border: 1px dashed #aebdb4; border-radius: 5px; background: var(--code); text-align: center; transition: border-color .15s ease, background-color .15s ease; }
+    .drop-zone.drag-active { border: 2px dashed var(--green); background: var(--green-soft); }
+    .drop-icon { color: var(--green); font: 26px var(--mono); }
+    .drop-title { margin: 0; font-size: 13px; font-weight: 700; }
+    .drop-hint { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
+    .drop-actions { display: flex; justify-content: center; margin-top: 7px; }
+    .file-input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; clip-path: inset(50%); }
+    .algorithm-section { padding: 0 16px 16px; }
+    .section-label { margin: 3px 0 9px; color: var(--muted); font: 700 10px var(--mono); letter-spacing: .07em; text-transform: uppercase; }
+    .algorithm-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+    .algorithm-option { display: flex; min-height: 33px; align-items: center; gap: 8px; padding: 0 8px; border: 1px solid var(--line); border-radius: 4px; background: white; cursor: pointer; font: 11px var(--mono); }
+    .algorithm-option:has(input:checked) { border-color: #9dc6ad; background: #f1f8f3; color: var(--green-dark); }
+    .algorithm-option input { width: 14px; height: 14px; margin: 0; accent-color: var(--green); }
+    .algorithm-note { margin: 9px 0 0; color: var(--muted); font-size: 10px; line-height: 1.55; }
+    .panel-actions { display: flex; flex-wrap: wrap; gap: 7px; padding: 12px 16px; border-top: 1px solid var(--line); background: #fbfcfb; }
+    .results-toolbar { display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding: 8px 12px; border-bottom: 1px solid var(--line); background: #fbfcfb; }
+    .file-result-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 6px; }
+    .format-control { display: inline-flex; align-items: center; gap: 7px; color: var(--muted); font-size: 11px; white-space: nowrap; }
+    .format-control select { height: 30px; padding: 0 25px 0 8px; border: 1px solid var(--line); border-radius: 4px; background: white; color: var(--ink); font-size: 11px; }
+    .results-wrap { min-height: 280px; max-height: min(68vh, 760px); overflow: auto; }
+    .empty-state { display: grid; min-height: 280px; place-content: center; gap: 7px; padding: 20px; color: var(--muted); text-align: center; }
+    .empty-state[hidden], #results-list[hidden] { display: none; }
+    .empty-state strong { color: #53675d; font-size: 12px; }
+    .empty-state span { font-size: 11px; }
+    .file-result { border-bottom: 1px solid var(--line); }
+    .file-result:last-child { border-bottom: 0; }
+    .file-result-head { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; border-bottom: 1px solid #e8eeea; background: #fbfcfb; }
+    .file-result-info { min-width: 0; }
+    .file-name { display: block; max-width: 360px; overflow: hidden; color: var(--ink); font-size: 11px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
+    .file-size { display: block; margin-top: 4px; color: var(--muted); font: 10px var(--mono); }
+    .result-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 11px; }
+    .result-table th, .result-table td { padding: 9px 12px; border-bottom: 1px solid #eef2ef; text-align: left; vertical-align: top; }
+    .result-table th { color: var(--muted); font: 700 10px var(--mono); letter-spacing: .04em; text-transform: uppercase; }
+    .result-table th:first-child { width: 120px; }
+    .result-table th:last-child { width: 116px; }
+    .hash-value { display: block; overflow-wrap: anywhere; color: #28523f; font: 10px/1.6 var(--mono); }
+    .hash-error { color: #a64e3b; }
+    .copy-button { min-height: 27px; padding: 0 8px; font-size: 10px; }
+    .delete-button { min-width: 27px; min-height: 27px; padding: 0 6px; color: #9c5545; font-size: 12px; }
+    .delete-button:hover:not(:disabled) { border-color: #e2b7aa; background: var(--coral-soft); }
+    .no-results { padding: 12px; color: #89968f; font-size: 11px; font-style: italic; }
+    .statusbar { min-height: 49px; display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 8px 15px; border: 1px solid var(--line); border-top: 0; background: #fbfcfb; }
+    .status-message { display: flex; min-width: 0; align-items: center; gap: 9px; }
+    .status-dot { width: 8px; height: 8px; flex: 0 0 auto; border-radius: 50%; background: #a0aaa4; }
+    .status-dot.valid { background: #27966c; box-shadow: 0 0 0 3px #e4f3eb; }
+    .status-dot.invalid { background: var(--coral); box-shadow: 0 0 0 3px var(--coral-soft); }
+    .status-text { overflow: hidden; color: var(--muted); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+    .status-text strong { color: var(--ink); }
+    .metrics { display: flex; flex: 0 0 auto; align-items: center; justify-content: end; gap: clamp(12px, 2vw, 28px); }
+    .metric { display: flex; gap: 6px; color: var(--muted); font: 10px var(--mono); white-space: nowrap; }
+    .metric output { color: var(--ink); }
+    .footnote { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 13px 1px 0; color: var(--muted); font-size: 11px; }
+    .toast { position: fixed; right: 24px; bottom: 22px; z-index: 2; padding: 11px 15px; border-radius: 5px; background: var(--ink); color: white; font-size: 12px; opacity: 0; pointer-events: none; transform: translateY(7px); transition: opacity .18s ease, transform .18s ease; }
+    .toast.visible { opacity: 1; transform: translateY(0); }
+
+    @media (min-width: 1200px) {
+      .workspace { grid-template-columns: minmax(400px, 1fr) minmax(0, 1.6fr); }
+      .drop-zone { min-height: 132px; padding: 14px; }
+      .algorithm-list { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; }
+      .algorithm-option { gap: 6px; padding: 0 6px; font-size: 10px; overflow-wrap: anywhere; }
+      .algorithm-option input { flex: 0 0 auto; }
+    }
+    @media (max-width: 900px) {
+      .workspace { grid-template-columns: minmax(250px, .85fr) minmax(0, 1.3fr); }
+      .metrics { gap: 12px; }
+    }
+    @media (max-width: 760px) {
+      .shell { padding: 0 18px 16px; }
+      main { padding-top: 18px; }
+      .intro { align-items: start; flex-direction: column; gap: 12px; }
+      .workspace { grid-template-columns: minmax(0, 1fr); }
+      .pane + .pane { border-top: 1px solid var(--line); border-left: 0; }
+      .drop-zone { min-height: 150px; }
+      .statusbar { align-items: flex-start; flex-direction: column; }
+      .metrics { width: 100%; justify-content: space-between; }
+    }
+    @media (max-width: 430px) {
+      .shell { padding-right: 12px; padding-left: 12px; }
+      .topbar-note { font-size: 9px; }
+      h1 { font-size: 27px; }
+      .pane-head { padding: 0 12px; }
+      .algorithm-section { padding-right: 12px; padding-left: 12px; }
+      .panel-actions { padding-right: 12px; padding-left: 12px; }
+      .file-result-head { align-items: flex-start; flex-direction: column; }
+      .file-result-actions { justify-content: flex-start; }
+      .result-table th, .result-table td { padding: 9px 8px; }
+      .footnote { align-items: stretch; flex-direction: column; gap: 7px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="DH.DevUtil home">
+        <span class="brand-mark" aria-hidden="true">DH</span>
+        <span>DH.DevUtil</span>
+      </a>
+      <span class="topbar-note">Developer Utilities / 02</span>
+    </header>
+
+    <main>
+      <section class="intro" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">FILE TOOL / 02</p>
+          <h1 id="page-title">File Hash Calculator</h1>
+        </div>
+        <p class="intro-copy">Calculate cryptographic hashes and non-cryptographic checksums for local files. Files are processed only in your browser.</p>
+      </section>
+
+      <section aria-label="File hash workspace">
+        <div class="workspace">
+          <section class="pane" aria-labelledby="source-heading">
+            <div class="pane-head">
+              <h2 class="pane-title" id="source-heading"><span class="pane-index">01</span> Files &amp; algorithms</h2>
+              <span class="pane-meta" id="file-count">0 files</span>
+            </div>
+            <div class="drop-zone" id="drop-zone" role="region" aria-label="Drop files here">
+              <span class="drop-icon" aria-hidden="true">↓</span>
+              <p class="drop-title">Drop files here</p>
+              <p class="drop-hint">or choose one or more files from your device</p>
+              <div class="drop-actions">
+                <button class="button" id="choose-files-button" type="button">Choose files</button>
+                <input class="file-input" id="file-input" type="file" multiple aria-label="Choose files to hash">
+              </div>
+            </div>
+
+            <div class="algorithm-section">
+              <p class="section-label">Cryptographic hashes</p>
+              <div class="algorithm-list" role="group" aria-label="Cryptographic hash algorithms">
+                <label class="algorithm-option"><input type="checkbox" name="algorithm" value="SHA-224"> SHA-224</label>
+                <label class="algorithm-option"><input type="checkbox" name="algorithm" value="SHA-256" checked> SHA-256</label>
+                <label class="algorithm-option"><input type="checkbox" name="algorithm" value="SHA-384"> SHA-384</label>
+                <label class="algorithm-option"><input type="checkbox" name="algorithm" value="SHA-512"> SHA-512</label>
+                <label class="algorithm-option"><input type="checkbox" name="algorithm" value="SHA3-224"> SHA3-224</label>
+                <label class="algorithm-option"><input type="checkbox" name="algorithm" value="SHA3-256"> SHA3-256</label>
+                <label class="algorithm-option"><input type="checkbox" name="algorithm" value="SHA3-384"> SHA3-384</label>
+                <label class="algorithm-option"><input type="checkbox" name="algorithm" value="SHA3-512"> SHA3-512</label>
+                <label class="algorithm-option"><input type="checkbox" name="algorithm" value="SHAKE128-256"> SHAKE128 (256-bit output)</label>
+                <label class="algorithm-option"><input type="checkbox" name="algorithm" value="SHAKE256-512"> SHAKE256 (512-bit output)</label>
+              </div>
+              <p class="algorithm-note">SHAKE128/256 use fixed 256/512-bit outputs. SHA-1, MD4, and MD5 are legacy and cryptographically broken; do not use them for security, signatures, password storage, or tamper protection.</p>
+              <div class="algorithm-list" role="group" aria-label="Legacy cryptographic hash algorithms">
+                <label class="algorithm-option"><input type="checkbox" name="algorithm" value="SHA-1"> SHA-1 (legacy, insecure)</label>
+                <label class="algorithm-option"><input type="checkbox" name="algorithm" value="MD4"> MD4 (legacy, insecure)</label>
+                <label class="algorithm-option"><input type="checkbox" name="algorithm" value="MD5"> MD5 (legacy, insecure)</label>
+              </div>
+            </div>
+            <div class="algorithm-section">
+              <p class="section-label">Non-cryptographic checksums</p>
+              <div class="algorithm-list" role="group" aria-label="Non-cryptographic checksum algorithms">
+                <label class="algorithm-option"><input type="checkbox" name="algorithm" value="CRC-8/SMBUS"> CRC-8 / SMBUS</label>
+                <label class="algorithm-option"><input type="checkbox" name="algorithm" value="CRC-16/CCITT-FALSE"> CRC-16 / CCITT-FALSE</label>
+                <label class="algorithm-option"><input type="checkbox" name="algorithm" value="CRC-32/ISO-HDLC"> CRC-32 / ISO-HDLC</label>
+                <label class="algorithm-option"><input type="checkbox" name="algorithm" value="CRC-64/ECMA-182"> CRC-64 / ECMA-182</label>
+                <label class="algorithm-option"><input type="checkbox" name="algorithm" value="Adler-32"> Adler-32</label>
+                <label class="algorithm-option"><input type="checkbox" name="algorithm" value="Fletcher-32"> Fletcher-32 (big-endian words)</label>
+                <label class="algorithm-option"><input type="checkbox" name="algorithm" value="FNV-1a-32"> FNV-1a 32</label>
+                <label class="algorithm-option"><input type="checkbox" name="algorithm" value="FNV-1a-64"> FNV-1a 64</label>
+                <label class="algorithm-option"><input type="checkbox" name="algorithm" value="xxHash32"> xxHash32 (seed 0)</label>
+                <label class="algorithm-option"><input type="checkbox" name="algorithm" value="xxHash64"> xxHash64 (seed 0)</label>
+                <label class="algorithm-option"><input type="checkbox" name="algorithm" value="MurmurHash3-x86-32"> MurmurHash3 x86 32</label>
+                <label class="algorithm-option"><input type="checkbox" name="algorithm" value="CityHash64"> CityHash 64</label>
+                <label class="algorithm-option"><input type="checkbox" name="algorithm" value="FarmHash-Fingerprint64"> FarmHash Fingerprint 64</label>
+                <label class="algorithm-option"><input type="checkbox" name="algorithm" value="MetroHash64-v1"> MetroHash 64 v1</label>
+                <label class="algorithm-option"><input type="checkbox" name="algorithm" value="Jenkins-OAAT-32"> Jenkins One-at-a-time 32</label>
+              </div>
+              <p class="algorithm-note">Fletcher-32 reads big-endian 16-bit words and zero-pads an odd final byte. xxHash32/64 use seed 0. Non-cryptographic checksums detect accidental changes; they are not suitable for protection against malicious tampering.</p>
+            </div>
+            <div class="panel-actions">
+              <button class="button button-quiet" id="clear-button" type="button" disabled>Clear</button>
+            </div>
+          </section>
+
+          <section class="pane" aria-labelledby="results-heading">
+            <div class="pane-head">
+              <h2 class="pane-title" id="results-heading"><span class="pane-index">02</span> Results</h2>
+              <span class="pane-meta" id="result-count">0 results</span>
+            </div>
+            <div class="results-toolbar">
+              <button class="button" id="download-results-button" type="button" title="Download all accumulated results as a UTF-8 text file" disabled>Save as file</button>
+            </div>
+            <div class="results-wrap" id="results-wrap">
+              <div class="empty-state" id="empty-state">
+                <strong>No files selected</strong>
+                <span>Choose files or drop them in the panel to get started.</span>
+              </div>
+              <div id="results-list" hidden></div>
+            </div>
+          </section>
+        </div>
+
+        <div class="statusbar" aria-live="polite">
+          <div class="status-message">
+            <span class="status-dot" id="status-dot" aria-hidden="true"></span>
+            <span class="status-text" id="status-text">Choose files or drop them here to calculate hashes.</span>
+          </div>
+          <div class="metrics" aria-label="File metrics">
+            <span class="metric">FILES <output id="metric-files">0</output></span>
+            <span class="metric">SIZE <output id="metric-size">-</output></span>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footnote">
+        <span>All processing happens locally in your browser. No files are uploaded.</span>
+        <span>Large files may require substantial memory.</span>
+      </footer>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    "use strict";
+
+    const algorithms = [
+      { id: "SHA-224", kind: "sync", calculate: bytes => sha224(bytes) },
+      { id: "SHA-256", kind: "crypto", webName: "SHA-256" },
+      { id: "SHA-384", kind: "crypto", webName: "SHA-384" },
+      { id: "SHA-512", kind: "crypto", webName: "SHA-512" },
+      { id: "SHA3-224", kind: "sync", calculate: bytes => sha3(bytes, 224) },
+      { id: "SHA3-256", kind: "sync", calculate: bytes => sha3(bytes, 256) },
+      { id: "SHA3-384", kind: "sync", calculate: bytes => sha3(bytes, 384) },
+      { id: "SHA3-512", kind: "sync", calculate: bytes => sha3(bytes, 512) },
+      { id: "SHAKE128-256", kind: "sync", calculate: bytes => shake(bytes, 128, 32) },
+      { id: "SHAKE256-512", kind: "sync", calculate: bytes => shake(bytes, 256, 64) },
+      { id: "SHA-1", kind: "sync", calculate: bytes => sha1(bytes) },
+      { id: "MD4", kind: "sync", calculate: md4 },
+      { id: "MD5", kind: "sync", calculate: md5 },
+      { id: "CRC-8/SMBUS", kind: "sync", calculate: crc8Smbus },
+      { id: "CRC-16/CCITT-FALSE", kind: "sync", calculate: crc16CcittFalse },
+      { id: "CRC-32/ISO-HDLC", kind: "sync", calculate: crc32 },
+      { id: "CRC-64/ECMA-182", kind: "sync", calculate: crc64Ecma182 },
+      { id: "Adler-32", kind: "sync", calculate: adler32 },
+      { id: "Fletcher-32", kind: "sync", calculate: fletcher32 },
+      { id: "FNV-1a-32", kind: "sync", calculate: fnv1a32 },
+      { id: "FNV-1a-64", kind: "sync", calculate: fnv1a64 },
+      { id: "xxHash32", kind: "sync", calculate: xxHash32 },
+      { id: "xxHash64", kind: "sync", calculate: xxHash64 },
+      { id: "MurmurHash3-x86-32", kind: "sync", calculate: murmurHash3X86_32 },
+      { id: "CityHash64", kind: "sync", calculate: cityHash64 },
+      { id: "FarmHash-Fingerprint64", kind: "sync", calculate: farmHashFingerprint64 },
+      { id: "MetroHash64-v1", kind: "sync", calculate: metroHash64V1 },
+      { id: "Jenkins-OAAT-32", kind: "sync", calculate: jenkinsOneAtATime }
+    ];
+    const files = [];
+    const fileInput = document.getElementById("file-input");
+    const dropZone = document.getElementById("drop-zone");
+    const chooseButton = document.getElementById("choose-files-button");
+    const downloadResultsButton = document.getElementById("download-results-button");
+    const clearButton = document.getElementById("clear-button");
+    const resultsList = document.getElementById("results-list");
+    const emptyState = document.getElementById("empty-state");
+    const statusText = document.getElementById("status-text");
+    const statusDot = document.getElementById("status-dot");
+    const toast = document.getElementById("toast");
+    let activeFile = null;
+    let toastTimer;
+
+    function selectedAlgorithms() {
+      const selected = new Set(
+        Array.from(document.querySelectorAll('input[name="algorithm"]:checked'), input => input.value)
+      );
+      return algorithms.filter(algorithm => selected.has(algorithm.id));
+    }
+
+    function bytesToHex(bytes) {
+      return Array.from(bytes, byte => byte.toString(16).padStart(2, "0")).join("");
+    }
+
+    function integerToBytes(value, length) {
+      let remaining = BigInt(value);
+      const bytes = new Uint8Array(length);
+      for (let i = length - 1; i >= 0; i--) {
+        bytes[i] = Number(remaining & 0xffn);
+        remaining >>= 8n;
+      }
+      return bytes;
+    }
+
+    function formatDigest(bytes, format) {
+      if (format === "base64") {
+        let binary = "";
+        for (const byte of bytes) binary += String.fromCharCode(byte);
+        return btoa(binary);
+      }
+      const hex = bytesToHex(bytes);
+      return format === "hex-upper" ? hex.toUpperCase() : hex;
+    }
+
+    function crc32(bytes) {
+      let crc = 0xffffffff;
+      for (const byte of bytes) {
+        crc ^= byte;
+        for (let bit = 0; bit < 8; bit++) {
+          crc = (crc >>> 1) ^ ((crc & 1) ? 0xedb88320 : 0);
+        }
+      }
+      return integerToBytes((crc ^ 0xffffffff) >>> 0, 4);
+    }
+
+    function crc8Smbus(bytes) {
+      let crc = 0x00;
+      for (const byte of bytes) {
+        crc ^= byte;
+        for (let bit = 0; bit < 8; bit++) {
+          crc = ((crc & 0x80) ? (crc << 1) ^ 0x07 : crc << 1) & 0xff;
+        }
+      }
+      return integerToBytes(crc, 1);
+    }
+
+    function crc16CcittFalse(bytes) {
+      let crc = 0xffff;
+      for (const byte of bytes) {
+        crc ^= byte << 8;
+        for (let bit = 0; bit < 8; bit++) {
+          crc = ((crc & 0x8000) ? (crc << 1) ^ 0x1021 : crc << 1) & 0xffff;
+        }
+      }
+      return integerToBytes(crc, 2);
+    }
+
+    function crc64Ecma182(bytes) {
+      const mask = 0xffffffffffffffffn;
+      const polynomial = 0x42f0e1eba9ea3693n;
+      let crc = 0n;
+      for (const byte of bytes) {
+        crc ^= BigInt(byte) << 56n;
+        for (let bit = 0; bit < 8; bit++) {
+          crc = ((crc & 0x8000000000000000n) ? (crc << 1n) ^ polynomial : crc << 1n) & mask;
+        }
+      }
+      return integerToBytes(crc, 8);
+    }
+
+    function adler32(bytes) {
+      let a = 1;
+      let b = 0;
+      for (let i = 0; i < bytes.length; i++) {
+        a = (a + bytes[i]) % 65521;
+        b = (b + a) % 65521;
+      }
+      return integerToBytes(((b << 16) | a) >>> 0, 4);
+    }
+
+    function fletcher32(bytes) {
+      let sum1 = 0;
+      let sum2 = 0;
+      for (let offset = 0; offset < bytes.length; offset += 2) {
+        const word = (bytes[offset] << 8) | (bytes[offset + 1] ?? 0);
+        sum1 = (sum1 + word) % 0xffff;
+        sum2 = (sum2 + sum1) % 0xffff;
+      }
+      return integerToBytes(((sum2 << 16) | sum1) >>> 0, 4);
+    }
+
+    function fnv1a32(bytes) {
+      let hash = 0x811c9dc5;
+      for (const byte of bytes) {
+        hash ^= byte;
+        hash = Math.imul(hash, 0x01000193) >>> 0;
+      }
+      return integerToBytes(hash, 4);
+    }
+
+    function fnv1a64(bytes) {
+      const mask = 0xffffffffffffffffn;
+      let hash = 0xcbf29ce484222325n;
+      for (const byte of bytes) {
+        hash ^= BigInt(byte);
+        hash = (hash * 0x100000001b3n) & mask;
+      }
+      return integerToBytes(hash, 8);
+    }
+
+    function rotateLeft32(value, shift) {
+      return ((value << shift) | (value >>> (32 - shift))) >>> 0;
+    }
+
+    function xxHash32Round(accumulator, input) {
+      accumulator = (accumulator + Math.imul(input, 0x85ebca77)) >>> 0;
+      accumulator = rotateLeft32(accumulator, 13);
+      return Math.imul(accumulator, 0x9e3779b1) >>> 0;
+    }
+
+    function xxHash32(bytes) {
+      const prime1 = 0x9e3779b1;
+      const prime2 = 0x85ebca77;
+      const prime3 = 0xc2b2ae3d;
+      const prime4 = 0x27d4eb2f;
+      const prime5 = 0x165667b1;
+      const length = bytes.length;
+      let offset = 0;
+      let hash;
+
+      if (length >= 16) {
+        let v1 = (prime1 + prime2) >>> 0;
+        let v2 = prime2;
+        let v3 = 0;
+        let v4 = -prime1 >>> 0;
+        const limit = length - 16;
+        do {
+          v1 = xxHash32Round(v1, read32le(bytes, offset)); offset += 4;
+          v2 = xxHash32Round(v2, read32le(bytes, offset)); offset += 4;
+          v3 = xxHash32Round(v3, read32le(bytes, offset)); offset += 4;
+          v4 = xxHash32Round(v4, read32le(bytes, offset)); offset += 4;
+        } while (offset <= limit);
+        hash = (rotateLeft32(v1, 1) + rotateLeft32(v2, 7) + rotateLeft32(v3, 12) + rotateLeft32(v4, 18)) >>> 0;
+      } else {
+        hash = prime5;
+      }
+
+      hash = (hash + length) >>> 0;
+      while (offset + 4 <= length) {
+        hash = (hash + Math.imul(read32le(bytes, offset), prime3)) >>> 0;
+        hash = Math.imul(rotateLeft32(hash, 17), prime4) >>> 0;
+        offset += 4;
+      }
+      while (offset < length) {
+        hash = (hash + Math.imul(bytes[offset], prime5)) >>> 0;
+        hash = Math.imul(rotateLeft32(hash, 11), prime1) >>> 0;
+        offset++;
+      }
+      hash ^= hash >>> 15;
+      hash = Math.imul(hash, prime2) >>> 0;
+      hash ^= hash >>> 13;
+      hash = Math.imul(hash, prime3) >>> 0;
+      hash ^= hash >>> 16;
+      return integerToBytes(hash >>> 0, 4);
+    }
+
+    const XXHASH64_PRIME1 = 0x9e3779b185ebca87n;
+    const XXHASH64_PRIME2 = 0xc2b2ae3d27d4eb4fn;
+    const XXHASH64_PRIME3 = 0x165667b19e3779f9n;
+    const XXHASH64_PRIME4 = 0x85ebca77c2b2ae63n;
+    const XXHASH64_PRIME5 = 0x27d4eb2f165667c5n;
+
+    function rotateLeft64(value, shift) {
+      if (shift === 0) return value & MASK_64;
+      const count = BigInt(shift);
+      return ((value << count) | (value >> (64n - count))) & MASK_64;
+    }
+
+    function xxHash64Round(accumulator, input) {
+      accumulator = (accumulator + input * XXHASH64_PRIME2) & MASK_64;
+      accumulator = rotateLeft64(accumulator, 31);
+      return (accumulator * XXHASH64_PRIME1) & MASK_64;
+    }
+
+    function xxHash64MergeRound(accumulator, value) {
+      accumulator ^= xxHash64Round(0n, value);
+      return (accumulator * XXHASH64_PRIME1 + XXHASH64_PRIME4) & MASK_64;
+    }
+
+    function xxHash64(bytes) {
+      const length = bytes.length;
+      let offset = 0;
+      let hash;
+
+      if (length >= 32) {
+        let v1 = (XXHASH64_PRIME1 + XXHASH64_PRIME2) & MASK_64;
+        let v2 = XXHASH64_PRIME2;
+        let v3 = 0n;
+        let v4 = (-XXHASH64_PRIME1) & MASK_64;
+        const limit = length - 32;
+        do {
+          v1 = xxHash64Round(v1, read64le(bytes, offset)); offset += 8;
+          v2 = xxHash64Round(v2, read64le(bytes, offset)); offset += 8;
+          v3 = xxHash64Round(v3, read64le(bytes, offset)); offset += 8;
+          v4 = xxHash64Round(v4, read64le(bytes, offset)); offset += 8;
+        } while (offset <= limit);
+        hash = (rotateLeft64(v1, 1) + rotateLeft64(v2, 7) + rotateLeft64(v3, 12) + rotateLeft64(v4, 18)) & MASK_64;
+        for (const accumulator of [v1, v2, v3, v4]) hash = xxHash64MergeRound(hash, accumulator);
+      } else {
+        hash = XXHASH64_PRIME5;
+      }
+
+      hash = (hash + BigInt(length)) & MASK_64;
+      while (offset + 8 <= length) {
+        hash ^= xxHash64Round(0n, read64le(bytes, offset));
+        hash = (rotateLeft64(hash, 27) * XXHASH64_PRIME1 + XXHASH64_PRIME4) & MASK_64;
+        offset += 8;
+      }
+      if (offset + 4 <= length) {
+        hash ^= (BigInt(read32le(bytes, offset)) * XXHASH64_PRIME1) & MASK_64;
+        hash = (rotateLeft64(hash, 23) * XXHASH64_PRIME2 + XXHASH64_PRIME3) & MASK_64;
+        offset += 4;
+      }
+      while (offset < length) {
+        hash ^= (BigInt(bytes[offset]) * XXHASH64_PRIME5) & MASK_64;
+        hash = (rotateLeft64(hash, 11) * XXHASH64_PRIME1) & MASK_64;
+        offset++;
+      }
+      hash ^= hash >> 33n;
+      hash = (hash * XXHASH64_PRIME2) & MASK_64;
+      hash ^= hash >> 29n;
+      hash = (hash * XXHASH64_PRIME3) & MASK_64;
+      hash ^= hash >> 32n;
+      return integerToBytes(hash & MASK_64, 8);
+    }
+
+    function padMdInput(bytes) {
+      const paddedLength = Math.ceil((bytes.length + 9) / 64) * 64;
+      const padded = new Uint8Array(paddedLength);
+      padded.set(bytes);
+      padded[bytes.length] = 0x80;
+      let bitLength = BigInt(bytes.length) * 8n;
+      for (let index = 0; index < 8; index++) {
+        padded[paddedLength - 8 + index] = Number(bitLength & 0xffn);
+        bitLength >>= 8n;
+      }
+      return padded;
+    }
+
+    function md4(bytes) {
+      const padded = padMdInput(bytes);
+      let a0 = 0x67452301;
+      let b0 = 0xefcdab89;
+      let c0 = 0x98badcfe;
+      let d0 = 0x10325476;
+      const words = new Uint32Array(16);
+      const f = (x, y, z) => (x & y) | (~x & z);
+      const g = (x, y, z) => (x & y) | (x & z) | (y & z);
+      const h = (x, y, z) => x ^ y ^ z;
+      const round1 = (a, b, c, d, word, shift) => rotateLeft32((a + f(b, c, d) + word) >>> 0, shift);
+      const round2 = (a, b, c, d, word, shift) => rotateLeft32((a + g(b, c, d) + word + 0x5a827999) >>> 0, shift);
+      const round3 = (a, b, c, d, word, shift) => rotateLeft32((a + h(b, c, d) + word + 0x6ed9eba1) >>> 0, shift);
+
+      for (let offset = 0; offset < padded.length; offset += 64) {
+        for (let index = 0; index < 16; index++) words[index] = read32le(padded, offset + index * 4);
+        let a = a0;
+        let b = b0;
+        let c = c0;
+        let d = d0;
+
+        for (let index = 0; index < 16; index += 4) {
+          a = round1(a, b, c, d, words[index], 3);
+          d = round1(d, a, b, c, words[index + 1], 7);
+          c = round1(c, d, a, b, words[index + 2], 11);
+          b = round1(b, c, d, a, words[index + 3], 19);
+        }
+        for (let index = 0; index < 4; index++) {
+          a = round2(a, b, c, d, words[index], 3);
+          d = round2(d, a, b, c, words[index + 4], 5);
+          c = round2(c, d, a, b, words[index + 8], 9);
+          b = round2(b, c, d, a, words[index + 12], 13);
+        }
+        const round3Order = [0, 8, 4, 12, 2, 10, 6, 14, 1, 9, 5, 13, 3, 11, 7, 15];
+        for (let index = 0; index < 16; index++) {
+          switch (index % 4) {
+            case 0: a = round3(a, b, c, d, words[round3Order[index]], 3); break;
+            case 1: d = round3(d, a, b, c, words[round3Order[index]], 9); break;
+            case 2: c = round3(c, d, a, b, words[round3Order[index]], 11); break;
+            case 3: b = round3(b, c, d, a, words[round3Order[index]], 15); break;
+          }
+        }
+        a0 = (a0 + a) >>> 0;
+        b0 = (b0 + b) >>> 0;
+        c0 = (c0 + c) >>> 0;
+        d0 = (d0 + d) >>> 0;
+      }
+
+      const digest = new Uint8Array(16);
+      [a0, b0, c0, d0].forEach((word, index) => {
+        digest.set(integerToBytesLittleEndian(BigInt(word), 4), index * 4);
+      });
+      return digest;
+    }
+
+    function md5(bytes) {
+      const padded = padMdInput(bytes);
+      let a0 = 0x67452301;
+      let b0 = 0xefcdab89;
+      let c0 = 0x98badcfe;
+      let d0 = 0x10325476;
+      const shifts = [
+        7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22,
+        5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20,
+        4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23,
+        6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21
+      ];
+      const constants = Array.from({ length: 64 }, (_, index) =>
+        Math.floor(Math.abs(Math.sin(index + 1)) * 0x100000000) >>> 0
+      );
+      const words = new Uint32Array(16);
+
+      for (let offset = 0; offset < padded.length; offset += 64) {
+        for (let index = 0; index < 16; index++) words[index] = read32le(padded, offset + index * 4);
+        let a = a0;
+        let b = b0;
+        let c = c0;
+        let d = d0;
+
+        for (let index = 0; index < 64; index++) {
+          let functionValue;
+          let wordIndex;
+          if (index < 16) {
+            functionValue = (b & c) | (~b & d);
+            wordIndex = index;
+          } else if (index < 32) {
+            functionValue = (d & b) | (~d & c);
+            wordIndex = (5 * index + 1) % 16;
+          } else if (index < 48) {
+            functionValue = b ^ c ^ d;
+            wordIndex = (3 * index + 5) % 16;
+          } else {
+            functionValue = c ^ (b | ~d);
+            wordIndex = (7 * index) % 16;
+          }
+          const next = d;
+          d = c;
+          c = b;
+          b = (b + rotateLeft32((a + functionValue + constants[index] + words[wordIndex]) >>> 0, shifts[index])) >>> 0;
+          a = next;
+        }
+
+        a0 = (a0 + a) >>> 0;
+        b0 = (b0 + b) >>> 0;
+        c0 = (c0 + c) >>> 0;
+        d0 = (d0 + d) >>> 0;
+      }
+
+      const digest = new Uint8Array(16);
+      [a0, b0, c0, d0].forEach((word, index) => {
+        digest.set(integerToBytesLittleEndian(BigInt(word), 4), index * 4);
+      });
+      return digest;
+    }
+
+    function padSha1Sha2(bytes) {
+      const paddedLength = Math.ceil((bytes.length + 9) / 64) * 64;
+      const padded = new Uint8Array(paddedLength);
+      padded.set(bytes);
+      padded[bytes.length] = 0x80;
+      let bitLength = BigInt(bytes.length) * 8n;
+      for (let index = 0; index < 8; index++) {
+        padded[paddedLength - 1 - index] = Number(bitLength & 0xffn);
+        bitLength >>= 8n;
+      }
+      return padded;
+    }
+
+    function rotateRight32(value, shift) {
+      return (value >>> shift) | (value << (32 - shift));
+    }
+
+    function read32be(bytes, offset) {
+      return ((bytes[offset] << 24) | (bytes[offset + 1] << 16) | (bytes[offset + 2] << 8) | bytes[offset + 3]) >>> 0;
+    }
+
+    function sha1(bytes) {
+      const padded = padSha1Sha2(bytes);
+      let h0 = 0x67452301;
+      let h1 = 0xefcdab89;
+      let h2 = 0x98badcfe;
+      let h3 = 0x10325476;
+      let h4 = 0xc3d2e1f0;
+      const words = new Uint32Array(80);
+
+      for (let offset = 0; offset < padded.length; offset += 64) {
+        for (let index = 0; index < 16; index++) words[index] = read32be(padded, offset + index * 4);
+        for (let index = 16; index < 80; index++) {
+          words[index] = rotateLeft32(words[index - 3] ^ words[index - 8] ^ words[index - 14] ^ words[index - 16], 1);
+        }
+        let a = h0;
+        let b = h1;
+        let c = h2;
+        let d = h3;
+        let e = h4;
+
+        for (let index = 0; index < 80; index++) {
+          let functionValue;
+          let constant;
+          if (index < 20) {
+            functionValue = (b & c) | (~b & d);
+            constant = 0x5a827999;
+          } else if (index < 40) {
+            functionValue = b ^ c ^ d;
+            constant = 0x6ed9eba1;
+          } else if (index < 60) {
+            functionValue = (b & c) | (b & d) | (c & d);
+            constant = 0x8f1bbcdc;
+          } else {
+            functionValue = b ^ c ^ d;
+            constant = 0xca62c1d6;
+          }
+          const temporary = (rotateLeft32(a, 5) + functionValue + e + constant + words[index]) >>> 0;
+          e = d;
+          d = c;
+          c = rotateLeft32(b, 30);
+          b = a;
+          a = temporary;
+        }
+        h0 = (h0 + a) >>> 0;
+        h1 = (h1 + b) >>> 0;
+        h2 = (h2 + c) >>> 0;
+        h3 = (h3 + d) >>> 0;
+        h4 = (h4 + e) >>> 0;
+      }
+
+      const digest = new Uint8Array(20);
+      [h0, h1, h2, h3, h4].forEach((word, index) => {
+        digest.set([word >>> 24, word >>> 16, word >>> 8, word], index * 4);
+      });
+      return digest;
+    }
+
+    const SHA256_ROUND_CONSTANTS = [
+      0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+      0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+      0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+      0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+      0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+      0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+      0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+      0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+    ];
+
+    function sha224(bytes) {
+      const padded = padSha1Sha2(bytes);
+      const state = [
+        0xc1059ed8, 0x367cd507, 0x3070dd17, 0xf70e5939,
+        0xffc00b31, 0x68581511, 0x64f98fa7, 0xbefa4fa4
+      ];
+      const words = new Uint32Array(64);
+
+      for (let offset = 0; offset < padded.length; offset += 64) {
+        for (let index = 0; index < 16; index++) words[index] = read32be(padded, offset + index * 4);
+        for (let index = 16; index < 64; index++) {
+          const x = words[index - 15];
+          const y = words[index - 2];
+          const sigma0 = rotateRight32(x, 7) ^ rotateRight32(x, 18) ^ (x >>> 3);
+          const sigma1 = rotateRight32(y, 17) ^ rotateRight32(y, 19) ^ (y >>> 10);
+          words[index] = (words[index - 16] + sigma0 + words[index - 7] + sigma1) >>> 0;
+        }
+        let [a, b, c, d, e, f, g, h] = state;
+        for (let index = 0; index < 64; index++) {
+          const sum1 = rotateRight32(e, 6) ^ rotateRight32(e, 11) ^ rotateRight32(e, 25);
+          const choose = (e & f) ^ (~e & g);
+          const temp1 = (h + sum1 + choose + SHA256_ROUND_CONSTANTS[index] + words[index]) >>> 0;
+          const sum0 = rotateRight32(a, 2) ^ rotateRight32(a, 13) ^ rotateRight32(a, 22);
+          const majority = (a & b) ^ (a & c) ^ (b & c);
+          const temp2 = (sum0 + majority) >>> 0;
+          h = g;
+          g = f;
+          f = e;
+          e = (d + temp1) >>> 0;
+          d = c;
+          c = b;
+          b = a;
+          a = (temp1 + temp2) >>> 0;
+        }
+        state[0] = (state[0] + a) >>> 0;
+        state[1] = (state[1] + b) >>> 0;
+        state[2] = (state[2] + c) >>> 0;
+        state[3] = (state[3] + d) >>> 0;
+        state[4] = (state[4] + e) >>> 0;
+        state[5] = (state[5] + f) >>> 0;
+        state[6] = (state[6] + g) >>> 0;
+        state[7] = (state[7] + h) >>> 0;
+      }
+
+      const digest = new Uint8Array(28);
+      for (let index = 0; index < 7; index++) {
+        digest.set([state[index] >>> 24, state[index] >>> 16, state[index] >>> 8, state[index]], index * 4);
+      }
+      return digest;
+    }
+
+    const KECCAK_MASK = 0xffffffffffffffffn;
+    const KECCAK_ROUND_CONSTANTS = [
+      0x0000000000000001n, 0x0000000000008082n, 0x800000000000808an, 0x8000000080008000n,
+      0x000000000000808bn, 0x0000000080000001n, 0x8000000080008081n, 0x8000000000008009n,
+      0x000000000000008an, 0x0000000000000088n, 0x0000000080008009n, 0x000000008000000an,
+      0x000000008000808bn, 0x800000000000008bn, 0x8000000000008089n, 0x8000000000008003n,
+      0x8000000000008002n, 0x8000000000000080n, 0x000000000000800an, 0x800000008000000an,
+      0x8000000080008081n, 0x8000000000008080n, 0x0000000080000001n, 0x8000000080008008n
+    ];
+    const KECCAK_ROTATION_OFFSETS = [
+      0, 1, 62, 28, 27,
+      36, 44, 6, 55, 20,
+      3, 10, 43, 25, 39,
+      41, 45, 15, 21, 8,
+      18, 2, 61, 56, 14
+    ];
+
+    function keccakPermutation(state) {
+      for (const roundConstant of KECCAK_ROUND_CONSTANTS) {
+        const columnParity = new Array(5);
+        for (let x = 0; x < 5; x++) {
+          columnParity[x] = state[x] ^ state[x + 5] ^ state[x + 10] ^ state[x + 15] ^ state[x + 20];
+        }
+        const columnDelta = new Array(5);
+        for (let x = 0; x < 5; x++) {
+          columnDelta[x] = columnParity[(x + 4) % 5] ^ rotateLeft64(columnParity[(x + 1) % 5], 1);
+        }
+        for (let y = 0; y < 5; y++) {
+          for (let x = 0; x < 5; x++) state[x + 5 * y] ^= columnDelta[x];
+        }
+
+        const rotated = new Array(25).fill(0n);
+        for (let y = 0; y < 5; y++) {
+          for (let x = 0; x < 5; x++) {
+            const destinationX = y;
+            const destinationY = (2 * x + 3 * y) % 5;
+            rotated[destinationX + 5 * destinationY] =
+              rotateLeft64(state[x + 5 * y], KECCAK_ROTATION_OFFSETS[x + 5 * y]);
+          }
+        }
+        for (let y = 0; y < 5; y++) {
+          for (let x = 0; x < 5; x++) {
+            const current = rotated[x + 5 * y];
+            const next = rotated[(x + 1) % 5 + 5 * y];
+            const afterNext = rotated[(x + 2) % 5 + 5 * y];
+            state[x + 5 * y] = current ^ ((~next & KECCAK_MASK) & afterNext);
+          }
+        }
+        state[0] ^= roundConstant;
+      }
+    }
+
+    function keccakSponge(bytes, rateBytes, domainSuffix, outputLength) {
+      const paddedLength = Math.ceil((bytes.length + 1) / rateBytes) * rateBytes;
+      const padded = new Uint8Array(paddedLength);
+      padded.set(bytes);
+      padded[bytes.length] ^= domainSuffix;
+      padded[paddedLength - 1] ^= 0x80;
+      const state = new Array(25).fill(0n);
+
+      for (let offset = 0; offset < padded.length; offset += rateBytes) {
+        for (let index = 0; index < rateBytes; index++) {
+          const laneIndex = Math.floor(index / 8);
+          state[laneIndex] ^= BigInt(padded[offset + index]) << BigInt((index % 8) * 8);
+        }
+        keccakPermutation(state);
+      }
+
+      const output = new Uint8Array(outputLength);
+      let written = 0;
+      while (written < output.length) {
+        const blockLength = Math.min(rateBytes, output.length - written);
+        for (let index = 0; index < blockLength; index++) {
+          output[written + index] = Number((state[Math.floor(index / 8)] >> BigInt((index % 8) * 8)) & 0xffn);
+        }
+        written += blockLength;
+        if (written < output.length) keccakPermutation(state);
+      }
+      return output;
+    }
+
+    function sha3(bytes, outputBits) {
+      const rateBytes = 200 - 2 * (outputBits / 8);
+      return keccakSponge(bytes, rateBytes, 0x06, outputBits / 8);
+    }
+
+    function shake(bytes, securityBits, outputLength) {
+      const rateBytes = securityBits === 128 ? 168 : 136;
+      return keccakSponge(bytes, rateBytes, 0x1f, outputLength);
+    }
+
+    function read32le(bytes, offset) {
+      return (bytes[offset] | (bytes[offset + 1] << 8) | (bytes[offset + 2] << 16) | (bytes[offset + 3] << 24)) >>> 0;
+    }
+
+    function read64le(bytes, offset) {
+      let value = 0n;
+      for (let i = 7; i >= 0; i--) value = (value << 8n) | BigInt(bytes[offset + i]);
+      return value;
+    }
+
+    function integerToBytesLittleEndian(value, length) {
+      let remaining = BigInt(value);
+      const bytes = new Uint8Array(length);
+      for (let i = 0; i < length; i++) {
+        bytes[i] = Number(remaining & 0xffn);
+        remaining >>= 8n;
+      }
+      return bytes;
+    }
+
+    function murmurHash3X86_32(bytes) {
+      let hash = 0;
+      const c1 = 0xcc9e2d51;
+      const c2 = 0x1b873593;
+      const blockEnd = bytes.length & ~3;
+
+      for (let offset = 0; offset < blockEnd; offset += 4) {
+        let key = read32le(bytes, offset);
+        key = Math.imul(key, c1);
+        key = (key << 15) | (key >>> 17);
+        key = Math.imul(key, c2);
+        hash ^= key;
+        hash = (hash << 13) | (hash >>> 19);
+        hash = (Math.imul(hash, 5) + 0xe6546b64) >>> 0;
+      }
+
+      let tail = 0;
+      switch (bytes.length & 3) {
+        case 3: tail ^= bytes[blockEnd + 2] << 16;
+        case 2: tail ^= bytes[blockEnd + 1] << 8;
+        case 1:
+          tail ^= bytes[blockEnd];
+          tail = Math.imul(tail, c1);
+          tail = (tail << 15) | (tail >>> 17);
+          tail = Math.imul(tail, c2);
+          hash ^= tail;
+      }
+
+      hash ^= bytes.length;
+      hash ^= hash >>> 16;
+      hash = Math.imul(hash, 0x85ebca6b);
+      hash ^= hash >>> 13;
+      hash = Math.imul(hash, 0xc2b2ae35);
+      hash ^= hash >>> 16;
+      return integerToBytes(hash >>> 0, 4);
+    }
+
+    function jenkinsOneAtATime(bytes) {
+      let hash = 0;
+      for (const byte of bytes) {
+        hash = (hash + byte) >>> 0;
+        hash = (hash + (hash << 10)) >>> 0;
+        hash ^= hash >>> 6;
+      }
+      hash = (hash + (hash << 3)) >>> 0;
+      hash ^= hash >>> 11;
+      hash = (hash + (hash << 15)) >>> 0;
+      return integerToBytes(hash >>> 0, 4);
+    }
+
+    const MASK_64 = 0xffffffffffffffffn;
+    const CITY_K0 = 0xc3a5c85c97cb3127n;
+    const CITY_K1 = 0xb492b66fbe98f273n;
+    const CITY_K2 = 0x9ae16a3b2f90404fn;
+    const CITY_HASH_128_TO_64_MULTIPLIER = 0x9ddfea08eb382d69n;
+
+    function rotateRight64(value, shift) {
+      value &= MASK_64;
+      const count = BigInt(shift);
+      return ((value >> count) | (value << (64n - count))) & MASK_64;
+    }
+
+    function shiftMix64(value) {
+      value &= MASK_64;
+      return (value ^ (value >> 47n)) & MASK_64;
+    }
+
+    function hashLen16(u, v, multiplier = CITY_HASH_128_TO_64_MULTIPLIER) {
+      u &= MASK_64;
+      v &= MASK_64;
+      let a = ((u ^ v) * multiplier) & MASK_64;
+      a ^= a >> 47n;
+      let b = ((v ^ a) * multiplier) & MASK_64;
+      b ^= b >> 47n;
+      return (b * multiplier) & MASK_64;
+    }
+
+    function hashLen0To16(bytes, offset, length) {
+      if (length >= 8) {
+        const multiplier = CITY_K2 + BigInt(length) * 2n;
+        const a = (read64le(bytes, offset) + CITY_K2) & MASK_64;
+        const b = read64le(bytes, offset + length - 8);
+        const c = (rotateRight64(b, 37) * multiplier + a) & MASK_64;
+        const d = ((rotateRight64(a, 25) + b) * multiplier) & MASK_64;
+        return hashLen16(c, d, multiplier);
+      }
+      if (length >= 4) {
+        const multiplier = CITY_K2 + BigInt(length) * 2n;
+        const a = BigInt(read32le(bytes, offset));
+        return hashLen16(BigInt(length) + (a << 3n), BigInt(read32le(bytes, offset + length - 4)), multiplier);
+      }
+      if (length > 0) {
+        const a = BigInt(bytes[offset]);
+        const b = BigInt(bytes[offset + (length >> 1)]);
+        const c = BigInt(bytes[offset + length - 1]);
+        const y = a + (b << 8n);
+        const z = BigInt(length) + (c << 2n);
+        return (shiftMix64(((y * CITY_K2) ^ (z * CITY_K0)) & MASK_64) * CITY_K2) & MASK_64;
+      }
+      return CITY_K2;
+    }
+
+    function hashLen17To32(bytes, offset, length) {
+      const multiplier = CITY_K2 + BigInt(length) * 2n;
+      const a = (read64le(bytes, offset) * CITY_K1) & MASK_64;
+      const b = read64le(bytes, offset + 8);
+      const c = (read64le(bytes, offset + length - 8) * multiplier) & MASK_64;
+      const d = (read64le(bytes, offset + length - 16) * CITY_K2) & MASK_64;
+      return hashLen16(
+        (rotateRight64((a + b) & MASK_64, 43) + rotateRight64(c, 30) + d) & MASK_64,
+        (a + rotateRight64((b + CITY_K2) & MASK_64, 18) + c) & MASK_64,
+        multiplier
+      );
+    }
+
+    function hashLen33To64City(bytes, offset, length) {
+      const multiplier = CITY_K2 + BigInt(length) * 2n;
+      const a = (read64le(bytes, offset) * CITY_K2) & MASK_64;
+      const b = read64le(bytes, offset + 8);
+      const c = read64le(bytes, offset + length - 24);
+      const d = read64le(bytes, offset + length - 32);
+      const e = (read64le(bytes, offset + 16) * CITY_K2) & MASK_64;
+      const f = (read64le(bytes, offset + 24) * 9n) & MASK_64;
+      const g = read64le(bytes, offset + length - 8);
+      const h = (read64le(bytes, offset + length - 16) * multiplier) & MASK_64;
+      const u = (rotateRight64((a + g) & MASK_64, 43) + (rotateRight64(b, 30) + c) * 9n) & MASK_64;
+      const v = (((a + g) & MASK_64) ^ d) + f + 1n;
+      const swappedW = ((u + v) * multiplier) & MASK_64;
+      const bswapW = BigInt("0x" + bytesToHex(integerToBytesLittleEndian(swappedW, 8)));
+      const wValue = (bswapW + h) & MASK_64;
+      const x = (rotateRight64((e + f) & MASK_64, 42) + c) & MASK_64;
+      const swappedY = ((v + wValue) * multiplier) & MASK_64;
+      const bswapY = BigInt("0x" + bytesToHex(integerToBytesLittleEndian(swappedY, 8)));
+      const y = ((bswapY + g) * multiplier) & MASK_64;
+      const z = (e + f + c) & MASK_64;
+      const swappedA = (((x + z) * multiplier + y) & MASK_64);
+      const bswapA = BigInt("0x" + bytesToHex(integerToBytesLittleEndian(swappedA, 8)));
+      const aValue = (bswapA + b) & MASK_64;
+      const bValue = (shiftMix64((z + aValue) * multiplier + d + h) * multiplier) & MASK_64;
+      return (bValue + x) & MASK_64;
+    }
+
+    function weakHashLen32WithSeeds(bytes, offset, seedA, seedB) {
+      const w = read64le(bytes, offset);
+      const x = read64le(bytes, offset + 8);
+      const y = read64le(bytes, offset + 16);
+      const z = read64le(bytes, offset + 24);
+      let a = (seedA + w) & MASK_64;
+      let b = rotateRight64((seedB + a + z) & MASK_64, 21);
+      const c = a;
+      a = (a + x + y) & MASK_64;
+      b = (b + rotateRight64(a, 44)) & MASK_64;
+      return [(a + z) & MASK_64, (b + c) & MASK_64];
+    }
+
+    function cityHash64(bytes) {
+      const length = bytes.length;
+      if (length <= 16) return integerToBytes(hashLen0To16(bytes, 0, length), 8);
+      if (length <= 32) return integerToBytes(hashLen17To32(bytes, 0, length), 8);
+      if (length <= 64) return integerToBytes(hashLen33To64City(bytes, 0, length), 8);
+
+      let x = read64le(bytes, length - 40);
+      let y = (read64le(bytes, length - 16) + read64le(bytes, length - 56)) & MASK_64;
+      let z = hashLen16((read64le(bytes, length - 48) + BigInt(length)) & MASK_64, read64le(bytes, length - 24));
+      let v = weakHashLen32WithSeeds(bytes, length - 64, BigInt(length), z);
+      let w = weakHashLen32WithSeeds(bytes, length - 32, (y + CITY_K1) & MASK_64, x);
+      x = (x * CITY_K1 + read64le(bytes, 0)) & MASK_64;
+      let offset = 0;
+      let remaining = (length - 1) & ~63;
+
+      do {
+        x = (rotateRight64((x + y + v[0] + read64le(bytes, offset + 8)) & MASK_64, 37) * CITY_K1) & MASK_64;
+        y = (rotateRight64((y + v[1] + read64le(bytes, offset + 48)) & MASK_64, 42) * CITY_K1) & MASK_64;
+        x ^= w[1];
+        y = (y + v[0] + read64le(bytes, offset + 40)) & MASK_64;
+        z = (rotateRight64((z + w[0]) & MASK_64, 33) * CITY_K1) & MASK_64;
+        v = weakHashLen32WithSeeds(bytes, offset, (v[1] * CITY_K1) & MASK_64, (x + w[0]) & MASK_64);
+        w = weakHashLen32WithSeeds(bytes, offset + 32, (z + w[1]) & MASK_64, (y + read64le(bytes, offset + 16)) & MASK_64);
+        [z, x] = [x, z];
+        offset += 64;
+        remaining -= 64;
+      } while (remaining !== 0);
+
+      return integerToBytes(
+        hashLen16(
+          (hashLen16(v[0], w[0]) + shiftMix64(y) * CITY_K1 + z) & MASK_64,
+          (hashLen16(v[1], w[1]) + x) & MASK_64
+        ),
+        8
+      );
+    }
+
+    function hashLen33To64Farm(bytes, offset, length) {
+      const multiplier = CITY_K2 + BigInt(length) * 2n;
+      const a = (read64le(bytes, offset) * CITY_K2) & MASK_64;
+      const b = read64le(bytes, offset + 8);
+      const c = (read64le(bytes, offset + length - 8) * multiplier) & MASK_64;
+      const d = (read64le(bytes, offset + length - 16) * CITY_K2) & MASK_64;
+      const y = (rotateRight64((a + b) & MASK_64, 43) + rotateRight64(c, 30) + d) & MASK_64;
+      const z = hashLen16(y, (a + rotateRight64((b + CITY_K2) & MASK_64, 18) + c) & MASK_64, multiplier);
+      const e = (read64le(bytes, offset + 16) * multiplier) & MASK_64;
+      const f = read64le(bytes, offset + 24);
+      const g = ((y + read64le(bytes, offset + length - 32)) * multiplier) & MASK_64;
+      const h = ((z + read64le(bytes, offset + length - 24)) * multiplier) & MASK_64;
+      return hashLen16(
+        (rotateRight64((e + f) & MASK_64, 43) + rotateRight64(g, 30) + h) & MASK_64,
+        (e + rotateRight64((f + a) & MASK_64, 18) + g) & MASK_64,
+        multiplier
+      );
+    }
+
+    function farmHashFingerprint64(bytes) {
+      const length = bytes.length;
+      if (length <= 16) return integerToBytes(hashLen0To16(bytes, 0, length), 8);
+      if (length <= 32) return integerToBytes(hashLen17To32(bytes, 0, length), 8);
+      if (length <= 64) return integerToBytes(hashLen33To64Farm(bytes, 0, length), 8);
+
+      const seed = 81n;
+      let x = (seed * CITY_K2 + read64le(bytes, 0)) & MASK_64;
+      let y = (seed * CITY_K1 + 113n) & MASK_64;
+      let z = (shiftMix64((y * CITY_K2 + 113n) & MASK_64) * CITY_K2) & MASK_64;
+      let v = [0n, 0n];
+      let w = [0n, 0n];
+      const endOffset = Math.floor((length - 1) / 64) * 64;
+      const lastOffset = endOffset + ((length - 1) & 63) - 63;
+      for (let offset = 0; offset !== endOffset; offset += 64) {
+        x = (rotateRight64((x + y + v[0] + read64le(bytes, offset + 8)) & MASK_64, 37) * CITY_K1) & MASK_64;
+        y = (rotateRight64((y + v[1] + read64le(bytes, offset + 48)) & MASK_64, 42) * CITY_K1) & MASK_64;
+        x ^= w[1];
+        y = (y + v[0] + read64le(bytes, offset + 40)) & MASK_64;
+        z = (rotateRight64((z + w[0]) & MASK_64, 33) * CITY_K1) & MASK_64;
+        v = weakHashLen32WithSeeds(bytes, offset, (v[1] * CITY_K1) & MASK_64, (x + w[0]) & MASK_64);
+        w = weakHashLen32WithSeeds(bytes, offset + 32, (z + w[1]) & MASK_64, (y + read64le(bytes, offset + 16)) & MASK_64);
+        [z, x] = [x, z];
+      }
+      const multiplier = CITY_K1 + ((z & 0xffn) << 1n);
+      w[0] = (w[0] + BigInt((length - 1) & 63)) & MASK_64;
+      v[0] = (v[0] + w[0]) & MASK_64;
+      w[0] = (w[0] + v[0]) & MASK_64;
+      x = (rotateRight64((x + y + v[0] + read64le(bytes, lastOffset + 8)) & MASK_64, 37) * multiplier) & MASK_64;
+      y = (rotateRight64((y + v[1] + read64le(bytes, lastOffset + 48)) & MASK_64, 42) * multiplier) & MASK_64;
+      x ^= (w[1] * 9n) & MASK_64;
+      y = (y + v[0] * 9n + read64le(bytes, lastOffset + 40)) & MASK_64;
+      z = (rotateRight64((z + w[0]) & MASK_64, 33) * multiplier) & MASK_64;
+      v = weakHashLen32WithSeeds(bytes, lastOffset, (v[1] * multiplier) & MASK_64, (x + w[0]) & MASK_64);
+      w = weakHashLen32WithSeeds(bytes, lastOffset + 32, (z + w[1]) & MASK_64, (y + read64le(bytes, lastOffset + 16)) & MASK_64);
+      [z, x] = [x, z];
+      return integerToBytes(
+        hashLen16(
+          (hashLen16(v[0], w[0], multiplier) + shiftMix64(y) * CITY_K0 + z) & MASK_64,
+          (hashLen16(v[1], w[1], multiplier) + x) & MASK_64,
+          multiplier
+        ),
+        8
+      );
+    }
+
+    function metroHash64V1(bytes) {
+      const k0 = 0xd6d018f5n;
+      const k1 = 0xa2aa033bn;
+      const k2 = 0x62992fc1n;
+      const k3 = 0x30bc5b29n;
+      const seed = 0n;
+      let hash = ((seed + k2) * k0) & MASK_64;
+      let offset = 0;
+
+      if (bytes.length >= 32) {
+        const state = [hash, hash, hash, hash];
+        do {
+          state[0] = (rotateRight64((state[0] + read64le(bytes, offset) * k0) & MASK_64, 29) + state[2]) & MASK_64; offset += 8;
+          state[1] = (rotateRight64((state[1] + read64le(bytes, offset) * k1) & MASK_64, 29) + state[3]) & MASK_64; offset += 8;
+          state[2] = (rotateRight64((state[2] + read64le(bytes, offset) * k2) & MASK_64, 29) + state[0]) & MASK_64; offset += 8;
+          state[3] = (rotateRight64((state[3] + read64le(bytes, offset) * k3) & MASK_64, 29) + state[1]) & MASK_64; offset += 8;
+        } while (offset <= bytes.length - 32);
+        state[2] ^= (rotateRight64(((state[0] + state[3]) * k0 + state[1]) & MASK_64, 37) * k1) & MASK_64;
+        state[3] ^= (rotateRight64(((state[1] + state[2]) * k1 + state[0]) & MASK_64, 37) * k0) & MASK_64;
+        state[0] ^= (rotateRight64(((state[0] + state[2]) * k0 + state[3]) & MASK_64, 37) * k1) & MASK_64;
+        state[1] ^= (rotateRight64(((state[1] + state[3]) * k1 + state[2]) & MASK_64, 37) * k0) & MASK_64;
+        hash = (hash + (state[0] ^ state[1])) & MASK_64;
+      }
+
+      if (bytes.length - offset >= 16) {
+        let v0 = rotateRight64((hash + read64le(bytes, offset) * k2) & MASK_64, 29) * k3 & MASK_64; offset += 8;
+        let v1 = rotateRight64((hash + read64le(bytes, offset) * k2) & MASK_64, 29) * k3 & MASK_64; offset += 8;
+        v0 ^= (rotateRight64(v0 * k0 & MASK_64, 21) + v1) & MASK_64;
+        v1 ^= (rotateRight64(v1 * k3 & MASK_64, 21) + v0) & MASK_64;
+        hash = (hash + v1) & MASK_64;
+      }
+      if (bytes.length - offset >= 8) {
+        hash = (hash + read64le(bytes, offset) * k3) & MASK_64; offset += 8;
+        hash ^= (rotateRight64(hash, 55) * k1) & MASK_64;
+      }
+      if (bytes.length - offset >= 4) {
+        hash = (hash + BigInt(read32le(bytes, offset)) * k3) & MASK_64; offset += 4;
+        hash ^= (rotateRight64(hash, 26) * k1) & MASK_64;
+      }
+      if (bytes.length - offset >= 2) {
+        hash = (hash + BigInt(bytes[offset] | (bytes[offset + 1] << 8)) * k3) & MASK_64; offset += 2;
+        hash ^= (rotateRight64(hash, 48) * k1) & MASK_64;
+      }
+      if (bytes.length - offset >= 1) {
+        hash = (hash + BigInt(bytes[offset]) * k3) & MASK_64;
+        hash ^= (rotateRight64(hash, 37) * k1) & MASK_64;
+      }
+      hash ^= rotateRight64(hash, 28);
+      hash = (hash * k0) & MASK_64;
+      hash ^= rotateRight64(hash, 29);
+      return integerToBytesLittleEndian(hash, 8);
+    }
+
+    function formatSize(size) {
+      if (size < 1024) return `${size} B`;
+      const units = ["KB", "MB", "GB", "TB"];
+      let value = size;
+      let unitIndex = -1;
+      do {
+        value /= 1024;
+        unitIndex++;
+      } while (value >= 1024 && unitIndex < units.length - 1);
+      return `${value.toFixed(value >= 100 ? 0 : value >= 10 ? 1 : 2)} ${units[unitIndex]}`;
+    }
+
+    function setStatus(message, state = "") {
+      statusText.textContent = message;
+      statusDot.className = `status-dot${state ? ` ${state}` : ""}`;
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("visible");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("visible"), 2200);
+    }
+
+    function updateMetrics() {
+      const totalSize = files.reduce((sum, item) => sum + item.file.size, 0);
+      document.getElementById("file-count").textContent = `${files.length} ${files.length === 1 ? "file" : "files"}`;
+      document.getElementById("metric-files").textContent = String(files.length);
+      document.getElementById("metric-size").textContent = files.length ? formatSize(totalSize) : "-";
+      downloadResultsButton.disabled = !files.some(item => item.results.length > 0);
+      clearButton.disabled = activeFile !== null || files.length === 0;
+    }
+
+    function renderResults() {
+      const resultCount = files.reduce((sum, item) => sum + item.results.length, 0);
+      document.getElementById("result-count").textContent =
+        `${resultCount} ${resultCount === 1 ? "result" : "results"}`;
+      emptyState.hidden = files.length > 0;
+      resultsList.hidden = files.length === 0;
+      resultsList.replaceChildren();
+
+      if (!files.length) {
+        updateMetrics();
+        return;
+      }
+
+      for (const item of files) {
+        const group = document.createElement("section");
+        group.className = "file-result";
+        const groupHead = document.createElement("div");
+        groupHead.className = "file-result-head";
+        const fileInfo = document.createElement("div");
+        fileInfo.className = "file-result-info";
+        const fileName = document.createElement("span");
+        fileName.className = "file-name";
+        fileName.textContent = item.file.name || "Unnamed file";
+        fileName.title = item.file.name;
+        const fileSize = document.createElement("span");
+        fileSize.className = "file-size";
+        fileSize.textContent = formatSize(item.file.size);
+        fileInfo.append(fileName, fileSize);
+        const fileActions = document.createElement("div");
+        fileActions.className = "file-result-actions";
+        const formatLabel = document.createElement("label");
+        formatLabel.className = "format-control";
+        const formatLabelText = document.createElement("span");
+        formatLabelText.textContent = "Format";
+        const formatSelect = document.createElement("select");
+        formatSelect.setAttribute("aria-label", `Output format for ${item.file.name}`);
+        for (const [format, label] of [
+          ["hex-lower", "Hex (lowercase)"],
+          ["hex-upper", "Hex (uppercase)"],
+          ["base64", "Base64"]
+        ]) {
+          const option = document.createElement("option");
+          option.value = format;
+          option.textContent = label;
+          option.selected = item.outputFormat === format;
+          formatSelect.append(option);
+        }
+        formatSelect.addEventListener("change", () => {
+          item.outputFormat = formatSelect.value;
+          renderResults();
+        });
+        formatLabel.append(formatLabelText, formatSelect);
+        const calculateFileButton = document.createElement("button");
+        calculateFileButton.type = "button";
+        calculateFileButton.className = "button button-primary copy-button";
+        calculateFileButton.textContent = "Calculate";
+        calculateFileButton.disabled = activeFile !== null || selectedAlgorithms().length === 0;
+        calculateFileButton.setAttribute("aria-label", `Calculate selected hashes for ${item.file.name}`);
+        calculateFileButton.addEventListener("click", () => calculateFile(item));
+        const copyButton = document.createElement("button");
+        copyButton.type = "button";
+        copyButton.className = "button copy-button";
+        copyButton.textContent = "Copy all";
+        copyButton.disabled = activeFile !== null || item.results.length === 0;
+        copyButton.setAttribute("aria-label", `Copy all hash results for ${item.file.name}`);
+        copyButton.addEventListener("click", () => copyFileResults(item));
+        fileActions.append(formatLabel, calculateFileButton, copyButton);
+        groupHead.append(fileInfo, fileActions);
+        group.append(groupHead);
+
+        if (item.results.length) {
+          const table = document.createElement("table");
+          table.className = "result-table";
+          const head = document.createElement("thead");
+          const headerRow = document.createElement("tr");
+          for (const label of ["Algorithm", "Result", ""]) {
+            const cell = document.createElement("th");
+            cell.scope = "col";
+            cell.textContent = label;
+            headerRow.append(cell);
+          }
+          head.append(headerRow);
+          const body = document.createElement("tbody");
+
+          for (const result of item.results) {
+            const row = document.createElement("tr");
+            const algorithmCell = document.createElement("td");
+            algorithmCell.textContent = result.algorithm;
+            const valueCell = document.createElement("td");
+            const value = document.createElement("code");
+            value.className = `hash-value${result.error ? " hash-error" : ""}`;
+            value.textContent = result.error || formatDigest(result.bytes, item.outputFormat);
+            valueCell.append(value);
+            const actionCell = document.createElement("td");
+            const rowCopyButton = document.createElement("button");
+            rowCopyButton.type = "button";
+            rowCopyButton.className = "button copy-button";
+            rowCopyButton.textContent = "Copy";
+            rowCopyButton.disabled = activeFile !== null || Boolean(result.error);
+            rowCopyButton.setAttribute("aria-label", `Copy ${result.algorithm} result for ${item.file.name}`);
+            if (!result.error) {
+              rowCopyButton.addEventListener("click", () =>
+                copyText(formatDigest(result.bytes, item.outputFormat), `${result.algorithm} result copied.`)
+              );
+            }
+            actionCell.append(rowCopyButton);
+            const removeButton = document.createElement("button");
+            removeButton.type = "button";
+            removeButton.className = "button delete-button";
+            removeButton.textContent = "×";
+            removeButton.disabled = activeFile !== null;
+            removeButton.setAttribute("aria-label", `Delete ${result.algorithm} result for ${item.file.name}`);
+            removeButton.title = "Delete this result";
+            removeButton.addEventListener("click", () => {
+              item.results.splice(item.results.indexOf(result), 1);
+              renderResults();
+              setStatus(`${result.algorithm} result deleted for ${item.file.name}.`);
+            });
+            actionCell.append(removeButton);
+            row.append(algorithmCell, valueCell, actionCell);
+            body.append(row);
+          }
+
+          table.append(head, body);
+          group.append(table);
+        } else {
+          const placeholder = document.createElement("div");
+          placeholder.className = "no-results";
+          placeholder.textContent = "No calculations yet. Select algorithms and calculate hashes.";
+          group.append(placeholder);
+        }
+        resultsList.append(group);
+      }
+
+      updateMetrics();
+    }
+
+    function addFiles(fileList) {
+      const incoming = Array.from(fileList || []);
+      if (!incoming.length) return;
+
+      for (const file of incoming) {
+        files.push({ file, results: [], outputFormat: "hex-lower" });
+      }
+      renderResults();
+      setStatus(`${incoming.length} ${incoming.length === 1 ? "file" : "files"} added. Select algorithms and calculate hashes.`);
+    }
+
+    async function calculateHash(algorithm, bytes) {
+      if (algorithm.kind === "crypto") {
+        if (!globalThis.crypto?.subtle) {
+          throw new Error("Web Crypto API is unavailable in this browser context.");
+        }
+        return new Uint8Array(await crypto.subtle.digest(algorithm.webName, bytes));
+      }
+      return algorithm.calculate(bytes);
+    }
+
+    async function calculateFile(item) {
+      const selected = selectedAlgorithms();
+      if (activeFile || !selected.length) return;
+
+      activeFile = item;
+      const previousResultCount = item.results.length;
+      for (const input of document.querySelectorAll('input[name="algorithm"]')) input.disabled = true;
+      chooseButton.disabled = true;
+      setStatus(`Calculating ${selected.length} ${selected.length === 1 ? "algorithm" : "algorithms"} for ${item.file.name}...`);
+      renderResults();
+
+      let completed = 0;
+      let bytes;
+      try {
+        bytes = new Uint8Array(await item.file.arrayBuffer());
+      } catch (error) {
+        for (const algorithm of selected) {
+          item.results.push({ algorithm: algorithm.id, error: `Read failed: ${error.message}` });
+          completed++;
+        }
+      }
+
+      if (bytes) {
+        for (const algorithm of selected) {
+          try {
+            item.results.push({ algorithm: algorithm.id, bytes: await calculateHash(algorithm, bytes) });
+          } catch (error) {
+            item.results.push({
+              algorithm: algorithm.id,
+              error: error instanceof Error ? error.message : "Calculation failed."
+            });
+          }
+          completed++;
+          setStatus(`Calculating ${item.file.name}... ${completed} of ${selected.length} results`);
+          renderResults();
+        }
+      }
+
+      activeFile = null;
+      for (const input of document.querySelectorAll('input[name="algorithm"]')) input.disabled = false;
+      chooseButton.disabled = false;
+      renderResults();
+      const failed = item.results.slice(previousResultCount).filter(result => result.error).length;
+      setStatus(
+        failed ? `Finished with ${failed} calculation error${failed === 1 ? "" : "s"}.` : `Finished: ${completed} hash results calculated for ${item.file.name}.`,
+        failed ? "invalid" : "valid"
+      );
+    }
+
+    async function copyText(text, successMessage) {
+      try {
+        if (!navigator.clipboard?.writeText) throw new Error("Clipboard API unavailable");
+        await navigator.clipboard.writeText(text);
+        showToast(successMessage);
+      } catch {
+        setStatus("Could not access the clipboard. Select and copy the result manually.", "invalid");
+      }
+    }
+
+    function copyFileResults(item) {
+      const lines = item.results
+        .filter(result => result.bytes)
+        .map(result => `${result.algorithm}  ${formatDigest(result.bytes, item.outputFormat)}`);
+      if (!lines.length) return;
+      copyText(`${item.file.name}\n${lines.join("\n")}`, "File hash results copied.");
+    }
+
+    function downloadAllResults() {
+      const lines = [];
+      for (const item of files) {
+        if (!item.results.length) continue;
+        lines.push(`# ${item.file.name} (${formatSize(item.file.size)}, ${item.outputFormat})`);
+        for (const result of item.results) {
+          if (result.bytes) lines.push(`${result.algorithm}\t${formatDigest(result.bytes, item.outputFormat)}`);
+          else lines.push(`${result.algorithm}\tERROR: ${result.error}`);
+        }
+        lines.push("");
+      }
+      if (!lines.length) return;
+      const blob = new Blob([lines.join("\n").trimEnd() + "\n"], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "DH.DevUtil-hash-results.txt";
+      document.body.append(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 0);
+      showToast("Hash results saved as a text file.");
+    }
+
+    function clearFiles() {
+      if (activeFile) return;
+      files.length = 0;
+      fileInput.value = "";
+      renderResults();
+      setStatus("Choose files or drop them here to calculate hashes.");
+    }
+
+    chooseButton.addEventListener("click", () => fileInput.click());
+    fileInput.addEventListener("change", event => {
+      addFiles(event.currentTarget.files);
+      fileInput.value = "";
+    });
+    downloadResultsButton.addEventListener("click", downloadAllResults);
+    clearButton.addEventListener("click", clearFiles);
+
+    for (const input of document.querySelectorAll('input[name="algorithm"]')) {
+      input.addEventListener("change", () => {
+        renderResults();
+      });
+    }
+    for (const eventName of ["dragenter", "dragover"]) {
+      dropZone.addEventListener(eventName, event => {
+        event.preventDefault();
+        event.dataTransfer.dropEffect = "copy";
+        dropZone.classList.add("drag-active");
+      });
+    }
+    for (const eventName of ["dragleave", "drop"]) {
+      dropZone.addEventListener(eventName, event => {
+        event.preventDefault();
+        dropZone.classList.remove("drag-active");
+      });
+    }
+    dropZone.addEventListener("drop", event => addFiles(event.dataTransfer.files));
+    window.addEventListener("dragover", event => event.preventDefault());
+    window.addEventListener("drop", event => event.preventDefault());
+
+    renderResults();
+  </script>
+</body>
+</html>
