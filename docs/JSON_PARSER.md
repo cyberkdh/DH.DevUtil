@@ -31,6 +31,8 @@ When a value is recognized as Base64, the `View as` menu lets you inspect and co
 - C# `byte[]` initializer
 - C++ `unsigned char` array
 
+Base64 values without trailing `=` padding are also recognized. If a `data:...;base64,` value cannot be decoded, the `View as` menu shows the reason, such as invalid length, misplaced padding, or unexpected characters.
+
 Recognized Base64 image data can be opened with `Preview image`. The preview shows the image dimensions and MIME type and allows downloading the image. The tool does not fetch arbitrary external URLs.
 
 ## Processing and Privacy
@@ -41,4 +43,4 @@ JSON input is parsed in the browser tab. The tool does not send input to a serve
 
 - Syntax validation follows the browser's standard `JSON.parse` behavior. JavaScript object literals, comments, and trailing commas are not valid JSON and are rejected.
 - There is no file upload or JSON file import UI. Paste JSON text into the input instead.
-- Image preview is limited to recognized image data in Base64 values.
+- Image preview is limited to recognized, decodable image data in Base64 values. Corrupt or unsupported image data is reported instead of being shown as a successful preview.
