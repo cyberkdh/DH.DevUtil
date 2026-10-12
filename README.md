@@ -6,13 +6,13 @@ DH.DevUtil is a collection of lightweight utilities for everyday development tas
 
 ## Tools
 
-| Tool | What it does | Source | Guide |
-|---|---|---|---|
-| JSON Parser | Validate, explore, format, and minify JSON. Inspect Base64 values and preview embedded images. | [View source](./tools/DH.DevUtil.json.html) | [Guide](./docs/JSON_PARSER.md) |
-| File Hash Calculator | Calculate cryptographic hashes, checksums, and non-cryptographic hashes for local files. | [View source](./tools/DH.DevUtil.hash.html) | [Algorithms and guide](./docs/HASH_ALGORITHMS.md) |
-| HMAC Simulator (Base) | Calculate and verify HMAC tags and explore the Client → in-transit data → Server flow. | [View source](./tools/DH.DevUtil.hmac-simulator-base.html) | [Guide](./docs/HMAC_SIMULATOR.md) |
+| Tool | What it does | Live demo | Source | Guide |
+|---|---|---|---|---|
+| JSON Parser | Validate, explore, format, and minify JSON. Inspect Base64 values and preview embedded images. | [Run](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.json.html) | [View source](./tools/DH.DevUtil.json.html) | [Guide](./docs/JSON_PARSER.md) |
+| File Hash Calculator | Calculate cryptographic hashes, checksums, and non-cryptographic hashes for local files. | [Run](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.hash.html) | [View source](./tools/DH.DevUtil.hash.html) | [Algorithms and guide](./docs/HASH_ALGORITHMS.md) |
+| HMAC Simulator (Base) | Calculate and verify HMAC tags and explore the Client → in-transit data → Server flow. | [Run](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.hmac-simulator-base.html) | [View source](./tools/DH.DevUtil.hmac-simulator-base.html) | [Guide](./docs/HMAC_SIMULATOR.md) |
 
-The source links open the HTML files in GitHub's code viewer; they do not run the tools. To use a tool, download its HTML file or clone the repository and open it in a browser. A rendered online demo would require a separate GitHub Pages deployment.
+Live demos run the static HTML tools on GitHub Pages. The source links open the HTML files in GitHub's code viewer; they do not run the tools. To use a tool offline, download its HTML file or clone the repository and open it in a browser.
 
 ## Important
 
@@ -23,8 +23,8 @@ The source links open the HTML files in GitHub's code viewer; they do not run th
 
 ## Getting Started
 
-1. Clone this repository or download the HTML source file for the tool you need.
-2. Open the downloaded file from `tools` in a modern browser and follow its guide.
+1. Select **Run** in the tool catalog to use a live demo, or clone this repository/download the HTML source for offline use.
+2. Follow the corresponding tool guide.
 
 ## Recent Changes
 

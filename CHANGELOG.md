@@ -13,7 +13,8 @@ Notable changes to DH.DevUtil are listed here. The newest changes appear first.
 
 ### Improved
 
-- README labels tool links as source and explains that GitHub's code viewer does not run the HTML files.
+- README distinguishes GitHub Pages live demos from source-code links.
+- README explains that GitHub's code viewer does not run the HTML files.
 - JSON Parser recognizes valid Base64 values without trailing padding and reports why malformed Base64 data cannot be decoded.
 - JSON Parser validates embedded image data before reporting a successful preview and displays errors for corrupt or unsupported images.
 
