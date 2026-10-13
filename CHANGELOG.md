@@ -8,10 +8,14 @@ Notable changes to DH.DevUtil are listed here. The newest changes appear first.
 
 ### Added
 
+- Add Symmetric Encryption Simulator (Base), a dependency-free learning tool for AES, ARIA, 3DES, and DES in ECB and CBC modes with PKCS#7, ANSI X.923, ISO/IEC 7816-4, Zero, and No padding, a shared key/IV panel used by both Encrypt and Decrypt, a fixed IV for reproducible ciphertext, step-by-step details, built-in explanations of IV and padding behavior, and NIST/RFC 5794/DES test vectors.
+- Add Symmetric Encryption Simulator (Base) and Symmetric Encryption Simulator screenshots to the English and Korean READMEs and tool guides, and link the Symmetric Encryption Simulator guides to the Base guide.
 - HTTP Digest Authentication Simulator, a local RFC 7616 challenge-response and verification learning tool supporting all six registered algorithm tokens with `qop=auth`.
 - HTTP Digest Authentication Simulator supports the RFC 7616 `userhash=true` option.
 - Add JWT Inspector to generate demo JWTs with HS256, parse compact tokens, and verify HS256 signatures locally.
 - Add the JWT Inspector screenshot to the English and Korean READMEs and tool guides.
+- Add a Symmetric Encryption Simulator for AES-GCM/CBC/CTR and CBC padding comparisons.
+- Include a local `@noble/ciphers` 2.4.0 bundle and MIT license for selectable AES-CBC padding.
 - Add the HTTP Digest Simulator screenshot to the English and Korean READMEs and tool guides.
 - HMAC Simulator (Base), a browser-based learning tool for HMAC-SHA-256/384/512 with construction details and a Client → in-transit data → Server verification flow.
 - HMAC Simulator (Base) screenshot in the English and Korean tool guides.
@@ -19,6 +23,8 @@ Notable changes to DH.DevUtil are listed here. The newest changes appear first.
 ### Improved
 
 - Add JWT Inspector parse-segment and detailed HS256 signature verification views.
+- Support PKCS#7, ANSI X.923, Zero, and NoPadding options in AES-CBC.
+- Clarify that some offline tools require their referenced local assets alongside the HTML file.
 - HTTP Digest Authentication Simulator shows Server-side calculation details for successful and failed response verification.
 - README notes that Ctrl-click opens GitHub Pages live demos in a new tab because GitHub strips custom link targets.
 - README distinguishes GitHub Pages live demos from source-code links.

@@ -1,0 +1,675 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f7f4">
+  <title>Symmetric Encryption Simulator | DH.DevUtil</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --page: #f5f7f4;
+      --paper: #fff;
+      --ink: #172a24;
+      --muted: #71817a;
+      --line: #dce5df;
+      --green: #12694f;
+      --green-dark: #0d513d;
+      --green-soft: #e3f2e9;
+      --coral: #dc7254;
+      --coral-soft: #fff0e9;
+      --code: #f2f5f3;
+      --mono: "Cascadia Code", "Cascadia Mono", Consolas, monospace;
+      --sans: "Segoe UI Variable", "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      background:
+        radial-gradient(ellipse at 2% 5%, rgba(209, 232, 216, .52), transparent 31rem),
+        radial-gradient(ellipse at 100% 100%, rgba(255, 225, 210, .34), transparent 28rem),
+        var(--page);
+      color: var(--ink);
+      font-family: var(--sans);
+    }
+    button, input, select, textarea { font: inherit; }
+    button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid #70a98b; outline-offset: 2px; }
+    .shell { width: min(1120px, 100%); margin: 0 auto; padding: 0 30px 32px; }
+    .topbar { height: 68px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); }
+    .brand { display: inline-flex; align-items: center; gap: 11px; color: var(--ink); font-size: 14px; font-weight: 750; text-decoration: none; }
+    .brand-mark { display: grid; width: 28px; height: 28px; place-items: center; border-radius: 6px; background: var(--green); color: #fff; font: 700 11px var(--mono); }
+    .topbar-note { color: var(--muted); font: 11px var(--mono); letter-spacing: .06em; text-transform: uppercase; }
+    main { padding-top: 28px; }
+    .intro { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 18px; }
+    .eyebrow { margin: 0 0 8px; color: var(--green); font: 700 11px var(--mono); letter-spacing: .09em; text-transform: uppercase; }
+    h1 { margin: 0; font: 650 32px/1.15 Georgia, "Times New Roman", serif; }
+    .intro-copy { max-width: 500px; margin: 0 0 2px; color: var(--muted); font-size: 13px; line-height: 1.65; }
+    .notice { margin: 0 0 16px; padding: 11px 13px; border: 1px solid #efd2c4; border-radius: 5px; background: var(--coral-soft); color: #75422f; font-size: 11px; line-height: 1.55; }
+    .notice strong { margin-right: 5px; }
+    .layout { display: grid; grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr); gap: 16px; align-items: start; }
+    .card { min-width: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 6px; background: var(--paper); }
+    .card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 49px; padding: 0 16px; border-bottom: 1px solid var(--line); }
+    .card-head h2 { margin: 0; font-size: 13px; }
+    .card-head span { color: var(--muted); font: 10px var(--mono); }
+    .card-body { display: grid; gap: 14px; padding: 16px; }
+    .field { display: grid; min-width: 0; gap: 6px; }
+    .field[hidden] { display: none; }
+    label, .field-label { color: #455a50; font-size: 11px; font-weight: 700; }
+    .hint { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.5; }
+    select, input[type="text"], textarea {
+      width: 100%;
+      min-height: 36px;
+      padding: 8px 9px;
+      border: 1px solid #cfdad3;
+      border-radius: 4px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 12px;
+    }
+    textarea { min-height: 116px; resize: vertical; font: 11px/1.55 var(--mono); }
+    textarea.code { min-height: 190px; }
+    .mono-input { font-family: var(--mono) !important; font-size: 11px !important; }
+    .row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+    .row-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .button { min-height: 35px; padding: 0 12px; border: 1px solid var(--line); border-radius: 4px; background: #fff; color: var(--ink); cursor: pointer; font-size: 11px; font-weight: 650; }
+    .button:hover:not(:disabled) { border-color: #9ab6a6; background: #f7faf7; }
+    .button:disabled { cursor: not-allowed; opacity: .55; }
+    .button-primary { border-color: var(--green); background: var(--green); color: #fff; }
+    .button-primary:hover:not(:disabled) { border-color: var(--green-dark); background: var(--green-dark); }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 12px; border-top: 1px solid #e8eeea; }
+    .status { min-height: 34px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 4px; background: #fbfcfb; color: var(--muted); font-size: 10px; line-height: 1.5; overflow-wrap: anywhere; }
+    .status[data-kind="success"] { border-color: #b9d8c4; background: #f1f8f3; color: var(--green-dark); }
+    .status[data-kind="error"] { border-color: #efd2c4; background: var(--coral-soft); color: #8b402c; }
+    .status[data-kind="warning"] { border-color: #ead48b; background: #fff9df; color: #765900; }
+    .callout { margin: 0; padding: 10px 11px; border-left: 3px solid var(--green); background: #f2f7f3; color: #385548; font-size: 10px; line-height: 1.55; }
+    .callout.warning { border-left-color: var(--coral); background: var(--coral-soft); color: #75422f; }
+    details { border-top: 1px solid var(--line); padding-top: 11px; }
+    summary { color: #455a50; cursor: pointer; font-size: 11px; font-weight: 700; }
+    .details-grid { display: grid; gap: 8px; margin-top: 10px; }
+    .detail { display: grid; gap: 4px; min-width: 0; }
+    .detail strong { color: #455a50; font-size: 10px; }
+    .detail code { padding: 8px; border-radius: 4px; background: var(--code); color: #263d32; font: 10px/1.5 var(--mono); overflow-wrap: anywhere; white-space: pre-wrap; }
+    .legacy { margin-top: 16px; border: 1px solid var(--line); border-radius: 6px; background: rgba(255,255,255,.72); }
+    .legacy summary { padding: 12px 14px; }
+    .legacy-content { display: grid; gap: 8px; padding: 0 14px 14px; color: var(--muted); font-size: 10px; line-height: 1.6; }
+    .legacy-content p { margin: 0; }
+    .footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 20px; padding-top: 16px; color: var(--muted); font-size: 10px; line-height: 1.5; }
+    @media (max-width: 760px) {
+      .shell { padding-right: 16px; padding-left: 16px; }
+      .intro { display: grid; gap: 10px; }
+      h1 { font-size: 29px; }
+      .layout { grid-template-columns: minmax(0, 1fr); }
+    }
+    @media (max-width: 420px) {
+      .topbar-note { max-width: 120px; text-align: right; font-size: 9px; }
+      .row-2 { grid-template-columns: minmax(0, 1fr); }
+      .row { grid-template-columns: minmax(0, 1fr); }
+      .row .button { justify-self: start; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="../README.md" aria-label="DH.DevUtil home">
+        <span class="brand-mark">DH</span><span>DH.DevUtil</span>
+      </a>
+      <span class="topbar-note">Cryptography · Local simulator</span>
+    </header>
+    <main>
+      <section class="intro" aria-labelledby="title">
+        <div>
+          <p class="eyebrow">AES · Symmetric cryptography</p>
+          <h1 id="title">Symmetric Encryption Simulator</h1>
+        </div>
+        <p class="intro-copy">Encrypt and decrypt UTF-8 text locally. Compare authenticated encryption with modes that do not authenticate data.</p>
+      </section>
+      <p class="notice"><strong>Learning tool only.</strong> Use synthetic text and temporary keys. Do not enter production secrets or personal data. Processing stays in this browser; no network requests or persistent storage are used.</p>
+
+      <div class="layout">
+        <section class="card" aria-labelledby="encrypt-title">
+          <header class="card-head">
+            <h2 id="encrypt-title">01 · Configure and encrypt</h2>
+            <span>Web Crypto + local AES-CBC</span>
+          </header>
+          <div class="card-body">
+            <div class="row-2">
+              <div class="field">
+                <label for="algorithm">AES mode</label>
+                <select id="algorithm">
+                  <option value="AES-GCM">AES-GCM · authenticated (recommended)</option>
+                  <option value="AES-CBC">AES-CBC · padding, no authentication</option>
+                  <option value="AES-CTR">AES-CTR · counter, no authentication</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="key-size">AES key size</label>
+                <select id="key-size">
+                  <option value="128">128 bits</option>
+                  <option value="192">192 bits (AES-CBC only)</option>
+                  <option value="256" selected>256 bits</option>
+                </select>
+              </div>
+            </div>
+            <div class="field" id="padding-field" hidden>
+              <label for="padding">AES-CBC padding</label>
+              <select id="padding">
+                <option value="PKCS7">PKCS#7</option>
+                <option value="ANSI-X923">ANSI X.923</option>
+                <option value="ZERO">Zero padding</option>
+                <option value="NONE">No padding (block-aligned only)</option>
+              </select>
+              <p class="hint" id="padding-hint">Padding is only used by AES-CBC. AES-GCM and AES-CTR work on arbitrary-length input without block padding.</p>
+            </div>
+            <div class="field">
+              <label for="key">AES key (Base64URL)</label>
+              <div class="row">
+                <input class="mono-input" id="key" type="text" spellcheck="false" autocomplete="off" aria-describedby="key-hint">
+                <button class="button" id="new-key" type="button">Generate key</button>
+              </div>
+              <p class="hint" id="key-hint">Generate a cryptographically random key. Keep it separate from the encrypted package.</p>
+            </div>
+            <div class="field">
+              <label for="plaintext">Plaintext (UTF-8)</label>
+              <textarea id="plaintext" placeholder="Enter synthetic text to encrypt."></textarea>
+            </div>
+            <div class="field" id="aad-field">
+              <label for="aad">Additional authenticated data (AAD) · AES-GCM only</label>
+              <input id="aad" type="text" spellcheck="false" placeholder="Optional public context, e.g. record:42">
+              <p class="hint">AAD is authenticated but not encrypted. It must be identical during decryption.</p>
+            </div>
+            <div class="callout" id="mode-explanation"></div>
+            <div class="actions">
+              <button class="button button-primary" id="encrypt" type="button">Encrypt</button>
+              <button class="button" id="clear" type="button">Clear all</button>
+            </div>
+            <div class="status" id="encrypt-status" role="status" aria-live="polite">Generate or enter a key, then encrypt a test message.</div>
+          </div>
+        </section>
+
+        <section class="card" aria-labelledby="decrypt-title">
+          <header class="card-head">
+            <h2 id="decrypt-title">02 · Inspect and decrypt</h2>
+            <span>Portable JSON package</span>
+          </header>
+          <div class="card-body">
+            <div class="field">
+              <label for="package">Encrypted package (JSON)</label>
+              <textarea class="code" id="package" spellcheck="false" placeholder="Encrypt a message or paste a package JSON here."></textarea>
+              <p class="hint">The package contains the algorithm, IV/counter, and ciphertext. It never contains the key.</p>
+            </div>
+            <div class="actions" style="padding-top:0;border-top:0">
+              <button class="button button-primary" id="decrypt" type="button">Decrypt package</button>
+            </div>
+            <div class="status" id="decrypt-status" role="status" aria-live="polite">Paste a package and provide its matching key to decrypt.</div>
+            <div class="field" id="plaintext-result-field" hidden>
+              <label for="plaintext-result">Decrypted plaintext (UTF-8)</label>
+              <textarea id="plaintext-result" readonly></textarea>
+            </div>
+            <details id="details" hidden>
+              <summary>Show operation details</summary>
+              <div class="details-grid" id="detail-list"></div>
+            </details>
+          </div>
+        </section>
+      </div>
+
+      <details class="legacy">
+        <summary>Other algorithms and legacy ciphers</summary>
+        <div class="legacy-content">
+          <p><strong>ARIA</strong> is a modern standardized block cipher with 128-, 192-, and 256-bit keys. It is not included in the browser Web Crypto API or the local library bundle used here, so ARIA encryption/decryption is not implemented.</p>
+          <p><strong>DES</strong> has an inadequate 56-bit effective key. <strong>3DES/TDEA</strong> is a legacy cipher with a 64-bit block size and is not appropriate for new encryption. They are intentionally not offered as operational choices; use them only to understand legacy compatibility, not to protect data.</p>
+          <p>ECB is also omitted because it reveals repeated plaintext patterns. This simulator focuses on AES-GCM, AES-CBC, and AES-CTR.</p>
+        </div>
+      </details>
+      <footer class="footer">
+        <span>AES-GCM/CTR use Web Crypto; AES-CBC uses the local bundled library. Keys and messages are not uploaded or stored.</span>
+        <span>Do not reuse a GCM nonce or CTR counter with the same key. CBC and CTR do not authenticate ciphertext.</span>
+      </footer>
+    </main>
+  </div>
+  <script src="./vendor/noble-ciphers-2.4.0/aes-cbc.bundle.js"></script>
+  <script>
+    'use strict';
+
+    const el = id => document.getElementById(id);
+    const encoder = new TextEncoder();
+    let operationVersion = 0;
+    const modeHelp = {
+      'AES-GCM': 'AES-GCM provides confidentiality and authentication (AEAD). A modified ciphertext or AAD fails verification. A fresh 96-bit nonce is generated for each encryption; never reuse a nonce with the same key.',
+      'AES-CBC': 'AES-CBC uses a random 128-bit IV and a selectable padding scheme. It does not authenticate ciphertext: a successful decryption does not prove the data is genuine or unchanged. Use authenticated encryption for real applications.',
+      'AES-CTR': 'AES-CTR turns AES into a stream-like mode with a random 128-bit counter block. It does not authenticate ciphertext, and reusing a counter with the same key is dangerous. Use authenticated encryption for real applications.'
+    };
+    const paddingLabels = {
+      'PKCS7': 'PKCS#7',
+      'ANSI-X923': 'ANSI X.923',
+      'ZERO': 'Zero padding',
+      'NONE': 'No padding'
+    };
+
+    function setStatus(id, text, kind = '') {
+      const status = el(id);
+      status.textContent = text;
+      status.dataset.kind = kind;
+    }
+
+    function invalidatePendingOperation() {
+      operationVersion++;
+    }
+
+    function encodeBase64Url(bytes) {
+      let binary = '';
+      for (let offset = 0; offset < bytes.length; offset += 0x8000) {
+        binary += String.fromCharCode(...bytes.subarray(offset, offset + 0x8000));
+      }
+      return btoa(binary).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+    }
+
+    function decodeBase64Url(value, label, allowEmpty = false) {
+      if (typeof value !== 'string' || (!allowEmpty && !value) || !/^[A-Za-z0-9_-]*$/.test(value) || value.length % 4 === 1) {
+        throw new Error(`${label} must be valid unpadded Base64URL.`);
+      }
+      const base64 = value.replace(/-/g, '+').replace(/_/g, '/') + '='.repeat((4 - value.length % 4) % 4);
+      let binary;
+      try {
+        binary = atob(base64);
+      } catch {
+        throw new Error(`${label} must be valid Base64URL.`);
+      }
+      const bytes = Uint8Array.from(binary, character => character.charCodeAt(0));
+      if (encodeBase64Url(bytes) !== value) throw new Error(`${label} is not canonical Base64URL.`);
+      return bytes;
+    }
+
+    function makeErrorMessage(error) {
+      if (!(error instanceof Error)) return String(error) || 'An unknown error occurred.';
+      return error.message.trim() || `${error.name || 'Operation'} failed.`;
+    }
+
+    function randomBytes(length) {
+      return crypto.getRandomValues(new Uint8Array(length));
+    }
+
+    function getKeyBytes() {
+      const keyBytes = decodeBase64Url(el('key').value.trim(), 'AES key');
+      const requestedBits = Number(el('key-size').value);
+      if (keyBytes.byteLength * 8 !== requestedBits) {
+        throw new Error(`The selected key size is ${requestedBits} bits, but the entered key is ${keyBytes.byteLength * 8} bits.`);
+      }
+      return keyBytes;
+    }
+
+    async function importAesKey(rawKey, algorithm, usage) {
+      return crypto.subtle.importKey('raw', rawKey, { name: algorithm }, false, [usage]);
+    }
+
+    function appendDetail(container, label, value) {
+      const row = document.createElement('div');
+      row.className = 'detail';
+      const title = document.createElement('strong');
+      title.textContent = label;
+      const code = document.createElement('code');
+      code.textContent = value;
+      row.append(title, code);
+      container.append(row);
+    }
+
+    function showDetails(items) {
+      const list = el('detail-list');
+      list.replaceChildren();
+      for (const [label, value] of items) appendDetail(list, label, value);
+      el('details').hidden = false;
+      el('details').open = true;
+    }
+
+    function clearResults() {
+      el('plaintext-result-field').hidden = true;
+      el('plaintext-result').value = '';
+      el('details').hidden = true;
+      el('details').open = false;
+      el('detail-list').replaceChildren();
+    }
+
+    function updateModeHelp() {
+      const algorithm = el('algorithm').value;
+      el('mode-explanation').textContent = modeHelp[algorithm];
+      el('aad-field').hidden = algorithm !== 'AES-GCM';
+      el('padding-field').hidden = algorithm !== 'AES-CBC';
+      const supports192BitNativeMode = algorithm === 'AES-CBC';
+      const option192 = el('key-size').querySelector('option[value="192"]');
+      option192.disabled = !supports192BitNativeMode;
+      if (!supports192BitNativeMode && el('key-size').value === '192') el('key-size').value = '256';
+      el('padding-hint').textContent = el('padding').value === 'ZERO'
+        ? 'Zero padding cannot distinguish original trailing zero bytes by itself. This local package stores the original byte length; the metadata is not authenticated.'
+        : el('padding').value === 'NONE'
+          ? 'NoPadding accepts only plaintext whose UTF-8 byte length is a multiple of 16. Empty input is also block-aligned.'
+          : 'PKCS#7 and ANSI X.923 always add padding, including a full 16-byte block when plaintext is already block-aligned.';
+    }
+
+    function applyPadding(plaintext, padding) {
+      if (padding === 'PKCS7') return plaintext;
+      const remainder = plaintext.length % 16;
+      if (padding === 'NONE') {
+        if (remainder !== 0) throw new Error('NoPadding requires plaintext length to be a multiple of 16 bytes.');
+        return plaintext;
+      }
+      const paddingLength = padding === 'ZERO'
+        ? (16 - remainder) % 16
+        : (16 - remainder) || 16;
+      if (padding === 'ZERO' && paddingLength === 0) return plaintext;
+      const padded = new Uint8Array(plaintext.length + paddingLength);
+      padded.set(plaintext);
+      if (padding === 'ANSI-X923') padded[padded.length - 1] = paddingLength;
+      return padded;
+    }
+
+    function removePadding(plaintext, padding, originalLength) {
+      if (!Number.isInteger(originalLength) || originalLength < 0 || originalLength > plaintext.length) {
+        throw new Error('Package plaintextLength is invalid for the selected padding.');
+      }
+      if (padding === 'NONE') {
+        if (originalLength !== plaintext.length || plaintext.length % 16 !== 0) {
+          throw new Error('NoPadding package length must match its block-aligned plaintext.');
+        }
+        return plaintext;
+      }
+      if (padding === 'PKCS7') {
+        if (originalLength !== plaintext.length) {
+          throw new Error('PKCS#7 plaintext length does not match the package metadata.');
+        }
+        return plaintext;
+      }
+      if (padding === 'ZERO') {
+        for (let index = originalLength; index < plaintext.length; index++) {
+          if (plaintext[index] !== 0) throw new Error('Zero padding check failed. The package may be damaged or use a different key.');
+        }
+        return plaintext.subarray(0, originalLength);
+      }
+      const paddingLength = plaintext.length - originalLength;
+      if (paddingLength < 1 || paddingLength > 16) throw new Error(`${paddingLabels[padding]} length is invalid.`);
+      if (padding === 'ANSI-X923') {
+        for (let index = originalLength; index < plaintext.length - 1; index++) {
+          if (plaintext[index] !== 0) throw new Error('ANSI X.923 padding check failed. The package may be damaged or use a different key.');
+        }
+        if (plaintext[plaintext.length - 1] !== paddingLength) {
+          throw new Error('ANSI X.923 padding length is invalid. The package may be damaged or use a different key.');
+        }
+      }
+      return plaintext.subarray(0, originalLength);
+    }
+
+    async function encrypt() {
+      const operation = ++operationVersion;
+      clearResults();
+      try {
+        const algorithm = el('algorithm').value;
+        const keyBytes = getKeyBytes();
+        if (algorithm !== 'AES-CBC' && keyBytes.length === 24) {
+          throw new Error('The current browser Web Crypto API does not support 192-bit AES for this mode. Select 128/256 bits or use AES-CBC.');
+        }
+        const key = algorithm === 'AES-CBC'
+          ? null
+          : await importAesKey(keyBytes, algorithm, 'encrypt');
+        const plaintext = encoder.encode(el('plaintext').value);
+        let packageValue;
+        let detailItems;
+
+        if (algorithm === 'AES-GCM') {
+          const iv = randomBytes(12);
+          const aad = encoder.encode(el('aad').value);
+          const tagLength = 128;
+          const ciphertext = new Uint8Array(await crypto.subtle.encrypt(
+            { name: algorithm, iv, additionalData: aad, tagLength },
+            key,
+            plaintext
+          ));
+          const ivValue = encodeBase64Url(iv);
+          packageValue = { version: 1, algorithm, keyLength: keyBytes.length * 8, iv: ivValue, tagLength, aad: encodeBase64Url(aad), ciphertext: encodeBase64Url(ciphertext) };
+          detailItems = [
+            ['Mode and guarantee', 'AES-GCM · authenticated encryption (AEAD)'],
+            ['Key length', `${keyBytes.length * 8} bits (key material is not repeated here)`],
+            ['Nonce / IV', `${ivValue} (${iv.length} bytes, randomly generated)`],
+            ['AAD', `${aad.length} bytes; authenticated, not encrypted`],
+            ['Plaintext length', `${plaintext.length} UTF-8 bytes`],
+            ['Ciphertext and tag length', `${ciphertext.length} bytes; Web Crypto appends the authentication tag`]
+          ];
+        } else if (algorithm === 'AES-CBC') {
+          if (!globalThis.DHNobleCipherBundle?.cbc) throw new Error('The local AES-CBC library bundle could not be loaded.');
+          const iv = randomBytes(16);
+          const padding = el('padding').value;
+          const paddedPlaintext = applyPadding(plaintext, padding);
+          const cbc = DHNobleCipherBundle.cbc(
+            keyBytes,
+            iv,
+            padding === 'PKCS7' ? undefined : { disablePadding: true }
+          );
+          const ciphertext = cbc.encrypt(paddedPlaintext);
+          packageValue = {
+            version: 1,
+            algorithm,
+            keyLength: keyBytes.length * 8,
+            iv: encodeBase64Url(iv),
+            padding,
+            plaintextLength: plaintext.length,
+            ciphertext: encodeBase64Url(ciphertext)
+          };
+          detailItems = [
+            ['Mode and guarantee', 'AES-CBC · confidentiality only; no authentication'],
+            ['Key length', `${keyBytes.length * 8} bits (key material is not repeated here)`],
+            ['IV', `${encodeBase64Url(iv)} (${iv.length} bytes, randomly generated)`],
+            ['Padding', `${paddingLabels[padding]}${padding === 'PKCS7' ? ' (applied by the local Noble cipher library)' : ' (applied before AES-CBC)'}`],
+            ['Plaintext length', `${plaintext.length} UTF-8 bytes`],
+            ['Ciphertext length', `${ciphertext.length} bytes`]
+          ];
+        } else {
+          const counter = randomBytes(16);
+          const counterLength = 64;
+          const ciphertext = new Uint8Array(await crypto.subtle.encrypt({ name: algorithm, counter, length: counterLength }, key, plaintext));
+          packageValue = { version: 1, algorithm, keyLength: keyBytes.length * 8, counter: encodeBase64Url(counter), counterLength, ciphertext: encodeBase64Url(ciphertext) };
+          detailItems = [
+            ['Mode and guarantee', 'AES-CTR · confidentiality only; no authentication'],
+            ['Key length', `${keyBytes.length * 8} bits (key material is not repeated here)`],
+            ['Initial counter block', `${encodeBase64Url(counter)} (${counter.length} bytes, randomly generated)`],
+            ['Counter length', `${counterLength} bits`],
+            ['Plaintext length', `${plaintext.length} UTF-8 bytes`],
+            ['Ciphertext length', `${ciphertext.length} bytes`]
+          ];
+        }
+
+        if (operation !== operationVersion) return;
+        el('package').value = JSON.stringify(packageValue, null, 2);
+        el('algorithm').value = algorithm;
+        el('key-size').value = String(keyBytes.length * 8);
+        showDetails(detailItems);
+        setStatus('encrypt-status', `${algorithm} encryption completed locally. Keep the key separate from the package.`, 'success');
+        setStatus('decrypt-status', 'Package created. Use the matching key to decrypt it.');
+      } catch (error) {
+        if (operation === operationVersion) setStatus('encrypt-status', makeErrorMessage(error), 'error');
+      }
+    }
+
+    function readPackage() {
+      let value;
+      try {
+        value = JSON.parse(el('package').value);
+      } catch {
+        throw new Error('Encrypted package is not valid JSON.');
+      }
+      if (!value || typeof value !== 'object' || Array.isArray(value) || value.version !== 1) {
+        throw new Error('Unsupported encrypted package. Expected a version 1 JSON object.');
+      }
+      if (!['AES-GCM', 'AES-CBC', 'AES-CTR'].includes(value.algorithm)) {
+        throw new Error('Package algorithm is not supported. Choose AES-GCM, AES-CBC, or AES-CTR.');
+      }
+      if (![128, 192, 256].includes(value.keyLength)) throw new Error('Package keyLength must be 128, 192, or 256 bits.');
+      const ciphertext = decodeBase64Url(value.ciphertext, 'Ciphertext', true);
+      const ivField = value.algorithm === 'AES-CTR' ? 'counter' : 'iv';
+      const iv = decodeBase64Url(value[ivField], value.algorithm === 'AES-CTR' ? 'Counter block' : 'IV');
+      if (value.algorithm === 'AES-GCM' && iv.length !== 12) throw new Error('AES-GCM package nonce must be exactly 12 bytes.');
+      if (value.algorithm !== 'AES-GCM' && iv.length !== 16) throw new Error(`${value.algorithm} requires a 16-byte ${ivField}.`);
+      if (value.algorithm === 'AES-CBC' && !Object.hasOwn(paddingLabels, value.padding)) {
+        throw new Error('AES-CBC package padding must be PKCS7, ANSI-X923, ZERO, or NONE.');
+      }
+      if (value.algorithm === 'AES-CBC') {
+        if (value.padding === 'ZERO' && !Number.isInteger(value.plaintextLength)) {
+          throw new Error('Zero padding packages require the original plaintextLength.');
+        }
+        if (ciphertext.length % 16 !== 0) throw new Error('AES-CBC ciphertext must contain complete 16-byte blocks.');
+        if (['PKCS7', 'ANSI-X923'].includes(value.padding) && ciphertext.length === 0) {
+          throw new Error(`${paddingLabels[value.padding]} ciphertext must contain a padded AES block.`);
+        }
+        if (!Number.isInteger(value.plaintextLength) || value.plaintextLength < 0) {
+          throw new Error('AES-CBC package plaintextLength must be a non-negative integer.');
+        }
+      }
+      if (value.algorithm === 'AES-GCM' && ![32, 64, 96, 104, 112, 120, 128].includes(value.tagLength)) {
+        throw new Error('AES-GCM tagLength must be a supported value from 32 to 128 bits.');
+      }
+      if (value.algorithm === 'AES-CTR' && (!Number.isInteger(value.counterLength) || value.counterLength < 1 || value.counterLength > 128)) {
+        throw new Error('AES-CTR counterLength must be an integer from 1 to 128 bits.');
+      }
+      const aad = value.algorithm === 'AES-GCM'
+        ? decodeBase64Url(value.aad ?? '', 'AAD', true)
+        : new Uint8Array();
+      return { ...value, ciphertext, iv, aad, ivField };
+    }
+
+    async function decrypt() {
+      const operation = ++operationVersion;
+      clearResults();
+      let packageAlgorithm = '';
+      try {
+        const data = readPackage();
+        packageAlgorithm = data.algorithm;
+        el('key-size').value = String(data.keyLength);
+        const keyBytes = getKeyBytes();
+        if (keyBytes.length * 8 !== data.keyLength) {
+          throw new Error(`Package requires a ${data.keyLength}-bit key; the provided key is ${keyBytes.length * 8} bits.`);
+        }
+        let algorithm;
+        if (data.algorithm === 'AES-GCM') {
+          algorithm = { name: data.algorithm, iv: data.iv, additionalData: data.aad, tagLength: data.tagLength };
+        } else if (data.algorithm === 'AES-CTR') {
+          algorithm = { name: data.algorithm, counter: data.iv, length: data.counterLength };
+        }
+        let plaintextBytes;
+        if (data.algorithm === 'AES-CBC') {
+          if (!globalThis.DHNobleCipherBundle?.cbc) throw new Error('The local AES-CBC library bundle could not be loaded.');
+          const padding = data.padding;
+          const cbc = DHNobleCipherBundle.cbc(
+            keyBytes,
+            data.iv,
+            padding === 'PKCS7' ? undefined : { disablePadding: true }
+          );
+          plaintextBytes = cbc.decrypt(data.ciphertext);
+          plaintextBytes = removePadding(plaintextBytes, padding, data.plaintextLength);
+        } else {
+          const key = await importAesKey(keyBytes, data.algorithm, 'decrypt');
+          plaintextBytes = new Uint8Array(await crypto.subtle.decrypt(algorithm, key, data.ciphertext));
+        }
+        if (operation !== operationVersion) return;
+        const plaintext = new TextDecoder('utf-8').decode(plaintextBytes);
+        el('plaintext-result').value = plaintext;
+        el('plaintext-result-field').hidden = false;
+        el('algorithm').value = data.algorithm;
+        el('key-size').value = String(data.keyLength);
+        if (data.algorithm === 'AES-CBC') el('padding').value = data.padding;
+        updateModeHelp();
+        const authenticated = data.algorithm === 'AES-GCM';
+        const details = [
+          ['Mode', data.algorithm],
+          ['Authentication', authenticated ? 'Verified successfully by AES-GCM' : 'Not provided by this mode; successful decryption does not prove authenticity'],
+          ['Key length', `${data.keyLength} bits (key material is not repeated here)`],
+          [data.algorithm === 'AES-CTR' ? 'Counter block' : 'IV / nonce', `${encodeBase64Url(data.iv)} (${data.iv.length} bytes)`],
+          ['Ciphertext length', `${data.ciphertext.length} bytes`],
+          ['Decrypted plaintext length', `${plaintextBytes.length} UTF-8 bytes`]
+        ];
+        if (data.algorithm === 'AES-CBC') details.splice(2, 0, ['Padding', paddingLabels[data.padding]]);
+        if (authenticated) details.splice(4, 0, ['AAD length', `${data.aad.length} bytes`]);
+        showDetails(details);
+        setStatus(
+          'decrypt-status',
+          authenticated
+            ? 'AES-GCM decryption and authentication succeeded. The ciphertext and AAD match this key.'
+            : `${data.algorithm} decryption completed, but this mode does not authenticate the ciphertext.`,
+          authenticated ? 'success' : 'warning'
+        );
+      } catch (error) {
+        if (operation === operationVersion) {
+          const message = packageAlgorithm === 'AES-GCM' && error.name === 'OperationError'
+            ? 'AES-GCM authentication failed. Check that the key, ciphertext, and AAD are correct and unchanged.'
+            : makeErrorMessage(error);
+          setStatus('decrypt-status', message, 'error');
+        }
+      }
+    }
+
+    el('new-key').addEventListener('click', () => {
+      invalidatePendingOperation();
+      const bytes = randomBytes(Number(el('key-size').value) / 8);
+      el('key').value = encodeBase64Url(bytes);
+      clearResults();
+      setStatus('encrypt-status', `Generated a random ${bytes.length * 8}-bit AES key locally. Save it separately; it is not included in the package.`, 'success');
+      setStatus('decrypt-status', 'Key changed. Decrypt again with the matching key.');
+    });
+    el('algorithm').addEventListener('change', () => {
+      const needsNewKey = el('algorithm').value !== 'AES-CBC' && el('key-size').value === '192';
+      invalidatePendingOperation();
+      clearResults();
+      updateModeHelp();
+      setStatus('encrypt-status', needsNewKey
+        ? 'The current browser Web Crypto API does not support 192-bit AES for this mode. The size selector moved to 256 bits; generate a new key before encrypting.'
+        : 'Mode changed. The next encryption will use the selected AES mode.');
+    });
+    el('padding').addEventListener('change', () => {
+      invalidatePendingOperation();
+      clearResults();
+      updateModeHelp();
+      setStatus('encrypt-status', `AES-CBC padding changed to ${paddingLabels[el('padding').value]}.`);
+    });
+    el('key-size').addEventListener('change', () => {
+      invalidatePendingOperation();
+      clearResults();
+      setStatus('encrypt-status', 'Key size changed. Generate a matching key or enter one of the selected size.');
+    });
+    el('key').addEventListener('input', () => {
+      invalidatePendingOperation();
+      clearResults();
+      setStatus('encrypt-status', 'Key changed. Encrypt again to create a package using this key.');
+      setStatus('decrypt-status', 'Key changed. Decrypt again with the matching key.');
+    });
+    for (const id of ['plaintext', 'aad']) {
+      el(id).addEventListener('input', () => {
+        invalidatePendingOperation();
+        clearResults();
+        setStatus('encrypt-status', 'Encryption input changed. Encrypt again to update the package.');
+      });
+    }
+    el('package').addEventListener('input', () => {
+      invalidatePendingOperation();
+      clearResults();
+      setStatus('decrypt-status', 'Package changed. Decrypt again to inspect the current package.');
+    });
+    el('encrypt').addEventListener('click', encrypt);
+    el('decrypt').addEventListener('click', decrypt);
+    el('clear').addEventListener('click', () => {
+      invalidatePendingOperation();
+      el('key').value = '';
+      el('plaintext').value = '';
+      el('aad').value = '';
+      el('package').value = '';
+      el('plaintext-result').value = '';
+      el('algorithm').value = 'AES-GCM';
+      el('padding').value = 'PKCS7';
+      el('key-size').value = '256';
+      clearResults();
+      updateModeHelp();
+      setStatus('encrypt-status', 'Generate or enter a key, then encrypt a test message.');
+      setStatus('decrypt-status', 'Paste a package and provide its matching key to decrypt.');
+    });
+    updateModeHelp();
+  </script>
+</body>
+</html>
