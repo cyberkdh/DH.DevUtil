@@ -1,0 +1,742 @@
+<!--
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//	Projects		: DH.DevUtil
+//	Author			: CYBERKDH
+//	Module			: Number Notation Converter
+//	History			: 2026-10-13 Initial implementation (E notation, exact decimal, IEEE 754 double/float32)
+//	Copyrights		: Copyright (C)CYBERKDH. All Rights Reserved.
+//////////////////////////////////////////////////////////////////////////////////////////////////
+-->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Number Notation Converter | DH.DevUtil</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #182230;
+      --muted: #5d6b7a;
+      --line: #d9e1e8;
+      --surface: #fff;
+      --canvas: #f3f6f9;
+      --blue: #155eef;
+      --blue-dark: #1249bd;
+      --blue-soft: #eff4ff;
+      --green: #067647;
+      --red: #b42318;
+      --amber-bg: #fffaeb;
+      --amber-line: #fedf89;
+      --code: #f6f8fa;
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-width: 320px; color: var(--ink); background: var(--canvas); }
+    button, input, textarea, select { font: inherit; }
+    .shell { max-width: 1440px; margin: 0 auto; padding: 24px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+    .brand { display: inline-flex; gap: 10px; align-items: center; color: var(--ink); font-weight: 700; text-decoration: none; }
+    .brand-mark { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 9px; color: #fff; background: var(--blue); }
+    .topbar-note, .intro-copy, .hint, .footer-note { color: var(--muted); }
+    .intro { display: flex; justify-content: space-between; gap: 24px; align-items: end; margin-bottom: 20px; }
+    .eyebrow { margin: 0 0 8px; color: var(--blue); font-size: .78rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(1.8rem, 4vw, 2.5rem); letter-spacing: -.04em; }
+    .intro-copy { max-width: 560px; margin: 0; line-height: 1.55; }
+    .workspace { display: grid; grid-template-columns: minmax(280px, 400px) minmax(0, 1fr); gap: 16px; align-items: start; }
+    .pane { min-width: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); box-shadow: 0 2px 6px #1822300a; }
+    .pane-head { display: flex; min-height: 64px; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+    .pane-title { margin: 0; font-size: 1rem; }
+    .pane-index { color: var(--muted); font-size: .75rem; font-weight: 700; }
+    .pane-content { display: grid; gap: 16px; padding: 18px; }
+    .field { display: grid; gap: 7px; min-width: 0; }
+    label { font-size: .86rem; font-weight: 650; }
+    textarea, select { width: 100%; min-width: 0; padding: 10px 11px; border: 1px solid #c9d2dc; border-radius: 7px; color: var(--ink); background: #fff; }
+    textarea:focus, select:focus, button:focus-visible { outline: 3px solid #84adff80; outline-offset: 1px; border-color: var(--blue); }
+    textarea { min-height: 260px; resize: vertical; font: .86rem/1.55 Consolas, "Courier New", monospace; }
+    code, pre, .mono { font-family: Consolas, "Courier New", monospace; }
+    .hint, .footer-note { margin: 0; font-size: .78rem; line-height: 1.5; }
+    .button { min-height: 38px; padding: 8px 12px; border: 1px solid #c9d2dc; border-radius: 7px; color: var(--ink); background: #fff; cursor: pointer; font-weight: 650; }
+    .button:hover:not(:disabled) { background: #f3f6f9; }
+    .button:disabled { opacity: .55; cursor: not-allowed; }
+    .button-primary { border-color: var(--blue); color: #fff; background: var(--blue); }
+    .button-primary:hover:not(:disabled) { background: var(--blue-dark); }
+    .button-small { min-height: 30px; padding: 4px 9px; font-size: .78rem; }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .status { min-width: 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: 7px; color: var(--muted); background: #fafbfc; font-size: .83rem; line-height: 1.45; overflow-wrap: anywhere; }
+    .status[data-kind="success"] { color: var(--green); border-color: #abefc6; background: #ecfdf3; }
+    .status[data-kind="error"] { color: var(--red); border-color: #fecdca; background: #fef3f2; }
+    .status[data-kind="warning"] { color: #8a4b08; border-color: var(--amber-line); background: var(--amber-bg); }
+    .results { display: grid; gap: 14px; }
+    .empty { padding: 28px 18px; color: var(--muted); text-align: center; font-size: .88rem; }
+    .item { min-width: 0; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+    .item-head { display: flex; align-items: center; gap: 8px 10px; padding: 10px 14px; background: #fafbfc; border-radius: 10px; cursor: pointer; list-style: none; }
+    .item-head::-webkit-details-marker { display: none; }
+    .item-head::before { content: ""; flex: none; width: 7px; height: 7px; margin: 0 2px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(-45deg); transition: transform .15s; }
+    .item[open] > .item-head { border-bottom: 1px solid var(--line); border-radius: 10px 10px 0 0; }
+    .item[open] > .item-head::before { transform: rotate(45deg); }
+    .item-head:hover { background: #f3f6f9; }
+    .item-no { flex: none; color: var(--muted); font-size: .75rem; font-weight: 700; }
+    .item-text { display: flex; flex: 1; min-width: 0; align-items: baseline; gap: 8px; font: .9rem/1.4 Consolas, "Courier New", monospace; }
+    .item-input { flex: none; max-width: 45%; overflow: hidden; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
+    .item-arrow { flex: none; color: var(--muted); }
+    .item-preview { min-width: 0; overflow: hidden; color: var(--blue-dark); text-overflow: ellipsis; white-space: nowrap; }
+    .item-preview.error { color: var(--red); font-family: "Segoe UI", Arial, sans-serif; font-size: .82rem; }
+    .item-kind, .badge { flex: none; }
+    .results-tools { display: inline-flex; align-items: center; gap: 6px; }
+    .item-kind { color: var(--muted); font-size: .76rem; }
+    .badge { padding: 3px 8px; border-radius: 999px; font-size: .72rem; font-weight: 700; white-space: nowrap; }
+    .badge[data-kind="exact"] { color: var(--green); background: #ecfdf3; }
+    .badge[data-kind="rounded"] { color: #8a4b08; background: var(--amber-bg); }
+    .badge[data-kind="error"] { color: var(--red); background: #fef3f2; }
+    .rows { display: grid; }
+    .row { display: grid; grid-template-columns: minmax(130px, 190px) minmax(0, 1fr) auto; gap: 10px; align-items: start; padding: 8px 14px; border-top: 1px solid #eef2f6; }
+    .row:first-child { border-top: 0; }
+    .row-label { padding-top: 4px; color: var(--muted); font-size: .78rem; font-weight: 650; }
+    .row-value { min-width: 0; padding: 4px 0; font: .88rem/1.5 Consolas, "Courier New", monospace; overflow-wrap: anywhere; word-break: break-all; }
+    .row-value.text { font-family: "Segoe UI", Arial, sans-serif; word-break: normal; }
+    .row-value .dim { color: var(--muted); }
+    .row.main .row-value { font-size: 1rem; font-weight: 650; }
+    .notes { display: grid; gap: 6px; padding: 10px 14px 12px; border-top: 1px solid var(--line); }
+    .note { margin: 0; padding: 7px 10px; border-radius: 6px; font-size: .8rem; line-height: 1.5; }
+    .note[data-kind="info"] { color: #1d3c78; background: var(--blue-soft); }
+    .note[data-kind="warning"] { color: #8a4b08; background: var(--amber-bg); }
+    .note[data-kind="error"] { color: var(--red); background: #fef3f2; }
+    .learn-pane { margin-top: 16px; }
+    .lang-switch { display: inline-flex; gap: 4px; }
+    .lang-switch .button[aria-pressed="true"] { border-color: var(--blue); color: var(--blue-dark); background: var(--blue-soft); }
+    .learn { display: grid; gap: 14px; padding: 18px; font-size: .88rem; line-height: 1.6; }
+    .learn[hidden] { display: none; }
+    .learn h3 { margin: 4px 0 0; font-size: .95rem; }
+    .learn p, .learn ul { margin: 0; }
+    .learn ul { padding-left: 20px; }
+    .learn code { padding: 1px 4px; border-radius: 4px; background: var(--code); font-size: .84rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+    th, td { padding: 7px 9px; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { background: #fafbfc; }
+    .page-footer { display: flex; justify-content: space-between; gap: 20px; margin-top: 18px; padding: 13px 1px 0; border-top: 1px solid var(--line); color: var(--muted); font-size: .78rem; line-height: 1.5; }
+    @media (max-width: 900px) { .workspace { grid-template-columns: 1fr; } textarea { min-height: 170px; } }
+    @media (max-width: 600px) {
+      .shell { padding: 16px; }
+      .intro { display: block; }
+      .intro-copy { margin-top: 10px; }
+      .pane-head { flex-wrap: wrap; }
+      .item-head { flex-wrap: wrap; }
+      .item-text { flex-basis: calc(100% - 40px); order: 1; }
+      .item-no { order: 0; }
+      .item-kind { order: 2; margin-left: 22px; }
+      .badge { order: 3; }
+      .row { grid-template-columns: minmax(0, 1fr) auto; gap: 2px 8px; }
+      .row-label { grid-column: 1 / -1; padding-top: 0; }
+      .page-footer { display: grid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="../README.md" aria-label="DH.DevUtil home">
+        <span class="brand-mark" aria-hidden="true">DH</span><span>DH.DevUtil</span>
+      </a>
+      <span class="topbar-note">Numbers · Local converter</span>
+    </header>
+    <main>
+      <section class="intro" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">E notation · IEEE 754</p>
+          <h1 id="page-title">Number Notation Converter</h1>
+        </div>
+        <p class="intro-copy">Turn values such as <code>1.23457E+15</code> or <code>2.5e-4</code> into readable numbers. Conversion is exact on the decimal digits, and the results show what a double or float32 would actually store.</p>
+      </section>
+
+      <section class="workspace" aria-label="Number notation conversion">
+        <section class="pane" aria-labelledby="input-title">
+          <header class="pane-head">
+            <h2 class="pane-title" id="input-title"><span class="pane-index">01</span> Input</h2>
+            <span class="pane-index">One value per line</span>
+          </header>
+          <div class="pane-content">
+            <div class="field">
+              <label for="input">Values</label>
+              <textarea id="input" spellcheck="false" autocomplete="off" aria-describedby="input-hint" placeholder="1.23457E+15&#10;6.02e23&#10;-2.5e-4"></textarea>
+              <p class="hint" id="input-hint">Separate values with new lines, tabs, semicolons, or <code>, </code> (comma and space). Accepts <code>1.5E3</code>, <code>1.5 × 10^3</code>, <code>10³</code>, digit separators (<code>1,000</code> <code>1 000</code> <code>1_000</code> <code>1'000</code>), suffixes <code>f</code>/<code>d</code>/<code>m</code>, and <code>0x</code>/<code>0b</code>/<code>0o</code> integers or hex floats such as <code>0x1.8p3</code>.</p>
+            </div>
+            <div class="field">
+              <label for="group-sep">Digit grouping in "Grouped"</label>
+              <select id="group-sep">
+                <option value=",">Comma · 1,000,000</option>
+                <option value=" ">Space · 1 000 000</option>
+                <option value="_">Underscore · 1_000_000 (C#, Java, JS, Python)</option>
+                <option value="'">Apostrophe · 1'000'000 (C++14)</option>
+              </select>
+            </div>
+            <div class="actions">
+              <button class="button button-primary" id="examples" type="button">Load examples</button>
+              <button class="button" id="copy-plain" type="button">Copy all plain values</button>
+              <button class="button" id="clear" type="button">Clear</button>
+            </div>
+            <div class="status" id="status" role="status" aria-live="polite">Enter or paste values. Results update as you type.</div>
+          </div>
+          <p class="footer-note" style="padding: 0 18px 18px">Everything runs in this browser. Nothing is uploaded or stored.</p>
+        </section>
+
+        <section class="pane" aria-labelledby="result-title">
+          <header class="pane-head">
+            <h2 class="pane-title" id="result-title"><span class="pane-index">02</span> Results</h2>
+            <span class="results-tools">
+              <span class="pane-index" id="result-count">0 values</span>
+              <button class="button button-small" id="expand-all" type="button" disabled>Expand all</button>
+              <button class="button button-small" id="collapse-all" type="button" disabled>Collapse all</button>
+            </span>
+          </header>
+          <div class="pane-content">
+            <div class="results" id="results">
+              <div class="empty">Results appear here.</div>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <section class="pane learn-pane" aria-labelledby="learn-title">
+        <header class="pane-head">
+          <h2 class="pane-title" id="learn-title"><span class="pane-index">03</span> Learn more</h2>
+          <span class="lang-switch" role="group" aria-label="Explanation language">
+            <button class="button button-small" id="learn-lang-en" type="button" aria-pressed="true">EN</button>
+            <button class="button button-small" id="learn-lang-ko" type="button" aria-pressed="false">한국어</button>
+          </span>
+        </header>
+        <div class="learn" id="learn-en" lang="en">
+          <h3>What is E notation?</h3>
+          <p><code>aEb</code> (or <code>aeb</code>) means <code>a × 10<sup>b</sup></code>. <code>1.5E3</code> is 1,500, <code>6.02e23</code> is 602,000,000,000,000,000,000,000, and <code>2.5e-4</code> is 0.00025. Programs, spreadsheets, and logs switch to this scientific notation when a number is very large or very small.</p>
+          <p><strong>Engineering notation</strong> keeps the exponent a multiple of 3, so it maps directly onto SI prefixes: <code>250E-6</code> is 250 µ (micro), <code>4.7E+3</code> is 4.7 k (kilo).</p>
+          <h3>Why does a stored value change?</h3>
+          <p>A <code>double</code> (IEEE 754 binary64) keeps a 53-bit significand, about 15–17 significant decimal digits. A <code>float</code> (binary32) keeps 24 bits, about 6–9 digits. Most decimal fractions have no exact binary form, so <code>0.1</code> is stored as <code>0.1000000000000000055511151231257827…</code>. This tool reads your text as exact decimal digits, then shows the value that would really be stored, rounded to nearest with ties to even.</p>
+          <h3>Large integer IDs</h3>
+          <p>JavaScript <code>Number</code>, <code>JSON.parse</code>, and many JSON libraries use double. Integers above 2<sup>53</sup> − 1 = 9,007,199,254,740,991 can silently change, for example <code>9007199254740993</code> becomes <code>9007199254740992</code>. Send such IDs as strings, or use 64-bit integers or <code>BigInt</code>.</p>
+          <h3>Excel and <code>1.23457E+15</code></h3>
+          <p>Excel's General format displays long numbers in E notation with about 6 significant digits, and Excel stores only 15 significant digits. Digits after the 15th become 0, so a 16-digit card or account number cannot be recovered from the cell. Format the column as Text before typing or importing, or import the data as text.</p>
+          <h3>Literals in programming languages</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Language</th><th>E notation</th><th>Suffixes</th><th>Digit separator</th></tr></thead>
+              <tbody>
+                <tr><td>C / C++</td><td><code>1.5e3</code> is double</td><td><code>1.5e3f</code> float, <code>1.5e3L</code> long double</td><td>C++14: <code>1'000'000</code></td></tr>
+                <tr><td>C#</td><td><code>1.5e3</code> is double</td><td><code>f</code> float, <code>d</code> double, <code>m</code> decimal</td><td>C# 7: <code>1_000_000</code></td></tr>
+                <tr><td>Java</td><td><code>1.5e3</code> is double</td><td><code>f</code> float, <code>d</code> double</td><td>Java 7: <code>1_000_000</code></td></tr>
+                <tr><td>JavaScript</td><td><code>1.5e3</code> is Number (double)</td><td><code>n</code> BigInt (integers only, no E)</td><td>ES2021: <code>1_000_000</code></td></tr>
+                <tr><td>Python</td><td><code>1.5e3</code> is float (double)</td><td>none</td><td>3.6+: <code>1_000_000</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p><strong>Hex floats</strong> (C99, C++17, Java) use <code>p</code> for a power of <em>two</em>: <code>0x1.8p3</code> = 1.5 × 2<sup>3</sup> = 12. They describe a binary value exactly.</p>
+          <h3>Korean units</h3>
+          <p>Korean groups digits by four: 만 10<sup>4</sup>, 억 10<sup>8</sup>, 조 10<sup>12</sup>, 경 10<sup>16</sup>, 해 10<sup>20</sup>, 자 10<sup>24</sup>, 양 10<sup>28</sup>, 구 10<sup>32</sup>, 간 10<sup>36</sup>, 정 10<sup>40</sup>, 재 10<sup>44</sup>, 극 10<sup>48</sup>. For example 1,500,000,000,000,000 is 1,500조.</p>
+        </div>
+        <div class="learn" id="learn-ko" lang="ko" hidden>
+          <h3>E 표기법(E notation)이란?</h3>
+          <p><code>aEb</code>(또는 <code>aeb</code>)는 <code>a × 10<sup>b</sup></code>를 뜻합니다. <code>1.5E3</code>은 1,500, <code>6.02e23</code>은 602,000,000,000,000,000,000,000, <code>2.5e-4</code>는 0.00025입니다. 프로그램, 스프레드시트, 로그는 숫자가 아주 크거나 작으면 이 과학적 표기법(scientific notation)으로 바꿔 보여 줍니다.</p>
+          <p><strong>공학 표기법(Engineering notation)</strong>은 지수를 3의 배수로 맞추므로 SI 접두어와 바로 연결됩니다. <code>250E-6</code>은 250 µ(마이크로), <code>4.7E+3</code>은 4.7 k(킬로)입니다.</p>
+          <h3>저장하면 값이 왜 바뀌나요?</h3>
+          <p><code>double</code>(IEEE 754 binary64)은 53-bit 가수(significand), 즉 유효숫자 약 15~17자리를 보관합니다. <code>float</code>(binary32)는 24-bit, 약 6~9자리입니다. 대부분의 10진 소수는 2진수로 정확히 표현되지 않아서 <code>0.1</code>은 <code>0.1000000000000000055511151231257827…</code>로 저장됩니다. 이 도구는 입력을 정확한 10진 숫자로 읽은 뒤, 실제로 저장될 값을 최근접 짝수 반올림(round to nearest, ties to even) 규칙으로 보여 줍니다.</p>
+          <h3>큰 정수 ID</h3>
+          <p>JavaScript의 <code>Number</code>, <code>JSON.parse</code>, 많은 JSON 라이브러리는 double을 씁니다. 2<sup>53</sup> − 1 = 9,007,199,254,740,991보다 큰 정수는 조용히 바뀔 수 있습니다. 예를 들어 <code>9007199254740993</code>은 <code>9007199254740992</code>가 됩니다. 이런 ID는 문자열로 주고받거나 64-bit 정수, <code>BigInt</code>를 사용하세요.</p>
+          <h3>Excel과 <code>1.23457E+15</code></h3>
+          <p>Excel의 일반(General) 서식은 긴 숫자를 유효숫자 약 6자리의 E 표기로 보여 주고, 값 자체도 유효숫자 15자리까지만 보관합니다. 16번째 자리부터는 0이 되므로, 16자리 카드번호나 계좌번호는 셀에서 원래 값을 복구할 수 없습니다. 입력하거나 가져오기 전에 열 서식을 텍스트(Text)로 지정하거나, 데이터를 텍스트로 가져오세요.</p>
+          <h3>프로그래밍 언어의 리터럴(literal)</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>언어</th><th>E 표기</th><th>접미사(suffix)</th><th>자릿수 구분자</th></tr></thead>
+              <tbody>
+                <tr><td>C / C++</td><td><code>1.5e3</code>은 double</td><td><code>1.5e3f</code> float, <code>1.5e3L</code> long double</td><td>C++14: <code>1'000'000</code></td></tr>
+                <tr><td>C#</td><td><code>1.5e3</code>은 double</td><td><code>f</code> float, <code>d</code> double, <code>m</code> decimal</td><td>C# 7: <code>1_000_000</code></td></tr>
+                <tr><td>Java</td><td><code>1.5e3</code>은 double</td><td><code>f</code> float, <code>d</code> double</td><td>Java 7: <code>1_000_000</code></td></tr>
+                <tr><td>JavaScript</td><td><code>1.5e3</code>은 Number(double)</td><td><code>n</code> BigInt(정수만, E 표기 불가)</td><td>ES2021: <code>1_000_000</code></td></tr>
+                <tr><td>Python</td><td><code>1.5e3</code>은 float(double)</td><td>없음</td><td>3.6 이상: <code>1_000_000</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p><strong>16진 실수(Hex float)</strong>(C99, C++17, Java)는 <code>p</code> 뒤에 <em>2</em>의 지수를 씁니다. <code>0x1.8p3</code> = 1.5 × 2<sup>3</sup> = 12입니다. 2진 값을 오차 없이 그대로 적을 수 있습니다.</p>
+          <h3>한국어 단위</h3>
+          <p>한국어는 네 자리씩 끊어 읽습니다. 만 10<sup>4</sup>, 억 10<sup>8</sup>, 조 10<sup>12</sup>, 경 10<sup>16</sup>, 해 10<sup>20</sup>, 자 10<sup>24</sup>, 양 10<sup>28</sup>, 구 10<sup>32</sup>, 간 10<sup>36</sup>, 정 10<sup>40</sup>, 재 10<sup>44</sup>, 극 10<sup>48</sup>. 예를 들어 1,500,000,000,000,000은 1,500조입니다.</p>
+        </div>
+      </section>
+    </main>
+    <footer class="page-footer">
+      <span>Decimal conversion is exact and runs locally in this browser. No input is uploaded or stored.</span>
+      <span>IEEE 754 results use round to nearest, ties to even.</span>
+    </footer>
+  </div>
+  <script>
+    'use strict';
+
+    const el = id => document.getElementById(id);
+    const MAX_VALUES = 500;
+    const MAX_PLAIN_LENGTH = 1200;
+    const MAX_DECIMAL_EXPONENT = 1000000000;
+    const MAX_BINARY_EXPONENT = 100000;
+    const MAX_SAFE = 9007199254740991n;
+    const EXAMPLES = ['1.23457E+15', '6.02e23', '-2.5e-4', '1.5 × 10^3', '0.1', '9007199254740993', '1e-7', '3.4028235e38f', '0x1.8p3', '12,345,678.9'];
+    const SUPERSCRIPTS = { '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4', '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9', '⁺': '+', '⁻': '-' };
+    const SI_PREFIXES = {
+      30: ['Q', 'quetta'], 27: ['R', 'ronna'], 24: ['Y', 'yotta'], 21: ['Z', 'zetta'], 18: ['E', 'exa'], 15: ['P', 'peta'], 12: ['T', 'tera'], 9: ['G', 'giga'], 6: ['M', 'mega'], 3: ['k', 'kilo'], 0: ['', 'no prefix'],
+      '-3': ['m', 'milli'], '-6': ['µ', 'micro'], '-9': ['n', 'nano'], '-12': ['p', 'pico'], '-15': ['f', 'femto'], '-18': ['a', 'atto'], '-21': ['z', 'zepto'], '-24': ['y', 'yocto'], '-27': ['r', 'ronto'], '-30': ['q', 'quecto']
+    };
+    const KOREAN_UNITS = ['', '만', '억', '조', '경', '해', '자', '양', '구', '간', '정', '재', '극'];
+    const SUFFIX_NOTES = {
+      f: 'Suffix f (float literal in C, C++, C#, Java) was ignored for the decimal value. See the float32 rows.',
+      d: 'Suffix d (double literal in C#, Java) was ignored for the decimal value.',
+      m: 'Suffix m (decimal literal in C#) was ignored. C# decimal keeps 28–29 significant digits and is not IEEE 754 binary.'
+    };
+    const BINARY_FORMATS = {
+      double: { name: 'double', bits: 53, emin: -1022, emax: 1023, maxSci: 309, minSci: -326 },
+      float32: { name: 'float32', bits: 24, emin: -126, emax: 127, maxSci: 39, minSci: -47 }
+    };
+
+    // A decimal value is sign × digits × 10^exp, with digits free of leading and trailing zeros ('0' for zero).
+    function makeDecimal(neg, digits, exp) {
+      const significant = digits.replace(/^0+/, '');
+      if (!significant) return { neg: false, digits: '0', exp: 0 };
+      const trimmed = significant.replace(/0+$/, '');
+      return { neg, digits: trimmed, exp: exp + significant.length - trimmed.length };
+    }
+
+    function fromBinary(neg, mantissa, exp2) {
+      if (exp2 >= 0) return makeDecimal(neg, (mantissa << BigInt(exp2)).toString(), 0);
+      return makeDecimal(neg, (mantissa * 5n ** BigInt(-exp2)).toString(), exp2);
+    }
+
+    const isZero = d => d.digits === '0';
+    const sciExponent = d => isZero(d) ? 0 : d.digits.length - 1 + d.exp;
+    const sameDecimal = (a, b) => a.neg === b.neg && a.digits === b.digits && a.exp === b.exp;
+
+    function parseExponent(text, limit) {
+      const value = Number(text);
+      if (!Number.isSafeInteger(value) || Math.abs(value) > limit) throw new Error(`The exponent ${text} is outside the supported range (±${limit.toLocaleString('en-US')}).`);
+      return value;
+    }
+
+    // Parses one value into an exact decimal. Throws an Error with a readable message when the text is not a number.
+    function parseValue(raw) {
+      const notes = [];
+      let text = raw.trim()
+        .replace(/[−–‒]/g, '-')
+        .replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻]+/g, run => '^' + [...run].map(c => SUPERSCRIPTS[c]).join(''))
+        .replace(/[\s   ]+/g, ' ')
+        .replace(/ (?!\d)|(?<!\d) /g, '');
+      if (/^[+-]?(inf|infinity|nan)$/i.test(text)) throw new Error('Infinity and NaN are not finite numbers.');
+
+      let m = /^([+-]?)0[xX]([0-9a-fA-F'_]*)(?:\.([0-9a-fA-F'_]*))?(?:[pP]([+-]?\d+)([fFlL])?)?$/.exec(text);
+      if (m && (m[2] || m[3])) {
+        const integer = languageDigits(m[2], /[0-9a-fA-F]/), fraction = languageDigits(m[3] || '', /[0-9a-fA-F]/);
+        const isFloat = m[3] !== undefined || m[4] !== undefined;
+        const exp2 = (m[4] ? parseExponent(m[4], MAX_BINARY_EXPONENT) : 0) - 4 * fraction.length;
+        if (m[5] && m[5].toLowerCase() === 'f') notes.push({ kind: 'info', text: SUFFIX_NOTES.f });
+        return { value: fromBinary(m[1] === '-', BigInt('0x' + (integer + fraction || '0')), exp2), kind: isFloat ? 'Hexadecimal floating point' : 'Hexadecimal integer', notes, suffix: m[5] ? m[5].toLowerCase() : '' };
+      }
+      m = /^([+-]?)0([bB])([01'_]+)$/.exec(text) || /^([+-]?)0([oO])([0-7'_]+)$/.exec(text);
+      if (m) {
+        const body = languageDigits(m[3], /[0-7]/);
+        return { value: makeDecimal(m[1] === '-', BigInt('0' + m[2].toLowerCase() + body).toString(), 0), kind: /[bB]/.test(m[2]) ? 'Binary integer' : 'Octal integer', notes };
+      }
+      m = /^([+-]?)10(?:\^|\*\*)([+-]?\d+)$/.exec(text);
+      if (m) {
+        return { value: makeDecimal(m[1] === '-', '1', parseExponent(m[2], MAX_DECIMAL_EXPONENT)), kind: 'Power of ten', notes, sigDigits: 1, decimals: 0 };
+      }
+      m = /^([+-]?)([\d,'_ ]*)(?:\.([\d'_]*))?(?:([eE]|[×xX*·]10(?:\^|\*\*))([+-]?\d+))?([fFdDmM])?$/.exec(text);
+      if (!m || !/\d/.test((m[2] || '') + (m[3] || ''))) {
+        if (/^[+-]?[\d,'_ ]*\.[\d'_]*,/.test(text)) throw new Error('A comma after the decimal point is not supported. Use a period for decimals, e.g. 1234.56 for 1.234,56.');
+        throw new Error('Not a recognized number.');
+      }
+      if (/[, ]/.test(m[2])) {
+        if (!/^\d{1,3}(?:([, ])\d{3})(?:\1\d{3})*$/.test(m[2])) {
+          throw new Error('Commas and spaces must group the integer part in threes, e.g. 1,234,567. A decimal comma such as 1,5 is not supported; use 1.5.');
+        }
+        if (m[2].includes(' ')) notes.push({ kind: 'info', text: 'Spaces were read as digit grouping. If these are separate values, put each on its own line.' });
+      }
+      const integer = /[, ]/.test(m[2]) ? m[2].replace(/[, ]/g, '') : languageDigits(m[2], /\d/);
+      const fraction = languageDigits(m[3] || '', /\d/);
+      const exp = m[5] !== undefined ? parseExponent(m[5], MAX_DECIMAL_EXPONENT) : 0;
+      if (m[6]) notes.push({ kind: 'info', text: SUFFIX_NOTES[m[6].toLowerCase()] });
+      const kind = m[4] === undefined ? 'Decimal' : /^[eE]$/.test(m[4]) ? 'E notation' : '× 10ⁿ notation';
+      const sigDigits = (integer + fraction).replace(/^0+/, '').length || 1;
+      const decimals = Math.max(0, fraction.length - exp);
+      return { value: makeDecimal(m[1] === '-', integer + fraction, exp - fraction.length), kind, notes, sigDigits, decimals, suffix: m[6] ? m[6].toLowerCase() : '' };
+    }
+
+    // Language digit separators (' in C++14, _ in C#, Java, JavaScript, Python) may only sit between two digits.
+    function languageDigits(text, digit) {
+      if (!/['_]/.test(text)) return text;
+      const valid = new RegExp(`^${digit.source}+(?:['_]${digit.source}+)*$`);
+      if (!valid.test(text)) throw new Error('Digit separators (\' or _) must sit between two digits, not next to the decimal point or the exponent.');
+      return text.replace(/['_]/g, '');
+    }
+
+    function plainLength(d) {
+      if (d.exp >= 0) return d.digits.length + d.exp;
+      return Math.max(d.digits.length, -d.exp + 1) + 1;
+    }
+
+    function toPlain(d) {
+      if (plainLength(d) > MAX_PLAIN_LENGTH) return null;
+      const length = d.digits.length;
+      let text;
+      if (d.exp >= 0) text = d.digits + '0'.repeat(d.exp);
+      else if (-d.exp >= length) text = '0.' + '0'.repeat(-d.exp - length) + d.digits;
+      else text = d.digits.slice(0, length + d.exp) + '.' + d.digits.slice(length + d.exp);
+      return (d.neg ? '-' : '') + text;
+    }
+
+    function groupPlain(plain, separator) {
+      const sign = plain.startsWith('-') ? '-' : '';
+      const [integer, fraction] = plain.slice(sign.length).split('.');
+      const grouped = integer.replace(/\B(?=(\d{3})+(?!\d))/g, separator);
+      return sign + grouped + (fraction !== undefined ? '.' + fraction : '');
+    }
+
+    // Mantissa with intLength digits before the decimal point (pads with zeros when needed).
+    function mantissa(d, intLength) {
+      const digits = d.digits.length < intLength ? d.digits + '0'.repeat(intLength - d.digits.length) : d.digits;
+      return (d.neg ? '-' : '') + digits.slice(0, intLength) + (digits.length > intLength ? '.' + digits.slice(intLength) : '');
+    }
+
+    const exponentText = exp => (exp < 0 ? '-' : '+') + Math.abs(exp);
+    const superscript = exp => String(exp).replace(/[-0-9]/g, c => c === '-' ? '⁻' : '⁰¹²³⁴⁵⁶⁷⁸⁹'[c]);
+
+    function toScientific(d) {
+      return mantissa(d, 1) + 'E' + exponentText(sciExponent(d));
+    }
+
+    function toTimesTen(d) {
+      return mantissa(d, 1) + ' × 10' + superscript(sciExponent(d));
+    }
+
+    function engineeringParts(d) {
+      const sci = sciExponent(d);
+      const exp = Math.floor(sci / 3) * 3;
+      return { text: mantissa(d, 1 + sci - exp), exp };
+    }
+
+    function toKorean(plain) {
+      const sign = plain.startsWith('-') ? '-' : '';
+      const [integer, fraction] = plain.slice(sign.length).split('.');
+      if (integer === '0') return { text: 'Not applicable (less than 1)', plainText: true };
+      if (integer.length > 52) return { text: 'Out of range (larger than 극, 10⁴⁸ units)', plainText: true };
+      const groups = [];
+      for (let end = integer.length; end > 0; end -= 4) groups.push(Number(integer.slice(Math.max(0, end - 4), end)));
+      const parts = [];
+      for (let i = groups.length - 1; i >= 0; i--) {
+        if (groups[i]) parts.push(groups[i].toLocaleString('en-US') + KOREAN_UNITS[i]);
+      }
+      let text = parts.join(' ');
+      if (fraction !== undefined) text = groups[0] ? text + '.' + fraction : text + ' + 0.' + fraction;
+      return { text: sign + text };
+    }
+
+    function bitLength(n) {
+      return n === 0n ? 0 : n.toString(2).length;
+    }
+
+    // Rounds an exact decimal to an IEEE 754 binary format (round to nearest, ties to even).
+    function roundToBinary(d, format) {
+      if (isZero(d)) return { kind: 'zero', value: makeDecimal(false, '0', 0) };
+      const sci = sciExponent(d);
+      if (sci > format.maxSci) return { kind: 'overflow' };
+      if (sci < format.minSci) return { kind: 'underflow' };
+      let numerator = BigInt(d.digits), denominator = 1n;
+      if (d.exp >= 0) numerator *= 10n ** BigInt(d.exp);
+      else denominator = 10n ** BigInt(-d.exp);
+      const minExp = format.emin - (format.bits - 1);
+      const top = 1n << BigInt(format.bits);
+      let exp = bitLength(numerator) - bitLength(denominator) - format.bits;
+      let q, r, divisor;
+      const divide = () => {
+        let dividend = numerator;
+        divisor = denominator;
+        if (exp >= 0) divisor = denominator << BigInt(exp);
+        else dividend = numerator << BigInt(-exp);
+        q = dividend / divisor;
+        r = dividend % divisor;
+      };
+      divide();
+      while (q >= top) { exp++; divide(); }
+      while (q < top >> 1n && exp > minExp) { exp--; divide(); }
+      if (exp < minExp) { exp = minExp; divide(); }
+      const twice = r * 2n;
+      if (twice > divisor || (twice === divisor && (q & 1n))) q++;
+      if (q === top) { q >>= 1n; exp++; }
+      if (exp > format.emax - (format.bits - 1)) return { kind: 'overflow' };
+      if (q === 0n) return { kind: 'underflow' };
+      const subnormal = q < top >> 1n;
+      return { kind: subnormal ? 'subnormal' : 'normal', value: fromBinary(d.neg, q, exp) };
+    }
+
+    function subtract(a, b) {
+      const base = Math.min(a.exp, b.exp);
+      const big = d => (d.neg ? -1n : 1n) * BigInt(d.digits) * 10n ** BigInt(d.exp - base);
+      const difference = big(a) - big(b);
+      const neg = difference < 0n;
+      return makeDecimal(neg, (neg ? -difference : difference).toString(), base);
+    }
+
+    function roundSignificant(d, count) {
+      if (d.digits.length <= count) return d;
+      let kept = BigInt(d.digits.slice(0, count));
+      if (d.digits[count] >= '5') kept++;
+      return makeDecimal(d.neg, kept.toString(), d.exp + d.digits.length - count);
+    }
+
+    function shortestFloat32(value) {
+      for (let precision = 1; precision <= 9; precision++) {
+        const text = value.toPrecision(precision);
+        if (Math.fround(Number(text)) === value) return String(Number(text));
+      }
+      return String(value);
+    }
+
+    function isUnsafeInteger(d) {
+      if (d.exp < 0 || isZero(d)) return false;
+      const sci = sciExponent(d);
+      if (sci !== 15) return sci > 15;
+      return BigInt(d.digits) * 10n ** BigInt(d.exp) > MAX_SAFE;
+    }
+
+    function describeBinary(input, format) {
+      const result = roundToBinary(input, format);
+      const signedInfinity = input.neg ? '-Infinity' : 'Infinity';
+      if (result.kind === 'overflow') {
+        return { status: 'overflow', stored: signedInfinity, shortest: signedInfinity, note: `${format.name}: overflow. The value is larger than the ${format.name} maximum and becomes ${signedInfinity}.` };
+      }
+      if (result.kind === 'underflow') {
+        const zero = input.neg ? '-0' : '0';
+        return { status: 'underflow', stored: zero, shortest: zero, note: `${format.name}: underflow. The value is smaller than the smallest ${format.name} subnormal and becomes ${zero}.` };
+      }
+      const stored = result.value;
+      const storedPlain = toPlain(stored) ?? toScientific(stored);
+      const number = Number(toScientific(stored));
+      const shortest = format.name === 'double' ? String(number) : shortestFloat32(number);
+      if (sameDecimal(stored, input)) {
+        return { status: 'exact', stored: storedPlain, shortest, note: null };
+      }
+      const difference = roundSignificant(subtract(stored, input), 6);
+      const subnormal = result.kind === 'subnormal' ? ' The stored value is subnormal and has reduced precision.' : '';
+      return { status: 'rounded', stored: storedPlain, shortest, note: `${format.name}: not exact. Stored − input ≈ ${toScientific(difference)}.${subnormal}` };
+    }
+
+    function convert(raw) {
+      const parsed = parseValue(raw);
+      const d = parsed.value;
+      const plain = toPlain(d);
+      const engineering = engineeringParts(d);
+      const prefix = SI_PREFIXES[engineering.exp];
+      const sci = sciExponent(d);
+      const notes = parsed.notes.slice();
+      const double = describeBinary(d, BINARY_FORMATS.double);
+      const float32 = describeBinary(d, BINARY_FORMATS.float32);
+      const sigDigits = parsed.sigDigits ?? d.digits.length;
+      const decimals = parsed.decimals ?? Math.max(0, -d.exp);
+      const korean = plain === null
+        ? (sci >= 0 ? { text: 'Out of range (larger than 극, 10⁴⁸ units)', plainText: true } : { text: 'Not applicable (less than 1)', plainText: true })
+        : toKorean(plain);
+
+      if (plain === null) notes.push({ kind: 'info', text: `The plain form has ${plainLength(d).toLocaleString('en-US')} characters, which is too long to display. Use the scientific forms.` });
+      if (double.note) notes.push({ kind: double.status === 'rounded' ? 'warning' : 'error', text: double.note });
+      if (float32.note && (parsed.suffix === 'f' || double.status === 'exact')) notes.push({ kind: 'info', text: float32.note });
+      if (isUnsafeInteger(d)) {
+        notes.push({ kind: 'warning', text: 'This integer is larger than 2⁵³ − 1 (9,007,199,254,740,991). JavaScript Number and many JSON parsers cannot keep every digit; handle it as a string, a 64-bit integer, or BigInt.' });
+      }
+      // Excel's General format shows long integers such as IDs as d.ddddE+nn with about 6 significant digits.
+      if (parsed.kind === 'E notation' && parsed.sigDigits >= 5 && parsed.sigDigits <= 6 && sci >= 11 && sci <= 19) {
+        notes.push({ kind: 'warning', text: 'If this text was copied from an Excel cell in General format, it shows only about 6 significant digits. Excel keeps at most 15 significant digits, so a longer number such as a card or account ID is already lost. Re-export the column as Text.' });
+      }
+
+      return {
+        kind: parsed.kind,
+        badge: double.status === 'exact' ? ['exact', 'Exact in double'] : double.status === 'rounded' ? ['rounded', 'Rounded in double'] : ['error', double.status === 'overflow' ? 'Overflow in double' : 'Underflow in double'],
+        plain,
+        preview: plain === null ? toScientific(d) : groupPlain(plain, el('group-sep').value),
+        rows: [
+          { label: 'Plain', value: plain ?? '(too long to display)', copy: plain, main: true, plainText: plain === null },
+          { label: 'Grouped', value: plain === null ? '(too long to display)' : groupPlain(plain, el('group-sep').value), copy: plain === null ? null : groupPlain(plain, el('group-sep').value), plainText: plain === null },
+          { label: 'Scientific (E)', value: toScientific(d), copy: toScientific(d) },
+          { label: 'Scientific (× 10ⁿ)', value: toTimesTen(d), copy: toTimesTen(d) },
+          { label: 'Engineering', value: engineering.text + 'E' + exponentText(engineering.exp), copy: engineering.text + 'E' + exponentText(engineering.exp) },
+          { label: 'SI prefix', value: prefix ? `${engineering.text} ${prefix[0]} (${prefix[1]})`.replace('  ', ' ') : 'Outside the SI prefix range (10⁻³⁰ to 10³⁰)', copy: prefix ? `${engineering.text} ${prefix[0]}`.trim() : null, plainText: !prefix },
+          { label: 'Korean units', value: korean.text, copy: korean.plainText ? null : korean.text, plainText: korean.plainText },
+          { label: 'Digits', value: `${sigDigits} significant · ${sci >= 0 ? (sci + 1).toLocaleString('en-US') : 0} integer · ${decimals.toLocaleString('en-US')} decimal place${decimals === 1 ? '' : 's'}`, copy: null, plainText: true },
+          { label: 'double · stored value', value: double.stored, copy: double.stored },
+          { label: 'double · shortest text', value: double.shortest, copy: double.shortest },
+          { label: 'float32 · stored value', value: float32.stored, copy: float32.stored },
+          { label: 'float32 · shortest text', value: float32.shortest, copy: float32.shortest }
+        ],
+        notes
+      };
+    }
+
+    function splitValues(text) {
+      return text.split(/[\r\n\t;]+|,\s+|\s+,/).map(value => value.trim()).filter(Boolean);
+    }
+
+    async function copyText(text, button) {
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch {
+        const area = document.createElement('textarea');
+        area.value = text;
+        area.style.position = 'fixed';
+        area.style.opacity = '0';
+        document.body.append(area);
+        area.select();
+        document.execCommand('copy');
+        area.remove();
+      }
+      if (button) {
+        const label = button.textContent;
+        button.textContent = 'Copied';
+        setTimeout(() => { button.textContent = label; }, 1200);
+      }
+    }
+
+    function node(tag, className, text) {
+      const element = document.createElement(tag);
+      if (className) element.className = className;
+      if (text !== undefined) element.textContent = text;
+      return element;
+    }
+
+    let lastPlainValues = [];
+
+    // Items start collapsed. Open items stay open across re-renders while their line is unchanged.
+    function render() {
+      const values = splitValues(el('input').value);
+      const results = el('results');
+      const status = el('status');
+      const openKeys = new Set([...results.querySelectorAll('.item[open]')].map(item => item.dataset.key));
+      results.replaceChildren();
+      lastPlainValues = [];
+      el('copy-plain').disabled = true;
+      el('expand-all').disabled = el('collapse-all').disabled = !values.length;
+
+      if (!values.length) {
+        results.append(node('div', 'empty', 'Results appear here.'));
+        el('result-count').textContent = '0 values';
+        status.textContent = 'Enter or paste values. Results update as you type.';
+        status.dataset.kind = '';
+        return;
+      }
+
+      const shown = values.slice(0, MAX_VALUES);
+      let errors = 0;
+      shown.forEach((raw, index) => {
+        const item = node('details', 'item');
+        item.dataset.key = `${index}\u0000${raw}`;
+        item.open = openKeys.has(item.dataset.key);
+        const head = node('summary', 'item-head');
+        const text = node('span', 'item-text');
+        const input = node('span', 'item-input', raw);
+        input.title = raw;
+        text.append(input);
+        head.append(node('span', 'item-no', String(index + 1).padStart(2, '0')), text);
+        item.append(head);
+        let result;
+        try {
+          result = convert(raw);
+        } catch (error) {
+          errors++;
+          const badge = node('span', 'badge', 'Error');
+          badge.dataset.kind = 'error';
+          text.append(node('span', 'item-arrow', '→'), node('span', 'item-preview error', error.message));
+          head.append(badge);
+          const notes = node('div', 'notes');
+          const note = node('p', 'note', error.message);
+          note.dataset.kind = 'error';
+          notes.append(note);
+          item.append(notes);
+          results.append(item);
+          return;
+        }
+        if (result.plain !== null) lastPlainValues.push(result.plain);
+        const preview = node('span', 'item-preview', result.preview);
+        preview.title = result.preview;
+        text.append(node('span', 'item-arrow', '→'), preview);
+        const badge = node('span', 'badge', result.badge[1]);
+        badge.dataset.kind = result.badge[0];
+        head.append(node('span', 'item-kind', result.kind), badge);
+        const rows = node('div', 'rows');
+        for (const row of result.rows) {
+          const line = node('div', row.main ? 'row main' : 'row');
+          line.append(node('span', 'row-label', row.label), node('span', row.plainText ? 'row-value text' : 'row-value', row.value));
+          if (row.copy) {
+            const button = node('button', 'button button-small', 'Copy');
+            button.type = 'button';
+            button.setAttribute('aria-label', `Copy ${row.label} of value ${index + 1}`);
+            button.addEventListener('click', () => copyText(row.copy, button));
+            line.append(button);
+          } else {
+            line.append(node('span'));
+          }
+          rows.append(line);
+        }
+        item.append(rows);
+        if (result.notes.length) {
+          const notes = node('div', 'notes');
+          for (const note of result.notes) {
+            const paragraph = node('p', 'note', note.text);
+            paragraph.dataset.kind = note.kind;
+            notes.append(paragraph);
+          }
+          item.append(notes);
+        }
+        results.append(item);
+      });
+
+      const converted = shown.length - errors;
+      el('result-count').textContent = `${shown.length} value${shown.length === 1 ? '' : 's'}`;
+      el('copy-plain').disabled = !lastPlainValues.length;
+      let message = `${converted} converted` + (errors ? `, ${errors} not recognized.` : '.');
+      if (values.length > MAX_VALUES) message += ` Only the first ${MAX_VALUES} of ${values.length} values are shown.`;
+      status.textContent = message;
+      status.dataset.kind = errors ? 'warning' : 'success';
+    }
+
+    let renderTimer = 0;
+    el('input').addEventListener('input', () => {
+      clearTimeout(renderTimer);
+      renderTimer = setTimeout(render, 120);
+    });
+    el('group-sep').addEventListener('change', render);
+    el('examples').addEventListener('click', () => {
+      el('input').value = EXAMPLES.join('\n');
+      render();
+    });
+    el('clear').addEventListener('click', () => {
+      el('input').value = '';
+      render();
+      el('input').focus();
+    });
+    el('copy-plain').addEventListener('click', event => copyText(lastPlainValues.join('\n'), event.currentTarget));
+    el('expand-all').addEventListener('click', () => el('results').querySelectorAll('.item').forEach(item => { item.open = true; }));
+    el('collapse-all').addEventListener('click', () => el('results').querySelectorAll('.item').forEach(item => { item.open = false; }));
+
+    // Learn more language. Korean browsers start in Korean; the choice is remembered when storage is available.
+    function setLearnLanguage(lang) {
+      el('learn-en').hidden = lang !== 'en';
+      el('learn-ko').hidden = lang !== 'ko';
+      el('learn-lang-en').setAttribute('aria-pressed', String(lang === 'en'));
+      el('learn-lang-ko').setAttribute('aria-pressed', String(lang === 'ko'));
+    }
+    for (const lang of ['en', 'ko']) {
+      el(`learn-lang-${lang}`).addEventListener('click', () => {
+        setLearnLanguage(lang);
+        try { localStorage.setItem('dh-devutil-number-notation-learn-lang', lang); } catch {}
+      });
+    }
+    let strLearnLang = /^ko(-|$)/i.test(navigator.language || '') ? 'ko' : 'en';
+    try { strLearnLang = localStorage.getItem('dh-devutil-number-notation-learn-lang') || strLearnLang; } catch {}
+    setLearnLanguage(strLearnLang === 'ko' ? 'ko' : 'en');
+
+    render();
+  </script>
+</body>
+</html>

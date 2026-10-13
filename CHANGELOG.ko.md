@@ -8,6 +8,7 @@ DH.DevUtil의 주요 변경 사항을 기록합니다. 최신 변경이 위에 �
 
 ### 추가
 
+- E 표기, 10의 거듭제곱, 자릿수 구분자, 16진/2진/8진, 16진 실수 입력을 정확한 일반 표기, 천 단위 구분, 과학적 표기, 공학 표기, SI 접두어, 한국어 단위로 바꾸고, IEEE 754 double/float32 실제 저장값, 2<sup>53</sup> − 1 초과 정수 및 Excel 15자리 한계 경고, 영어·한국어 설명을 제공하는 Number Notation Converter 추가
 - AES, ARIA, 3DES, DES(ECB, CBC)와 PKCS#7, ANSI X.923, ISO/IEC 7816-4, Zero, No padding, Encrypt/Decrypt가 함께 쓰는 공유 Key/IV 패널, 재현 가능한 고정 IV, 단계별 상세, IV·padding 동작 설명, NIST/RFC 5794/DES 테스트 벡터를 제공하는 외부 라이브러리 없는 학습 도구 Symmetric Encryption Simulator (Base) 추가
 - 영문·한국어 README와 Symmetric Encryption Simulator (Base), Symmetric Encryption Simulator 안내 문서에 화면 미리보기 추가, Symmetric Encryption Simulator 안내 문서에 Base 안내 링크 추가
 - RFC 7616의 여섯 algorithm 토큰과 `qop=auth`를 지원하는 로컬 HTTP Digest Authentication challenge-response·검증 학습 도구 추가

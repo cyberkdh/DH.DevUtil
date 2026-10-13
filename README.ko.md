@@ -13,6 +13,7 @@ DH.DevUtil은 일상적인 개발 작업에 사용하는 가벼운 유틸리티 
 | HMAC Simulator (Base) | HMAC 태그를 계산·검증하고 Client → 전달 데이터 → Server 흐름을 확인 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.hmac-simulator-base.html) | [소스 보기](./tools/DH.DevUtil.hmac-simulator-base.html) | [사용 안내](./docs/HMAC_SIMULATOR.ko.md) |
 | HTTP Digest Authentication Simulator | RFC 7616 challenge, Digest response, Server 검증 흐름 시뮬레이션 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.http-digest-auth-simulator.html) | [소스 보기](./tools/DH.DevUtil.http-digest-auth-simulator.html) | [사용 안내](./docs/HTTP_DIGEST_AUTH_SIMULATOR.ko.md) |
 | JWT Inspector | 테스트 JWT 생성(HS256), 일반 JWT 파싱 및 HS256 서명 검증 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.jwt-inspector.html) | [소스 보기](./tools/DH.DevUtil.jwt-inspector.html) | [사용 안내](./docs/JWT_INSPECTOR.ko.md) |
+| Number Notation Converter | `1.23457E+15` 같은 E 표기를 정확한 일반 표기, 천 단위 구분, 공학 표기, SI 접두어, 한국어 단위로 바꾸고 double·float32 저장값 확인 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.number-notation.html) | [소스 보기](./tools/DH.DevUtil.number-notation.html) | [사용 안내](./docs/NUMBER_NOTATION_CONVERTER.ko.md) |
 | Symmetric Encryption Simulator (Base) | AES, ARIA, 3DES, DES(ECB/CBC)와 padding 선택, 공유 Key/IV, 고정 IV로 같은 결과를 재현하며 대칭 암호화 학습 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.symmetric-encryption-simulator-base.html) | [소스 보기](./tools/DH.DevUtil.symmetric-encryption-simulator-base.html) | [사용 안내](./docs/SYMMETRIC_ENCRYPTION_SIMULATOR_BASE.ko.md) |
 | Symmetric Encryption Simulator | AES-GCM/CBC/CTR 암복호화와 CBC padding 비교 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.symmetric-encryption-simulator.html) | [소스 보기](./tools/DH.DevUtil.symmetric-encryption-simulator.html) | [사용 안내](./docs/SYMMETRIC_ENCRYPTION_SIMULATOR.ko.md) |
 
@@ -29,6 +30,12 @@ RFC 7616 challenge 생성, Client response 계산, Server 검증과 계산 상�
 테스트 JWT 생성, compact token 파싱, HS256 서명 검증과 상세 정보를 확인할 수 있습니다. 자세한 기능과 사용 방법은 [JWT Inspector 안내](./docs/JWT_INSPECTOR.ko.md)를 참고하세요.
 
 ![JWT Inspector 화면 미리보기](./docs/images/DH.DevUtil.jwt-inspector.png)
+
+## Number Notation Converter 미리보기
+
+`1.23457E+15` 같은 E 표기를 정확한 10진 변환으로 읽기 쉬운 숫자로 바꾸고, double·float32에 실제로 저장되는 값을 확인할 수 있습니다. 자세한 기능과 사용 방법은 [Number Notation Converter 안내](./docs/NUMBER_NOTATION_CONVERTER.ko.md)를 참고하세요.
+
+![Number Notation Converter 화면 미리보기](./docs/images/DH.DevUtil.number-notation.png)
 
 ## Symmetric Encryption Simulator (Base) 미리보기
 

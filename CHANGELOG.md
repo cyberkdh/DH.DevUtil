@@ -8,6 +8,7 @@ Notable changes to DH.DevUtil are listed here. The newest changes appear first.
 
 ### Added
 
+- Add Number Notation Converter, which converts E notation, powers of ten, digit-separated, hex/binary/octal, and hex-float input into exact plain, grouped, scientific, engineering, SI-prefix, and Korean-unit forms, shows the exact IEEE 754 double/float32 stored values, warns about integers above 2<sup>53</sup> − 1 and Excel's 15-digit limit, and explains them in English and Korean.
 - Add Symmetric Encryption Simulator (Base), a dependency-free learning tool for AES, ARIA, 3DES, and DES in ECB and CBC modes with PKCS#7, ANSI X.923, ISO/IEC 7816-4, Zero, and No padding, a shared key/IV panel used by both Encrypt and Decrypt, a fixed IV for reproducible ciphertext, step-by-step details, built-in explanations of IV and padding behavior, and NIST/RFC 5794/DES test vectors.
 - Add Symmetric Encryption Simulator (Base) and Symmetric Encryption Simulator screenshots to the English and Korean READMEs and tool guides, and link the Symmetric Encryption Simulator guides to the Base guide.
 - HTTP Digest Authentication Simulator, a local RFC 7616 challenge-response and verification learning tool supporting all six registered algorithm tokens with `qop=auth`.
