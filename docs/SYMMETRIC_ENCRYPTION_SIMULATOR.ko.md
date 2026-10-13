@@ -25,7 +25,7 @@ Symmetric Encryption Simulator는 대칭키 암호의 암호화와 복호화 흐
 
 ## 사용 방법
 
-1. 저장소를 clone하거나 HTML 및 `tools/vendor/noble-ciphers-2.4.0` 폴더를 함께 받아 최신 브라우저에서 [Symmetric Encryption Simulator](../tools/DH.DevUtil.symmetric-encryption-simulator.html)를 엽니다. 이 로컬 폴더는 AES-CBC padding 선택에 필요합니다.
+1. 최신 브라우저에서 [Symmetric Encryption Simulator](../tools/DH.DevUtil.symmetric-encryption-simulator.html)를 엽니다. HTML 파일 하나만으로 동작합니다.
 2. AES mode와 key size를 선택하고 **Generate key**를 눌러 임시 key를 만듭니다. 필요하면 합성(synthetic) 테스트 문장을 입력합니다.
 3. AES-CBC 선택 시 padding 방식을 고릅니다. **No padding**은 UTF-8 바이트 길이가 16의 배수여야 합니다. AES-GCM과 AES-CTR에는 block padding이 적용되지 않습니다.
 4. **Encrypt**를 누릅니다. 생성된 JSON package를 복사해 보관할 수 있습니다. 복호화하려면 package와 동일한 AES key가 필요합니다.
@@ -55,10 +55,10 @@ Counter (CTR) mode는 임의 길이의 입력을 처리하므로 block padding�
 ## 구현과 지원 범위
 
 - AES-GCM 및 AES-CTR은 브라우저 Web Crypto API를 사용합니다.
-- AES-GCM/CTR의 192-bit key 지원 여부는 브라우저 구현에 따라 다릅니다. 현재 검수 환경은 이를 거부하므로 해당 mode에서는 192-bit 선택을 제한합니다. AES-CBC는 로컬 라이브러리로 192-bit key도 지원합니다.
-- padding 선택이 필요한 AES-CBC는 MIT 라이선스의 `@noble/ciphers` 2.4.0을 `tools/vendor/noble-ciphers-2.4.0`에 로컬 복사해 사용합니다. 페이지에서 CDN이나 외부 네트워크를 요청하지 않습니다. 라이선스와 upstream 정보는 해당 vendor 폴더를 참고하세요.
-- AES-CBC 외부 입력용 package는 version 1 JSON 형식이며, 각 mode에 필요한 IV/counter, padding, ciphertext 정보를 포함합니다. 형식은 학습용이며 표준 암호 컨테이너 포맷이 아닙니다.
-- ARIA는 이 브라우저/Web Crypto 기반 버전에서 구현하지 않습니다. DES와 3DES/TDEA도 신규 암호화에 적합하지 않은 legacy cipher이므로 실행 가능한 선택지에 포함하지 않습니다.
+- AES-GCM/CTR의 192-bit key 지원 여부는 브라우저 구현에 따라 다릅니다. 현재 검수 환경은 이를 거부하므로 해당 mode에서는 192-bit 선택을 제한합니다. AES-CBC는 192-bit key도 지원합니다.
+- Web Crypto의 AES-CBC는 항상 PKCS#7을 적용해 다른 padding을 선택할 수 없으므로, AES-CBC는 HTML 안에 순수 JavaScript로 구현한 AES를 사용합니다. NIST SP 800-38A 테스트 벡터와 OpenSSL로 결과를 검증했으며, 외부 라이브러리는 사용하지 않습니다.
+- 가져오기/내보내기용 package는 학습용 version 1 JSON 형식이며, 각 mode에 필요한 IV/counter, padding(해당 시), ciphertext 정보를 포함합니다. 형식은 학습용이며 표준 암호 컨테이너 포맷이 아닙니다.
+- ARIA는 이 브라우저/Web Crypto 기반 버전에서 구현하지 않으며, [Symmetric Encryption Simulator (Base)](./SYMMETRIC_ENCRYPTION_SIMULATOR_BASE.ko.md)에서 학습할 수 있습니다. DES와 3DES/TDEA도 신규 암호화에 적합하지 않은 legacy cipher이므로 실행 가능한 선택지에 포함하지 않습니다.
 - ECB mode는 반복 plaintext pattern을 드러내므로 지원하지 않습니다.
 
 ## 보안 안내

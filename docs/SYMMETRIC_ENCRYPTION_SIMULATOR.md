@@ -25,7 +25,7 @@ The screenshot uses synthetic text and a temporary key to illustrate the interfa
 
 ## How to use
 
-1. Clone the repository or download the HTML together with `tools/vendor/noble-ciphers-2.4.0`, then open [Symmetric Encryption Simulator](../tools/DH.DevUtil.symmetric-encryption-simulator.html) in a modern browser. The local folder is required for AES-CBC padding options.
+1. Open [Symmetric Encryption Simulator](../tools/DH.DevUtil.symmetric-encryption-simulator.html) in a modern browser. The HTML file works on its own.
 2. Select an AES mode and key size, then select **Generate key**. Enter synthetic test text if needed.
 3. For AES-CBC, select a padding scheme. **No padding** requires the UTF-8 byte length to be a multiple of 16. AES-GCM and AES-CTR do not use block padding.
 4. Select **Encrypt**. Copy the generated JSON package if you want to keep it. Decryption requires the matching AES key.
@@ -55,10 +55,10 @@ Counter (CTR) mode handles arbitrary-length input and does not use block padding
 ## Implementation and supported scope
 
 - AES-GCM and AES-CTR use the browser Web Crypto API.
-- AES-192 support in Web Crypto AES-GCM/CTR varies by browser. The tested browser rejects it, so the selector restricts 192-bit keys to AES-CBC; the local library supports AES-CBC with all three key sizes.
-- AES-CBC uses a local copy of `@noble/ciphers` 2.4.0 under the MIT license to provide selectable padding. The library is stored in `tools/vendor/noble-ciphers-2.4.0`; the page does not load it from a CDN or request it over the network. See that vendor folder for licensing and upstream details.
+- AES-192 support in Web Crypto AES-GCM/CTR varies by browser. The tested browser rejects it, so the selector restricts 192-bit keys to AES-CBC, which supports all three key sizes.
+- AES-CBC runs on an AES implementation written in plain JavaScript inside the HTML file, because Web Crypto AES-CBC always applies PKCS#7 and cannot offer other padding schemes. It is checked against the NIST SP 800-38A test vectors and OpenSSL. No external libraries are used.
 - Imported/exported data uses a learning-only version 1 JSON package containing mode parameters, padding where applicable, and ciphertext. It is not a standardized cryptographic container format.
-- ARIA is not implemented in this browser/Web Crypto-based version. DES and 3DES/TDEA are legacy ciphers and are not offered as runnable encryption options.
+- ARIA is not implemented in this browser/Web Crypto-based version; [Symmetric Encryption Simulator (Base)](./SYMMETRIC_ENCRYPTION_SIMULATOR_BASE.md) covers it for learning. DES and 3DES/TDEA are legacy ciphers and are not offered as runnable encryption options.
 - ECB is omitted because it reveals repeated plaintext patterns.
 
 ## Security

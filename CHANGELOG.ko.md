@@ -14,8 +14,7 @@ DH.DevUtil의 주요 변경 사항을 기록합니다. 최신 변경이 위에 �
 - RFC 7616 `userhash=true` 지원
 - 로컬에서 테스트 JWT를 생성(HS256)하고 compact JWT를 파싱·검증하는 JWT Inspector 추가
 - 영문·한국어 README와 JWT Inspector 안내 문서에 화면 미리보기 추가
-- AES-GCM/CBC/CTR 암복호화와 AES-CBC 패딩 비교를 위한 Symmetric Encryption Simulator 추가
-- AES-CBC padding 옵션용 `@noble/ciphers` 2.4.0 로컬 번들 및 MIT 라이선스 포함
+- AES-GCM/CBC/CTR 암복호화와 AES-CBC 패딩 비교를 위한 Symmetric Encryption Simulator 추가. AES-CBC는 HTML 안의 JavaScript AES 구현으로 동작해 외부 라이브러리가 필요 없음
 - 영문·한국어 README와 HTTP Digest Simulator 안내 문서에 도구 스크린샷 추가
 - HMAC-SHA-256/384/512 계산 과정과 Client → 전달 데이터 → Server 검증 흐름을 학습할 수 있는 브라우저 기반 HMAC Simulator (Base) 추가
 - 영문·한국어 HMAC 안내 문서에 HMAC Simulator 스크린샷 추가
@@ -24,7 +23,6 @@ DH.DevUtil의 주요 변경 사항을 기록합니다. 최신 변경이 위에 �
 
 - JWT Inspector에 Parse 세그먼트 디코딩 과정과 HS256 서명 검증 상세 표시 추가
 - Symmetric Encryption Simulator에서 AES-CBC PKCS#7, ANSI X.923, Zero, NoPadding 선택 지원
-- README의 오프라인 사용 안내에 도구별 로컬 보조 파일 다운로드 방법 반영
 - HTTP Digest Authentication Simulator에서 검증 성공·실패 모두 Server 측 계산 상세를 표시
 - GitHub가 README 링크의 새 탭 속성을 제거하므로 Ctrl+클릭으로 새 탭을 여는 방법을 안내
 - README에 GitHub Pages 온라인 실행 링크를 추가하고 소스 링크와 구분

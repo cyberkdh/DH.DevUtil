@@ -14,8 +14,7 @@ Notable changes to DH.DevUtil are listed here. The newest changes appear first.
 - HTTP Digest Authentication Simulator supports the RFC 7616 `userhash=true` option.
 - Add JWT Inspector to generate demo JWTs with HS256, parse compact tokens, and verify HS256 signatures locally.
 - Add the JWT Inspector screenshot to the English and Korean READMEs and tool guides.
-- Add a Symmetric Encryption Simulator for AES-GCM/CBC/CTR and CBC padding comparisons.
-- Include a local `@noble/ciphers` 2.4.0 bundle and MIT license for selectable AES-CBC padding.
+- Add a Symmetric Encryption Simulator for AES-GCM/CBC/CTR and CBC padding comparisons. AES-CBC runs on a built-in JavaScript AES implementation, so the tool needs no external libraries.
 - Add the HTTP Digest Simulator screenshot to the English and Korean READMEs and tool guides.
 - HMAC Simulator (Base), a browser-based learning tool for HMAC-SHA-256/384/512 with construction details and a Client → in-transit data → Server verification flow.
 - HMAC Simulator (Base) screenshot in the English and Korean tool guides.
@@ -24,7 +23,6 @@ Notable changes to DH.DevUtil are listed here. The newest changes appear first.
 
 - Add JWT Inspector parse-segment and detailed HS256 signature verification views.
 - Support PKCS#7, ANSI X.923, Zero, and NoPadding options in AES-CBC.
-- Clarify that some offline tools require their referenced local assets alongside the HTML file.
 - HTTP Digest Authentication Simulator shows Server-side calculation details for successful and failed response verification.
 - README notes that Ctrl-click opens GitHub Pages live demos in a new tab because GitHub strips custom link targets.
 - README distinguishes GitHub Pages live demos from source-code links.

@@ -1,6 +1,6 @@
 # DH.DevUtil
 
-DH.DevUtil is a collection of lightweight utilities for everyday development tasks. Most tools are standalone HTML files that run in a modern browser without installation; a few tools use local assets included in the repository.
+DH.DevUtil is a collection of lightweight utilities for everyday development tasks. Each tool is a standalone HTML file that runs in a modern browser without installation or external libraries.
 
 [한국어](./README.ko.md)
 
@@ -16,7 +16,7 @@ DH.DevUtil is a collection of lightweight utilities for everyday development tas
 | Symmetric Encryption Simulator (Base) | Learn symmetric encryption with AES, ARIA, 3DES, and DES in ECB/CBC mode, selectable padding, one shared key and IV, and a fixed IV for reproducible ciphertext. | [Run (Ctrl-click for a new tab)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.symmetric-encryption-simulator-base.html) | [View source](./tools/DH.DevUtil.symmetric-encryption-simulator-base.html) | [Guide](./docs/SYMMETRIC_ENCRYPTION_SIMULATOR_BASE.md) |
 | Symmetric Encryption Simulator | Encrypt/decrypt with AES-GCM/CBC/CTR and compare CBC padding schemes. | [Run (Ctrl-click for a new tab)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.symmetric-encryption-simulator.html) | [View source](./tools/DH.DevUtil.symmetric-encryption-simulator.html) | [Guide](./docs/SYMMETRIC_ENCRYPTION_SIMULATOR.md) |
 
-Live demos run the static HTML tools on GitHub Pages. The source links open the HTML files in GitHub's code viewer; they do not run the tools. To use a tool offline, clone the repository or download the HTML together with the local assets referenced by that tool, then open it in a browser.
+Live demos run the static HTML tools on GitHub Pages. The source links open the HTML files in GitHub's code viewer; they do not run the tools. To use a tool offline, clone the repository or download its HTML file, then open it in a browser.
 
 ## HTTP Digest Authentication Simulator preview
 
@@ -55,7 +55,7 @@ Encrypt with AES-GCM, AES-CBC, or AES-CTR, export a JSON package without the key
 
 ## Getting Started
 
-1. Select **Run** in the tool catalog to use a live demo, or clone this repository/download the HTML and its required local assets for offline use.
+1. Select **Run** in the tool catalog to use a live demo, or clone this repository/download the HTML file for offline use.
 2. Follow the corresponding tool guide.
 
 ## Recent Changes

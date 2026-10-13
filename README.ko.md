@@ -1,6 +1,6 @@
 # DH.DevUtil
 
-DH.DevUtil은 일상적인 개발 작업에 사용하는 가벼운 유틸리티 모음입니다. 대부분의 도구는 설치 없이 최신 브라우저에서 실행되는 독립 HTML 파일이며, 일부 도구는 저장소에 포함된 로컬 보조 파일을 함께 사용합니다.
+DH.DevUtil은 일상적인 개발 작업에 사용하는 가벼운 유틸리티 모음입니다. 각 도구는 설치나 외부 라이브러리 없이 최신 브라우저에서 실행되는 독립 HTML 파일입니다.
 
 [English](./README.md)
 
@@ -16,7 +16,7 @@ DH.DevUtil은 일상적인 개발 작업에 사용하는 가벼운 유틸리티 
 | Symmetric Encryption Simulator (Base) | AES, ARIA, 3DES, DES(ECB/CBC)와 padding 선택, 공유 Key/IV, 고정 IV로 같은 결과를 재현하며 대칭 암호화 학습 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.symmetric-encryption-simulator-base.html) | [소스 보기](./tools/DH.DevUtil.symmetric-encryption-simulator-base.html) | [사용 안내](./docs/SYMMETRIC_ENCRYPTION_SIMULATOR_BASE.ko.md) |
 | Symmetric Encryption Simulator | AES-GCM/CBC/CTR 암복호화와 CBC padding 비교 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.symmetric-encryption-simulator.html) | [소스 보기](./tools/DH.DevUtil.symmetric-encryption-simulator.html) | [사용 안내](./docs/SYMMETRIC_ENCRYPTION_SIMULATOR.ko.md) |
 
-온라인 데모는 GitHub Pages에서 정적 HTML 도구를 실행합니다. 소스 링크는 GitHub에서 HTML 코드를 보여줄 뿐 도구를 실행하지 않습니다. 오프라인으로 사용하려면 저장소를 clone하거나 도구 HTML과 해당 도구 문서에서 언급한 로컬 보조 파일을 함께 내려받아 브라우저에서 여세요.
+온라인 데모는 GitHub Pages에서 정적 HTML 도구를 실행합니다. 소스 링크는 GitHub에서 HTML 코드를 보여줄 뿐 도구를 실행하지 않습니다. 오프라인으로 사용하려면 저장소를 clone하거나 도구 HTML 파일을 내려받아 브라우저에서 여세요.
 
 ## HTTP Digest Authentication Simulator 미리보기
 
@@ -55,7 +55,7 @@ AES-GCM, AES-CBC, AES-CTR로 암호화하고, 키를 제외한 JSON 패키지를
 
 ## 시작하기
 
-1. 도구 목록에서 **실행**을 선택해 온라인 데모를 사용하거나, 오프라인 사용을 위해 저장소를 clone하거나 HTML과 필요한 로컬 보조 파일을 내려받습니다.
+1. 도구 목록에서 **실행**을 선택해 온라인 데모를 사용하거나, 오프라인 사용을 위해 저장소를 clone하거나 HTML 파일을 내려받습니다.
 2. 해당 도구의 안내 문서를 참고합니다.
 
 ## 최근 변경 사항

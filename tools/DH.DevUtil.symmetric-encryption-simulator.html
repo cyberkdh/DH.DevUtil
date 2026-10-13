@@ -219,20 +219,153 @@
       <details class="legacy">
         <summary>Other algorithms and legacy ciphers</summary>
         <div class="legacy-content">
-          <p><strong>ARIA</strong> is a modern standardized block cipher with 128-, 192-, and 256-bit keys. It is not included in the browser Web Crypto API or the local library bundle used here, so ARIA encryption/decryption is not implemented.</p>
+          <p><strong>ARIA</strong> is a modern standardized block cipher with 128-, 192-, and 256-bit keys. It is not included in the browser Web Crypto API, so it is not offered here. Symmetric Encryption Simulator (Base) implements ARIA for learning.</p>
           <p><strong>DES</strong> has an inadequate 56-bit effective key. <strong>3DES/TDEA</strong> is a legacy cipher with a 64-bit block size and is not appropriate for new encryption. They are intentionally not offered as operational choices; use them only to understand legacy compatibility, not to protect data.</p>
           <p>ECB is also omitted because it reveals repeated plaintext patterns. This simulator focuses on AES-GCM, AES-CBC, and AES-CTR.</p>
         </div>
       </details>
       <footer class="footer">
-        <span>AES-GCM/CTR use Web Crypto; AES-CBC uses the local bundled library. Keys and messages are not uploaded or stored.</span>
+        <span>AES-GCM/CTR use Web Crypto; AES-CBC uses a built-in JavaScript AES implementation. Keys and messages are not uploaded or stored.</span>
         <span>Do not reuse a GCM nonce or CTR counter with the same key. CBC and CTR do not authenticate ciphertext.</span>
       </footer>
     </main>
   </div>
-  <script src="./vendor/noble-ciphers-2.4.0/aes-cbc.bundle.js"></script>
   <script>
     'use strict';
+
+    // ---------------------------------------------------------------------------------------
+    // AES block cipher for AES-CBC (FIPS 197; learning implementation, not constant-time).
+    // Web Crypto always applies PKCS#7 to AES-CBC, so CBC with selectable padding runs here.
+    // ---------------------------------------------------------------------------------------
+
+    function gfMul(a, b) {
+      let result = 0;
+      while (b) {
+        if (b & 1) result ^= a;
+        a = (a << 1) ^ (a & 0x80 ? 0x11b : 0);
+        b >>= 1;
+      }
+      return result & 0xff;
+    }
+
+    function gfPow(x, exponent) {
+      let result = 1;
+      while (exponent) {
+        if (exponent & 1) result = gfMul(result, x);
+        x = gfMul(x, x);
+        exponent >>= 1;
+      }
+      return result;
+    }
+
+    const xorBytes = (a, b) => a.map((value, index) => value ^ b[index]);
+
+    function invertTable(table) {
+      const inverse = new Uint8Array(256);
+      table.forEach((value, index) => { inverse[value] = index; });
+      return inverse;
+    }
+
+    // AES S-box: multiplicative inverse in GF(2^8) followed by the FIPS 197 affine transform.
+    const AES_SBOX = new Uint8Array(256);
+    for (let x = 0; x < 256; x++) {
+      const inv = x ? gfPow(x, 254) : 0;
+      let value = inv;
+      for (let shift = 1; shift <= 4; shift++) value ^= ((inv << shift) | (inv >> (8 - shift))) & 0xff;
+      AES_SBOX[x] = value ^ 0x63;
+    }
+    const AES_INV_SBOX = invertTable(AES_SBOX);
+
+    const AES = (() => {
+      const xtime = a => ((a << 1) ^ (a & 0x80 ? 0x1b : 0)) & 0xff;
+
+      function expandKey(key) {
+        const nk = key.length / 4;
+        const rounds = nk + 6;
+        const words = new Uint8Array(16 * (rounds + 1));
+        words.set(key);
+        let rcon = 1;
+        for (let i = nk; i < 4 * (rounds + 1); i++) {
+          let temp = Array.from(words.subarray(4 * (i - 1), 4 * i));
+          if (i % nk === 0) {
+            temp = [AES_SBOX[temp[1]] ^ rcon, AES_SBOX[temp[2]], AES_SBOX[temp[3]], AES_SBOX[temp[0]]];
+            rcon = xtime(rcon);
+          } else if (nk > 6 && i % nk === 4) {
+            temp = temp.map(b => AES_SBOX[b]);
+          }
+          for (let j = 0; j < 4; j++) words[4 * i + j] = words[4 * (i - nk) + j] ^ temp[j];
+        }
+        return { words, rounds };
+      }
+
+      function addRoundKey(state, words, round) {
+        for (let i = 0; i < 16; i++) state[i] ^= words[16 * round + i];
+      }
+
+      function shiftRows(state, inverse) {
+        const copy = state.slice();
+        for (let r = 1; r < 4; r++) {
+          for (let c = 0; c < 4; c++) {
+            if (inverse) state[r + 4 * ((c + r) % 4)] = copy[r + 4 * c];
+            else state[r + 4 * c] = copy[r + 4 * ((c + r) % 4)];
+          }
+        }
+      }
+
+      function mixColumns(state, inverse) {
+        const m = inverse ? [14, 11, 13, 9] : [2, 3, 1, 1];
+        for (let c = 0; c < 4; c++) {
+          const a = state.slice(4 * c, 4 * c + 4);
+          for (let r = 0; r < 4; r++) {
+            state[4 * c + r] = gfMul(a[r], m[0]) ^ gfMul(a[(r + 1) % 4], m[1]) ^ gfMul(a[(r + 2) % 4], m[2]) ^ gfMul(a[(r + 3) % 4], m[3]);
+          }
+        }
+      }
+
+      return {
+        create(key) {
+          const { words, rounds } = expandKey(key);
+          return {
+            encrypt(block) {
+              const state = block.slice();
+              addRoundKey(state, words, 0);
+              for (let round = 1; round <= rounds; round++) {
+                for (let i = 0; i < 16; i++) state[i] = AES_SBOX[state[i]];
+                shiftRows(state, false);
+                if (round !== rounds) mixColumns(state, false);
+                addRoundKey(state, words, round);
+              }
+              return state;
+            },
+            decrypt(block) {
+              const state = block.slice();
+              addRoundKey(state, words, rounds);
+              for (let round = rounds - 1; round >= 0; round--) {
+                shiftRows(state, true);
+                for (let i = 0; i < 16; i++) state[i] = AES_INV_SBOX[state[i]];
+                addRoundKey(state, words, round);
+                if (round !== 0) mixColumns(state, true);
+              }
+              return state;
+            }
+          };
+        }
+      };
+    })();
+
+    // AES-CBC over whole 16-byte blocks. Padding is applied and checked by applyPadding/removePadding.
+    function aesCbc(keyBytes, iv, data, decrypting) {
+      const cipher = AES.create(keyBytes);
+      const output = new Uint8Array(data.length);
+      let previous = iv;
+      for (let offset = 0; offset < data.length; offset += 16) {
+        const block = data.subarray(offset, offset + 16);
+        const result = decrypting ? xorBytes(cipher.decrypt(block), previous) : cipher.encrypt(xorBytes(block, previous));
+        output.set(result, offset);
+        previous = decrypting ? block : result;
+      }
+      return output;
+    }
 
     const el = id => document.getElementById(id);
     const encoder = new TextEncoder();
@@ -349,7 +482,6 @@
     }
 
     function applyPadding(plaintext, padding) {
-      if (padding === 'PKCS7') return plaintext;
       const remainder = plaintext.length % 16;
       if (padding === 'NONE') {
         if (remainder !== 0) throw new Error('NoPadding requires plaintext length to be a multiple of 16 bytes.');
@@ -361,6 +493,7 @@
       if (padding === 'ZERO' && paddingLength === 0) return plaintext;
       const padded = new Uint8Array(plaintext.length + paddingLength);
       padded.set(plaintext);
+      if (padding === 'PKCS7') padded.fill(paddingLength, plaintext.length);
       if (padding === 'ANSI-X923') padded[padded.length - 1] = paddingLength;
       return padded;
     }
@@ -375,12 +508,6 @@
         }
         return plaintext;
       }
-      if (padding === 'PKCS7') {
-        if (originalLength !== plaintext.length) {
-          throw new Error('PKCS#7 plaintext length does not match the package metadata.');
-        }
-        return plaintext;
-      }
       if (padding === 'ZERO') {
         for (let index = originalLength; index < plaintext.length; index++) {
           if (plaintext[index] !== 0) throw new Error('Zero padding check failed. The package may be damaged or use a different key.');
@@ -389,6 +516,11 @@
       }
       const paddingLength = plaintext.length - originalLength;
       if (paddingLength < 1 || paddingLength > 16) throw new Error(`${paddingLabels[padding]} length is invalid.`);
+      if (padding === 'PKCS7') {
+        for (let index = originalLength; index < plaintext.length; index++) {
+          if (plaintext[index] !== paddingLength) throw new Error('PKCS#7 padding check failed. The package may be damaged or use a different key.');
+        }
+      }
       if (padding === 'ANSI-X923') {
         for (let index = originalLength; index < plaintext.length - 1; index++) {
           if (plaintext[index] !== 0) throw new Error('ANSI X.923 padding check failed. The package may be damaged or use a different key.');
@@ -436,16 +568,10 @@
             ['Ciphertext and tag length', `${ciphertext.length} bytes; Web Crypto appends the authentication tag`]
           ];
         } else if (algorithm === 'AES-CBC') {
-          if (!globalThis.DHNobleCipherBundle?.cbc) throw new Error('The local AES-CBC library bundle could not be loaded.');
           const iv = randomBytes(16);
           const padding = el('padding').value;
           const paddedPlaintext = applyPadding(plaintext, padding);
-          const cbc = DHNobleCipherBundle.cbc(
-            keyBytes,
-            iv,
-            padding === 'PKCS7' ? undefined : { disablePadding: true }
-          );
-          const ciphertext = cbc.encrypt(paddedPlaintext);
+          const ciphertext = aesCbc(keyBytes, iv, paddedPlaintext, false);
           packageValue = {
             version: 1,
             algorithm,
@@ -459,7 +585,7 @@
             ['Mode and guarantee', 'AES-CBC · confidentiality only; no authentication'],
             ['Key length', `${keyBytes.length * 8} bits (key material is not repeated here)`],
             ['IV', `${encodeBase64Url(iv)} (${iv.length} bytes, randomly generated)`],
-            ['Padding', `${paddingLabels[padding]}${padding === 'PKCS7' ? ' (applied by the local Noble cipher library)' : ' (applied before AES-CBC)'}`],
+            ['Padding', `${paddingLabels[padding]} (applied before AES-CBC)`],
             ['Plaintext length', `${plaintext.length} UTF-8 bytes`],
             ['Ciphertext length', `${ciphertext.length} bytes`]
           ];
@@ -556,15 +682,8 @@
         }
         let plaintextBytes;
         if (data.algorithm === 'AES-CBC') {
-          if (!globalThis.DHNobleCipherBundle?.cbc) throw new Error('The local AES-CBC library bundle could not be loaded.');
-          const padding = data.padding;
-          const cbc = DHNobleCipherBundle.cbc(
-            keyBytes,
-            data.iv,
-            padding === 'PKCS7' ? undefined : { disablePadding: true }
-          );
-          plaintextBytes = cbc.decrypt(data.ciphertext);
-          plaintextBytes = removePadding(plaintextBytes, padding, data.plaintextLength);
+          plaintextBytes = aesCbc(keyBytes, data.iv, data.ciphertext, true);
+          plaintextBytes = removePadding(plaintextBytes, data.padding, data.plaintextLength);
         } else {
           const key = await importAesKey(keyBytes, data.algorithm, 'decrypt');
           plaintextBytes = new Uint8Array(await crypto.subtle.decrypt(algorithm, key, data.ciphertext));
