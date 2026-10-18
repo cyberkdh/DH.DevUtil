@@ -1,6 +1,6 @@
 # DH.DevUtil
 
-DH.DevUtil is a collection of lightweight utilities for everyday development tasks. Each tool is a standalone HTML file that runs in a modern browser without installation or external libraries.
+DH.DevUtil is a collection of lightweight utilities for everyday development tasks. Each tool is a standalone HTML file that runs in a modern browser without installation or external libraries. The exception is DH.MarkDown.Flow, a prebuilt app that bundles its third-party libraries.
 
 [한국어](./README.ko.md)
 
@@ -16,8 +16,9 @@ DH.DevUtil is a collection of lightweight utilities for everyday development tas
 | Number Notation Converter | Turn E notation such as `1.23457E+15` into exact plain, grouped, engineering, SI, and Korean-unit forms, and see what a double or float32 stores. | [Run (Ctrl-click for a new tab)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.number-notation.html) | [View source](./tools/DH.DevUtil.number-notation.html) | [Guide](./docs/NUMBER_NOTATION_CONVERTER.md) |
 | Symmetric Encryption Simulator (Base) | Learn symmetric encryption with AES, ARIA, 3DES, and DES in ECB/CBC mode, selectable padding, one shared key and IV, and a fixed IV for reproducible ciphertext. | [Run (Ctrl-click for a new tab)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.symmetric-encryption-simulator-base.html) | [View source](./tools/DH.DevUtil.symmetric-encryption-simulator-base.html) | [Guide](./docs/SYMMETRIC_ENCRYPTION_SIMULATOR_BASE.md) |
 | Symmetric Encryption Simulator | Encrypt/decrypt with AES-GCM/CBC/CTR and compare CBC padding schemes. | [Run (Ctrl-click for a new tab)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.symmetric-encryption-simulator.html) | [View source](./tools/DH.DevUtil.symmetric-encryption-simulator.html) | [Guide](./docs/SYMMETRIC_ENCRYPTION_SIMULATOR.md) |
+| DH.MarkDown.Flow | Local-first Markdown editor with Source, WYSIWYG, and Split modes, Mermaid diagrams, and Markdown/HTML/PDF/Word export. | [Run (Ctrl-click for a new tab)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.MarkDown.Flow/index.html) | [View files](./tools/DH.MarkDown.Flow/) | [Guide](./docs/MARKDOWN_FLOW.md) |
 
-Live demos run the static HTML tools on GitHub Pages. The source links open the HTML files in GitHub's code viewer; they do not run the tools. To use a tool offline, clone the repository or download its HTML file, then open it in a browser.
+Live demos run the static HTML tools on GitHub Pages. The source links open the HTML files in GitHub's code viewer; they do not run the tools. To use a tool offline, clone the repository or download its HTML file, then open it in a browser. For DH.MarkDown.Flow, open `index_local.html`; `index.html` needs a web server.
 
 ## HTTP Digest Authentication Simulator preview
 
@@ -49,6 +50,12 @@ Encrypt with AES-GCM, AES-CBC, or AES-CTR, export a JSON package without the key
 
 ![Symmetric Encryption Simulator preview](./docs/images/DH.DevUtil.symmetric-encryption-simulator.png)
 
+## DH.MarkDown.Flow preview
+
+Edit Markdown in Source, WYSIWYG, or Split mode, preview Mermaid diagrams, and export to Markdown, HTML, PDF, or Word. See the [DH.MarkDown.Flow guide](./docs/MARKDOWN_FLOW.md) for features and usage.
+
+![DH.MarkDown.Flow preview](./docs/images/DH.MarkDown.Flow.png)
+
 ## Important
 
 - Tools process input in the current browser and do not upload it to a DH.DevUtil server.
@@ -58,6 +65,7 @@ Encrypt with AES-GCM, AES-CBC, or AES-CTR, export a JSON package without the key
 - Do not enter production keys or personal data in Symmetric Encryption Simulator (Base). It displays keys and intermediate values, uses a fixed IV by default, and includes DES/3DES for learning only.
 - Do not enter production keys or personal data in Symmetric Encryption Simulator. AES-CBC and AES-CTR do not authenticate ciphertext.
 - Legacy hashes and non-cryptographic checksums are not suitable for security against malicious changes. See the [hash security notes](./docs/HASH_ALGORITHMS.md).
+- DH.MarkDown.Flow stores drafts in the browser's local storage and loads external images referenced by a document from the network. It bundles third-party libraries listed in its [third-party notices](./tools/DH.MarkDown.Flow/THIRD_PARTY_NOTICES.md).
 - When using a downloaded copy or embedding a tool in another page, verify and trust its source and the surrounding browser environment.
 
 ## Getting Started

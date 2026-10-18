@@ -1,6 +1,6 @@
 # DH.DevUtil
 
-DH.DevUtil은 일상적인 개발 작업에 사용하는 가벼운 유틸리티 모음입니다. 각 도구는 설치나 외부 라이브러리 없이 최신 브라우저에서 실행되는 독립 HTML 파일입니다.
+DH.DevUtil은 일상적인 개발 작업에 사용하는 가벼운 유틸리티 모음입니다. 각 도구는 설치나 외부 라이브러리 없이 최신 브라우저에서 실행되는 독립 HTML 파일입니다. 단, DH.MarkDown.Flow는 서드파티 라이브러리를 포함해 빌드한 앱입니다.
 
 [English](./README.md)
 
@@ -16,8 +16,9 @@ DH.DevUtil은 일상적인 개발 작업에 사용하는 가벼운 유틸리티 
 | Number Notation Converter | `1.23457E+15` 같은 E 표기를 정확한 일반 표기, 천 단위 구분, 공학 표기, SI 접두어, 한국어 단위로 바꾸고 double·float32 저장값 확인 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.number-notation.html) | [소스 보기](./tools/DH.DevUtil.number-notation.html) | [사용 안내](./docs/NUMBER_NOTATION_CONVERTER.ko.md) |
 | Symmetric Encryption Simulator (Base) | AES, ARIA, 3DES, DES(ECB/CBC)와 padding 선택, 공유 Key/IV, 고정 IV로 같은 결과를 재현하며 대칭 암호화 학습 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.symmetric-encryption-simulator-base.html) | [소스 보기](./tools/DH.DevUtil.symmetric-encryption-simulator-base.html) | [사용 안내](./docs/SYMMETRIC_ENCRYPTION_SIMULATOR_BASE.ko.md) |
 | Symmetric Encryption Simulator | AES-GCM/CBC/CTR 암복호화와 CBC padding 비교 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.symmetric-encryption-simulator.html) | [소스 보기](./tools/DH.DevUtil.symmetric-encryption-simulator.html) | [사용 안내](./docs/SYMMETRIC_ENCRYPTION_SIMULATOR.ko.md) |
+| DH.MarkDown.Flow | Source·WYSIWYG·Split 편집, Mermaid 다이어그램, Markdown/HTML/PDF/Word 내보내기를 지원하는 로컬 우선 Markdown 편집기 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.MarkDown.Flow/index.html) | [파일 보기](./tools/DH.MarkDown.Flow/) | [사용 안내](./docs/MARKDOWN_FLOW.ko.md) |
 
-온라인 데모는 GitHub Pages에서 정적 HTML 도구를 실행합니다. 소스 링크는 GitHub에서 HTML 코드를 보여줄 뿐 도구를 실행하지 않습니다. 오프라인으로 사용하려면 저장소를 clone하거나 도구 HTML 파일을 내려받아 브라우저에서 여세요.
+온라인 데모는 GitHub Pages에서 정적 HTML 도구를 실행합니다. 소스 링크는 GitHub에서 HTML 코드를 보여줄 뿐 도구를 실행하지 않습니다. 오프라인으로 사용하려면 저장소를 clone하거나 도구 HTML 파일을 내려받아 브라우저에서 여세요. DH.MarkDown.Flow는 `index_local.html`을 여세요. `index.html`은 웹 서버가 필요합니다.
 
 ## HTTP Digest Authentication Simulator 미리보기
 
@@ -49,6 +50,12 @@ AES-GCM, AES-CBC, AES-CTR로 암호화하고, 키를 제외한 JSON 패키지를
 
 ![Symmetric Encryption Simulator 화면 미리보기](./docs/images/DH.DevUtil.symmetric-encryption-simulator.png)
 
+## DH.MarkDown.Flow 미리보기
+
+Source, WYSIWYG, Split 모드로 Markdown을 편집하고, Mermaid 다이어그램을 미리보며, Markdown, HTML, PDF, Word로 내보낼 수 있습니다. 자세한 기능과 사용 방법은 [DH.MarkDown.Flow 안내](./docs/MARKDOWN_FLOW.ko.md)를 참고하세요.
+
+![DH.MarkDown.Flow 화면 미리보기](./docs/images/DH.MarkDown.Flow.png)
+
 ## 중요 안내
 
 - 도구 입력은 현재 브라우저에서 처리하며 DH.DevUtil 서버로 업로드하지 않습니다.
@@ -58,6 +65,7 @@ AES-GCM, AES-CBC, AES-CTR로 암호화하고, 키를 제외한 JSON 패키지를
 - Symmetric Encryption Simulator (Base)는 키와 중간값을 표시하고 기본적으로 고정 IV를 사용하며, DES/3DES는 학습용으로만 포함합니다. 운영 키나 개인정보를 입력하지 마세요.
 - Symmetric Encryption Simulator는 로컬 AES 키와 메시지를 처리합니다. 운영 키나 개인정보를 입력하지 마세요. AES-CBC와 AES-CTR은 암호문 무결성(authentication)을 보장하지 않습니다.
 - 레거시 해시와 비암호학 체크섬은 악의적인 변경에 대한 보안 용도로 적합하지 않습니다. [해시 보안 안내](./docs/HASH_ALGORITHMS.ko.md)를 확인하세요.
+- DH.MarkDown.Flow는 초안을 브라우저 로컬 저장소에 저장하고, 문서가 참조하는 외부 이미지를 네트워크에서 불러옵니다. 포함된 서드파티 라이브러리는 [서드파티 고지](./tools/DH.MarkDown.Flow/THIRD_PARTY_NOTICES.md)를 참고하세요.
 - 내려받은 사본을 실행하거나 다른 페이지에 도구를 삽입할 때는 도구 파일의 출처와 브라우저 환경을 신뢰할 수 있는지 확인하세요.
 
 ## 시작하기
