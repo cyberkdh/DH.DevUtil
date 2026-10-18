@@ -31,7 +31,7 @@ DH.MarkDown.Flow is a local-first Markdown editor and viewer. It keeps Markdown 
 
 ## How to use
 
-1. Open the [live demo](https://cyberkdh.github.io/DH.DevUtil/tools/DH.MarkDown.Flow/index.html), or download `index_local.html` and open it in Chrome or Edge.
+1. Open the [live demo](https://cyberkdh.github.io/DH.DevUtil/tools/DH.MarkDown.Flow/index.html), or [download the offline version](https://raw.githubusercontent.com/cyberkdh/DH.DevUtil/main/tools/DH.MarkDown.Flow/index_local.html) and open it in Chrome or Edge. Right-click the download link and choose **Save link as**; a normal click shows the file's code instead of saving it.
 2. Type Markdown in the editor, or select **Open** to load a local `.md` file.
 3. Switch between **Source**, **WYSIWYG**, and **Split** as needed. Select an item under **Examples** to see the supported syntax.
 4. Select **Save** to save the Markdown file, or **Export** to create HTML, PDF, or Word output.

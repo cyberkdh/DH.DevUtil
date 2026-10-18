@@ -31,7 +31,7 @@ DH.MarkDown.Flow는 로컬 우선(local-first) Markdown 편집기·뷰어입니�
 
 ## 사용 방법
 
-1. [온라인 실행](https://cyberkdh.github.io/DH.DevUtil/tools/DH.MarkDown.Flow/index.html)을 열거나, `index_local.html`을 내려받아 Chrome 또는 Edge에서 엽니다.
+1. [온라인 실행](https://cyberkdh.github.io/DH.DevUtil/tools/DH.MarkDown.Flow/index.html)을 열거나, [오프라인 버전](https://raw.githubusercontent.com/cyberkdh/DH.DevUtil/main/tools/DH.MarkDown.Flow/index_local.html)을 내려받아 Chrome 또는 Edge에서 엽니다. 다운로드 링크는 우클릭 후 **다른 이름으로 링크 저장**을 선택하세요. 그냥 클릭하면 저장되지 않고 파일 코드가 화면에 표시됩니다.
 2. 편집기에 Markdown을 입력하거나, **Open**으로 로컬 `.md` 파일을 불러옵니다.
 3. 필요에 따라 **Source**, **WYSIWYG**, **Split**을 전환합니다. 지원 문법은 **Examples**의 예제에서 확인할 수 있습니다.
 4. **Save**로 Markdown 파일을 저장하거나, **Export**로 HTML, PDF, Word 문서를 만듭니다.
