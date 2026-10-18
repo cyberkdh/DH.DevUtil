@@ -1,6 +1,6 @@
 # DH.DevUtil
 
-DH.DevUtil은 일상적인 개발 작업에 사용하는 가벼운 유틸리티 모음입니다. 각 도구는 설치나 외부 라이브러리 없이 최신 브라우저에서 실행되는 독립 HTML 파일입니다. 단, DH.MarkDown.Flow는 서드파티 라이브러리를 포함해 빌드한 앱입니다.
+DH.DevUtil은 일상적인 개발 작업에 사용하는 가벼운 유틸리티 모음입니다. 각 도구는 설치나 외부 라이브러리 없이 최신 브라우저에서 실행되는 독립 HTML 파일입니다. DH.MarkDown.Flow도 독립 실행 파일 하나(`index_local.html`)로 실행되지만, Mermaid, docx 등 서드파티 라이브러리를 포함합니다.
 
 [English](./README.md)
 

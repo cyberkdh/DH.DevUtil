@@ -1,6 +1,6 @@
 # DH.DevUtil
 
-DH.DevUtil is a collection of lightweight utilities for everyday development tasks. Each tool is a standalone HTML file that runs in a modern browser without installation or external libraries. The exception is DH.MarkDown.Flow, a prebuilt app that bundles its third-party libraries.
+DH.DevUtil is a collection of lightweight utilities for everyday development tasks. Each tool is a standalone HTML file that runs in a modern browser without installation or external libraries. DH.MarkDown.Flow also runs from a single standalone file (`index_local.html`), but it bundles third-party libraries such as Mermaid and docx.
 
 [한국어](./README.ko.md)
 
