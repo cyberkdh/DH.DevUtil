@@ -16,6 +16,7 @@ DH.DevUtil is a collection of lightweight utilities for everyday development tas
 | Number Notation Converter | Turn E notation such as `1.23457E+15` into exact plain, grouped, engineering, SI, and Korean-unit forms, and see what a double or float32 stores. | [Run (Ctrl-click for a new tab)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.number-notation.html) | [View source](./tools/DH.DevUtil.number-notation.html) | [Guide](./docs/NUMBER_NOTATION_CONVERTER.md) |
 | Symmetric Encryption Simulator (Base) | Learn symmetric encryption with AES, ARIA, 3DES, and DES in ECB/CBC mode, selectable padding, one shared key and IV, and a fixed IV for reproducible ciphertext. | [Run (Ctrl-click for a new tab)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.symmetric-encryption-simulator-base.html) | [View source](./tools/DH.DevUtil.symmetric-encryption-simulator-base.html) | [Guide](./docs/SYMMETRIC_ENCRYPTION_SIMULATOR_BASE.md) |
 | Symmetric Encryption Simulator | Encrypt/decrypt with AES-GCM/CBC/CTR and compare CBC padding schemes. | [Run (Ctrl-click for a new tab)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.symmetric-encryption-simulator.html) | [View source](./tools/DH.DevUtil.symmetric-encryption-simulator.html) | [Guide](./docs/SYMMETRIC_ENCRYPTION_SIMULATOR.md) |
+| Unicode · Encoding Inspector | Inspect code points, UTF-8/UTF-16/CP949 bytes, NFC/NFD normalization, hidden characters such as zero-width spaces and bidi controls, and mojibake; decode hex or Base64 bytes. | [Run (Ctrl-click for a new tab)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.unicode-inspector.html) | [View source](./tools/DH.DevUtil.unicode-inspector.html) | [Guide](./docs/UNICODE_ENCODING_INSPECTOR.md) |
 | DH.MarkDown.Flow | Local-first Markdown editor with Source, WYSIWYG, and Split modes, Mermaid diagrams, and Markdown/HTML/PDF/Word export. | [Run (Ctrl-click for a new tab)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.MarkDown.Flow/index.html)<br>[Download offline version (right-click → Save link as)](https://raw.githubusercontent.com/cyberkdh/DH.DevUtil/main/tools/DH.MarkDown.Flow/index_local.html) | [View files](./tools/DH.MarkDown.Flow/) | [Guide](./docs/MARKDOWN_FLOW.md) |
 
 Live demos run the static HTML tools on GitHub Pages. The source links open the HTML files in GitHub's code viewer; they do not run the tools. To use a tool offline, clone the repository or download its HTML file, then open it in a browser. For DH.MarkDown.Flow, open `index_local.html`; `index.html` needs a web server.
@@ -49,6 +50,12 @@ Encrypt and Decrypt with one shared key and IV in the middle, then compare ECB a
 Encrypt with AES-GCM, AES-CBC, or AES-CTR, export a JSON package without the key, and decrypt it with operation details. See the [Symmetric Encryption Simulator guide](./docs/SYMMETRIC_ENCRYPTION_SIMULATOR.md) for features and usage.
 
 ![Symmetric Encryption Simulator preview](./docs/images/DH.DevUtil.symmetric-encryption-simulator.png)
+
+## Unicode · Encoding Inspector preview
+
+See every code point with its UTF-8, UTF-16, and CP949 bytes, find hidden characters and NFC/NFD differences, and preview mojibake. See the [Unicode · Encoding Inspector guide](./docs/UNICODE_ENCODING_INSPECTOR.md) for features and usage.
+
+![Unicode · Encoding Inspector preview](./docs/images/DH.DevUtil.unicode-inspector.png)
 
 ## DH.MarkDown.Flow preview
 

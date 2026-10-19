@@ -1,0 +1,1216 @@
+<!--
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//	Projects		: DH.DevUtil
+//	Author			: CYBERKDH
+//	Module			: Unicode · Encoding Inspector
+//	History			: 2026-10-18 Initial implementation (code points, UTF-8/16, CP949, NFC/NFD, hidden characters, mojibake)
+//	Copyrights		: Copyright (C)CYBERKDH. All Rights Reserved.
+//////////////////////////////////////////////////////////////////////////////////////////////////
+-->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Unicode · Encoding Inspector | DH.DevUtil</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #182230;
+      --muted: #5d6b7a;
+      --line: #d9e1e8;
+      --surface: #fff;
+      --canvas: #f3f6f9;
+      --blue: #155eef;
+      --blue-dark: #1249bd;
+      --blue-soft: #eff4ff;
+      --green: #067647;
+      --red: #b42318;
+      --red-soft: #fef3f2;
+      --amber: #8a4b08;
+      --amber-bg: #fffaeb;
+      --amber-line: #fedf89;
+      --code: #f6f8fa;
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-width: 320px; color: var(--ink); background: var(--canvas); }
+    button, input, textarea, select { font: inherit; }
+    .shell { max-width: 1440px; margin: 0 auto; padding: 24px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+    .brand { display: inline-flex; gap: 10px; align-items: center; color: var(--ink); font-weight: 700; text-decoration: none; }
+    .brand-mark { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 9px; color: #fff; background: var(--blue); }
+    .topbar-note, .intro-copy, .hint, .footer-note { color: var(--muted); }
+    .intro { display: flex; justify-content: space-between; gap: 24px; align-items: end; margin-bottom: 20px; }
+    .eyebrow { margin: 0 0 8px; color: var(--blue); font-size: .78rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(1.8rem, 4vw, 2.5rem); letter-spacing: -.04em; }
+    .intro-copy { max-width: 600px; margin: 0; line-height: 1.55; }
+    .workspace { display: grid; grid-template-columns: minmax(280px, 420px) minmax(0, 1fr); gap: 16px; align-items: start; }
+    .pane { min-width: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); box-shadow: 0 2px 6px #1822300a; }
+    .pane-head { display: flex; min-height: 64px; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+    .pane-title { margin: 0; font-size: 1rem; }
+    .pane-index { color: var(--muted); font-size: .75rem; font-weight: 700; }
+    .pane-content { display: grid; gap: 16px; padding: 18px; }
+    .field { display: grid; gap: 7px; min-width: 0; }
+    .field[hidden] { display: none; }
+    label { font-size: .86rem; font-weight: 650; }
+    textarea, select { width: 100%; min-width: 0; padding: 10px 11px; border: 1px solid #c9d2dc; border-radius: 7px; color: var(--ink); background: #fff; }
+    textarea:focus, select:focus, button:focus-visible { outline: 3px solid #84adff80; outline-offset: 1px; border-color: var(--blue); }
+    textarea { min-height: 280px; resize: vertical; font: .9rem/1.55 Consolas, "Malgun Gothic", "Courier New", monospace; }
+    code, pre, .mono { font-family: Consolas, "Courier New", monospace; }
+    .hint, .footer-note { margin: 0; font-size: .78rem; line-height: 1.5; }
+    .button { min-height: 38px; padding: 8px 12px; border: 1px solid #c9d2dc; border-radius: 7px; color: var(--ink); background: #fff; cursor: pointer; font-weight: 650; }
+    .button:hover:not(:disabled) { background: #f3f6f9; }
+    .button:disabled { opacity: .55; cursor: not-allowed; }
+    .button[hidden] { display: none; }
+    .button-primary { border-color: var(--blue); color: #fff; background: var(--blue); }
+    .button-primary:hover:not(:disabled) { background: var(--blue-dark); }
+    .button-small { min-height: 30px; padding: 4px 9px; font-size: .78rem; }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .segmented { display: inline-flex; gap: 4px; }
+    .segmented .button[aria-pressed="true"] { border-color: var(--blue); color: var(--blue-dark); background: var(--blue-soft); }
+    .status { min-width: 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: 7px; color: var(--muted); background: #fafbfc; font-size: .83rem; line-height: 1.45; overflow-wrap: anywhere; }
+    .status[data-kind="success"] { color: var(--green); border-color: #abefc6; background: #ecfdf3; }
+    .status[data-kind="error"] { color: var(--red); border-color: #fecdca; background: var(--red-soft); }
+    .status[data-kind="warning"] { color: var(--amber); border-color: var(--amber-line); background: var(--amber-bg); }
+    .results { display: grid; gap: 14px; }
+    .results[hidden] { display: none; }
+    .empty { padding: 28px 18px; color: var(--muted); text-align: center; font-size: .88rem; }
+    .item { min-width: 0; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+    .item[hidden] { display: none; }
+    .item-head { display: flex; align-items: center; gap: 8px 10px; padding: 10px 14px; background: #fafbfc; border-radius: 10px; cursor: pointer; list-style: none; font-size: .9rem; font-weight: 650; }
+    .item-head::-webkit-details-marker { display: none; }
+    .item-head::before { content: ""; flex: none; width: 7px; height: 7px; margin: 0 2px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(-45deg); transition: transform .15s; }
+    .item[open] > .item-head { border-bottom: 1px solid var(--line); border-radius: 10px 10px 0 0; }
+    .item[open] > .item-head::before { transform: rotate(45deg); }
+    .item-head:hover { background: #f3f6f9; }
+    .item-sub { margin-left: auto; color: var(--muted); font-size: .76rem; font-weight: 600; }
+    .badge { flex: none; padding: 3px 8px; border-radius: 999px; font-size: .72rem; font-weight: 700; white-space: nowrap; }
+    .badge[data-kind="ok"] { color: var(--green); background: #ecfdf3; }
+    .badge[data-kind="warning"] { color: var(--amber); background: var(--amber-bg); }
+    .badge[data-kind="error"] { color: var(--red); background: var(--red-soft); }
+    .badge[data-kind="info"] { color: #1d3c78; background: var(--blue-soft); }
+    .stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; padding: 14px; }
+    .stat { min-width: 0; padding: 10px 12px; border: 1px solid #eef2f6; border-radius: 8px; background: #fafbfc; }
+    .stat-value { font: 650 1.15rem/1.3 Consolas, "Courier New", monospace; overflow-wrap: anywhere; }
+    .stat-label { margin-top: 2px; color: var(--muted); font-size: .74rem; line-height: 1.35; }
+    .rows { display: grid; }
+    .row { display: grid; grid-template-columns: minmax(130px, 200px) minmax(0, 1fr) auto; gap: 10px; align-items: start; padding: 8px 14px; border-top: 1px solid #eef2f6; }
+    .row:first-child { border-top: 0; }
+    .row-label { padding-top: 4px; color: var(--muted); font-size: .78rem; font-weight: 650; line-height: 1.4; }
+    .row-label .badge { display: inline-block; margin-top: 4px; }
+    .row-value { min-width: 0; max-height: 180px; overflow: auto; padding: 4px 0; font: .86rem/1.5 Consolas, "Malgun Gothic", "Courier New", monospace; overflow-wrap: anywhere; word-break: break-all; white-space: pre-wrap; }
+    .row-value .dim { color: var(--muted); }
+    .row-buttons { display: flex; gap: 6px; }
+    .notes { display: grid; gap: 6px; padding: 12px 14px; }
+    .note { margin: 0; padding: 7px 10px; border-radius: 6px; font-size: .8rem; line-height: 1.5; }
+    .note[data-kind="ok"] { color: var(--green); background: #ecfdf3; }
+    .note[data-kind="info"] { color: #1d3c78; background: var(--blue-soft); }
+    .note[data-kind="warning"] { color: var(--amber); background: var(--amber-bg); }
+    .note[data-kind="error"] { color: var(--red); background: var(--red-soft); }
+    .reveal { max-height: 280px; margin: 0; padding: 12px 14px; overflow: auto; font: .95rem/1.8 Consolas, "Malgun Gothic", "Courier New", monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .mk { display: inline-block; margin: 0 1px; padding: 0 4px; border-radius: 4px; font: 700 .68rem/1.5 "Segoe UI", Arial, sans-serif; vertical-align: 1px; color: var(--red); background: var(--red-soft); border: 1px solid #fecdca; }
+    .mk[data-kind="space"], .mk[data-kind="joiner"] { color: var(--amber); background: var(--amber-bg); border-color: var(--amber-line); }
+    .mk[data-kind="ws"] { color: #98a2b3; background: transparent; border-color: transparent; padding: 0 1px; }
+    .sp { color: #c0c8d2; }
+    .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 0 14px 12px; color: var(--muted); font-size: .76rem; }
+    .learn-pane, .table-pane { margin-top: 16px; }
+    .table-tools { display: inline-flex; align-items: center; gap: 8px; }
+    .table-tools select { width: auto; padding: 5px 8px; font-size: .8rem; }
+    .table-scroll { max-height: 560px; overflow: auto; }
+    .chars { width: 100%; border-collapse: collapse; font-size: .82rem; }
+    .chars th, .chars td { padding: 6px 10px; border-bottom: 1px solid #eef2f6; text-align: left; vertical-align: middle; }
+    .chars th { position: sticky; top: 0; z-index: 1; color: var(--muted); background: #fafbfc; font-size: .74rem; white-space: nowrap; }
+    .chars td.mono { font-size: .8rem; white-space: nowrap; }
+    .chars td.glyph { min-width: 56px; font: 1.25rem/1.2 "Segoe UI", "Malgun Gothic", "Segoe UI Emoji", sans-serif; text-align: center; }
+    .chars td.desc { min-width: 220px; line-height: 1.45; }
+    .chars tr[data-kind="warning"] td { background: var(--amber-bg); }
+    .chars tr[data-kind="error"] td { background: var(--red-soft); }
+    .chars tr[data-kind="info"] td { background: #f5f8ff; }
+    .tag { display: inline-block; margin-left: 4px; padding: 0 5px; border-radius: 4px; color: #1d3c78; background: var(--blue-soft); font-size: .7rem; font-weight: 700; }
+    .table-note { margin: 0; padding: 10px 14px; color: var(--muted); font-size: .78rem; border-top: 1px solid var(--line); }
+    .table-note:empty { display: none; }
+    .lang-switch { display: inline-flex; gap: 4px; }
+    .lang-switch .button[aria-pressed="true"] { border-color: var(--blue); color: var(--blue-dark); background: var(--blue-soft); }
+    .learn { display: grid; gap: 14px; padding: 18px; font-size: .88rem; line-height: 1.6; }
+    .learn[hidden] { display: none; }
+    .learn h3 { margin: 4px 0 0; font-size: .95rem; }
+    .learn p, .learn ul { margin: 0; }
+    .learn ul { padding-left: 20px; }
+    .learn code { padding: 1px 4px; border-radius: 4px; background: var(--code); font-size: .84rem; }
+    .table-wrap { overflow-x: auto; }
+    .learn table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+    .learn th, .learn td { padding: 7px 9px; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+    .learn th { background: #fafbfc; }
+    .page-footer { display: flex; justify-content: space-between; gap: 20px; margin-top: 18px; padding: 13px 1px 0; border-top: 1px solid var(--line); color: var(--muted); font-size: .78rem; line-height: 1.5; }
+    @media (max-width: 900px) { .workspace { grid-template-columns: 1fr; } textarea { min-height: 180px; } }
+    @media (max-width: 600px) {
+      .shell { padding: 16px; }
+      .intro { display: block; }
+      .intro-copy { margin-top: 10px; }
+      .pane-head { flex-wrap: wrap; }
+      .row { grid-template-columns: minmax(0, 1fr) auto; gap: 2px 8px; }
+      .row-label { grid-column: 1 / -1; padding-top: 0; }
+      .page-footer { display: grid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="../README.md" aria-label="DH.DevUtil home">
+        <span class="brand-mark" aria-hidden="true">DH</span><span>DH.DevUtil</span>
+      </a>
+      <span class="topbar-note">Text · Local inspector</span>
+    </header>
+    <main>
+      <section class="intro" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">Unicode · UTF-8 · CP949</p>
+          <h1 id="page-title">Unicode · Encoding Inspector</h1>
+        </div>
+        <p class="intro-copy">See what a string is really made of: code points, UTF-8, UTF-16, and CP949 bytes, NFC/NFD normalization, hidden characters such as zero-width spaces and bidi controls, and how the text breaks when it is decoded with the wrong encoding.</p>
+      </section>
+
+      <section class="workspace" aria-label="Unicode inspection">
+        <section class="pane" aria-labelledby="input-title">
+          <header class="pane-head">
+            <h2 class="pane-title" id="input-title"><span class="pane-index">01</span> Input</h2>
+            <span class="segmented" role="group" aria-label="Input type">
+              <button class="button button-small" id="mode-text" type="button" aria-pressed="true">Text</button>
+              <button class="button button-small" id="mode-bytes" type="button" aria-pressed="false">Bytes</button>
+            </span>
+          </header>
+          <div class="pane-content">
+            <div class="field">
+              <label for="input" id="input-label">Text</label>
+              <textarea id="input" spellcheck="false" autocomplete="off" aria-describedby="input-hint"></textarea>
+              <p class="hint" id="input-hint"></p>
+            </div>
+            <div class="field" id="format-field" hidden>
+              <label for="byte-format">Byte format</label>
+              <select id="byte-format">
+                <option value="auto">Auto-detect (hex or Base64)</option>
+                <option value="hex">Hex · ED 95 9C, 0xED, \xED, %ED</option>
+                <option value="base64">Base64 / Base64URL</option>
+              </select>
+            </div>
+            <div class="actions">
+              <button class="button button-primary" id="examples" type="button">Load example</button>
+              <button class="button" id="to-nfc" type="button">Normalize to NFC</button>
+              <button class="button" id="clean" type="button">Clean hidden characters</button>
+              <button class="button" id="clear" type="button">Clear</button>
+            </div>
+            <p class="hint" id="clean-hint"><strong>Clean hidden characters</strong> removes control, zero-width, bidi, tag, and filler characters and the BOM, and turns unusual spaces into normal spaces. It keeps tabs, line breaks, ZWJ/ZWNJ, and variation selectors because emoji and some scripts need them.</p>
+            <div class="status" id="status" role="status" aria-live="polite">Enter or paste text. Results update as you type.</div>
+          </div>
+          <p class="footer-note" style="padding: 0 18px 18px">Everything runs in this browser. Nothing is uploaded or stored.</p>
+        </section>
+
+        <section class="pane" aria-labelledby="result-title">
+          <header class="pane-head">
+            <h2 class="pane-title" id="result-title"><span class="pane-index">02</span> Results</h2>
+            <span class="pane-index" id="result-sub"></span>
+          </header>
+          <div class="pane-content">
+            <div class="empty" id="empty">Results appear here.</div>
+            <div class="results" id="text-results" hidden>
+              <details class="item" open>
+                <summary class="item-head">Summary</summary>
+                <div class="stats" id="stats"></div>
+              </details>
+              <details class="item" open>
+                <summary class="item-head">Findings <span class="item-sub" id="findings-sub"></span></summary>
+                <div class="notes" id="findings"></div>
+              </details>
+              <details class="item" open>
+                <summary class="item-head">Revealed text <span class="item-sub" id="reveal-sub"></span></summary>
+                <pre class="reveal" id="reveal"></pre>
+                <div class="legend"><span><span class="sp">·</span> space</span><span><span class="mk" data-kind="ws">⇥</span> tab</span><span><span class="mk" data-kind="ws">↵</span> LF</span><span><span class="mk" data-kind="ws">␍</span> CR</span><span><span class="mk">ZWSP</span> hidden or control</span><span><span class="mk" data-kind="space">NBSP</span> unusual space or joiner</span></div>
+              </details>
+              <details class="item" open>
+                <summary class="item-head">Encodings</summary>
+                <div class="rows" id="encodings"></div>
+              </details>
+              <details class="item">
+                <summary class="item-head">Normalization <span class="item-sub" id="norm-sub"></span></summary>
+                <div class="rows" id="normalization"></div>
+              </details>
+              <details class="item" id="mojibake-item">
+                <summary class="item-head">Mojibake preview <span class="item-sub">wrong-encoding decoding</span></summary>
+                <div class="rows" id="mojibake"></div>
+              </details>
+            </div>
+            <div class="results" id="byte-results" hidden>
+              <details class="item" open>
+                <summary class="item-head">Bytes <span class="item-sub" id="bytes-sub"></span></summary>
+                <div class="notes" id="byte-notes"></div>
+              </details>
+              <details class="item" open>
+                <summary class="item-head">Decoded as</summary>
+                <div class="rows" id="decodings"></div>
+              </details>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <section class="pane table-pane" aria-labelledby="table-title">
+        <header class="pane-head">
+          <h2 class="pane-title" id="table-title"><span class="pane-index">03</span> Characters</h2>
+          <span class="table-tools">
+            <span class="pane-index" id="table-count"></span>
+            <label class="pane-index" for="table-filter">Show</label>
+            <select id="table-filter">
+              <option value="all">All code points</option>
+              <option value="nonascii">Non-ASCII only</option>
+              <option value="special">Hidden and unusual only</option>
+            </select>
+          </span>
+        </header>
+        <div class="table-scroll">
+          <table class="chars">
+            <thead><tr><th>#</th><th>Line:Col</th><th>Char</th><th>Code point</th><th>UTF-8</th><th>UTF-16</th><th>CP949</th><th>Description</th></tr></thead>
+            <tbody id="chars"></tbody>
+          </table>
+          <div class="empty" id="table-empty">Characters appear here.</div>
+        </div>
+        <p class="table-note" id="table-note"></p>
+      </section>
+
+      <section class="pane learn-pane" aria-labelledby="learn-title">
+        <header class="pane-head">
+          <h2 class="pane-title" id="learn-title"><span class="pane-index">04</span> Learn more</h2>
+          <span class="lang-switch" role="group" aria-label="Explanation language">
+            <button class="button button-small" id="learn-lang-en" type="button" aria-pressed="true">EN</button>
+            <button class="button button-small" id="learn-lang-ko" type="button" aria-pressed="false">한국어</button>
+          </span>
+        </header>
+        <div class="learn" id="learn-en" lang="en">
+          <h3>Characters, code points, and encodings</h3>
+          <p>Unicode gives every character a number called a <strong>code point</strong>, written <code>U+AC00</code>. An <strong>encoding</strong> turns code points into bytes. UTF-8 uses 1–4 bytes per code point, UTF-16 uses one or two 16-bit <strong>code units</strong>, and CP949 uses 1 or 2 bytes but covers only Korean, a subset of Hanja, and common symbols.</p>
+          <h3>Why "length" gives different answers</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Text</th><th>Code points (Python <code>len</code>)</th><th>UTF-16 units (JS, Java, C# <code>length</code>)</th><th>UTF-8 bytes (C <code>strlen</code>, Go <code>len</code>)</th><th>Graphemes (what a user sees)</th></tr></thead>
+              <tbody>
+                <tr><td><code>A</code></td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
+                <tr><td><code>한</code> (NFC)</td><td>1</td><td>1</td><td>3</td><td>1</td></tr>
+                <tr><td><code>한</code> (NFD: ᄒ + ᅡ + ᆫ)</td><td>3</td><td>3</td><td>9</td><td>1</td></tr>
+                <tr><td><code>😀</code> U+1F600</td><td>1</td><td>2</td><td>4</td><td>1</td></tr>
+                <tr><td><code>👍🏽</code> thumbs up + skin tone</td><td>2</td><td>4</td><td>8</td><td>1</td></tr>
+                <tr><td><code>👨‍👩‍👧</code> family (joined with ZWJ)</td><td>5</td><td>8</td><td>18</td><td>1</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>Code points above U+FFFF need a <strong>surrogate pair</strong> in UTF-16, so <code>"😀".length</code> is 2 in JavaScript. Cutting a string by code units can split the pair and leave a broken <em>lone surrogate</em>. Use code points or grapheme segmentation (<code>Intl.Segmenter</code>) when you limit lengths for users.</p>
+          <h3>Database column sizes</h3>
+          <p>A Hangul syllable takes 3 bytes in UTF-8 and 2 bytes in CP949. A byte-sized column such as Oracle <code>VARCHAR2(10 BYTE)</code> in an AL32UTF8 database holds only 3 Hangul syllables. MySQL <code>LENGTH()</code> counts bytes, while <code>CHAR_LENGTH()</code> counts characters, and <code>utf8mb4</code> is required for 4-byte characters such as emoji.</p>
+          <h3>NFC and NFD</h3>
+          <p>The same visible text can have different code points. <strong>NFC</strong> (composed) stores <code>한</code> as one code point, U+D55C. <strong>NFD</strong> (decomposed) stores it as three conjoining jamo, U+1112 U+1161 U+11AB. They look the same but compare as different strings, so search, deduplication, and file lookups fail. macOS has long used decomposed file names, so names copied from a Mac can appear as separated jamo such as <code>ㅎㅏㄴㄱㅡㄹ</code> on other systems. Normalize to NFC before comparing or storing text (<code>str.normalize('NFC')</code>, Java <code>Normalizer</code>, .NET <code>string.Normalize()</code>, Python <code>unicodedata.normalize</code>), and consider <code>git config core.precomposeUnicode true</code> on macOS.</p>
+          <p><strong>NFKC/NFKD</strong> also fold compatibility characters: <code>ｆｕｌｌ</code> becomes <code>full</code>, <code>①</code> becomes <code>1</code>, and <code>㎏</code> becomes <code>kg</code>. That helps search and identifiers but loses formatting, so do not apply it to text you must preserve.</p>
+          <h3>Hangul syllable composition</h3>
+          <p>The 11,172 modern Hangul syllables U+AC00–U+D7A3 are computed, not listed: <code>code = 0xAC00 + (initial × 21 + medial) × 28 + final</code>, with 19 initial consonants, 21 vowels, and 28 finals (including "none"). The Description column uses this formula to split each syllable.</p>
+          <h3>Hidden characters</h3>
+          <p>Copy and paste from web pages, Word, chat apps, and PDFs often brings in characters you cannot see: <code>U+00A0</code> no-break space, <code>U+200B</code> zero width space, <code>U+FEFF</code> BOM, and soft hyphens. They break string comparison, identifiers, CSV headers, and configuration keys. Bidirectional controls such as <code>U+202E</code> RLO can make source code display differently from what the compiler reads (the "Trojan Source" attack, CVE-2021-42574). Tag characters U+E0000–U+E007F are invisible and can hide text, for example instructions aimed at AI tools.</p>
+          <h3>Byte order mark (BOM)</h3>
+          <p>A BOM at the start of a file marks its encoding: <code>EF BB BF</code> for UTF-8, <code>FF FE</code> for UTF-16LE, <code>FE FF</code> for UTF-16BE. Excel needs the UTF-8 BOM to open a CSV as UTF-8, but a BOM breaks shell script shebang lines, and JSON (RFC 8259) must not start with one.</p>
+          <h3>Mojibake</h3>
+          <p>Garbled text appears when bytes are decoded with a different encoding from the one that wrote them. Each wrong pairing leaves a recognizable pattern:</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Written as</th><th>Read as</th><th><code>한글</code> becomes</th></tr></thead>
+              <tbody>
+                <tr><td>UTF-8</td><td>CP949</td><td><code>�쒓�</code></td></tr>
+                <tr><td>CP949</td><td>UTF-8</td><td><code>�ѱ�</code></td></tr>
+                <tr><td>UTF-8</td><td>Windows-1252 (Latin-1)</td><td><code>í•œê¸€</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p><code>U+FFFD</code> (�) means a decoder already met bytes it could not read. The original bytes are lost, so the text cannot be repaired afterwards. Fix the encoding where the text was read. If you still have the bytes, paste them in <strong>Bytes</strong> mode to compare decodings.</p>
+          <h3>EUC-KR and CP949</h3>
+          <p>EUC-KR is based on KS X 1001, which has only 2,350 Hangul syllables. Microsoft's CP949 (Unified Hangul Code) adds the remaining 8,822 so all 11,172 syllables fit. A syllable such as <code>똠</code> is CP949 <code>8C 63</code> and has no EUC-KR code. Browsers implement the <code>euc-kr</code> label as CP949 (WHATWG Encoding Standard). Java calls it <code>MS949</code>, Python <code>cp949</code>, and .NET code page 949, which needs <code>CodePagesEncodingProvider</code> on .NET Core and later. CP949 cannot encode emoji or most other scripts; such characters become <code>?</code> when saved.</p>
+        </div>
+        <div class="learn" id="learn-ko" lang="ko" hidden>
+          <h3>문자, 코드 포인트(code point), 인코딩(encoding)</h3>
+          <p>Unicode는 모든 문자에 <strong>코드 포인트</strong>라는 번호를 붙이고 <code>U+AC00</code>처럼 씁니다. <strong>인코딩</strong>은 코드 포인트를 바이트로 바꾸는 규칙입니다. UTF-8은 코드 포인트 하나에 1~4바이트, UTF-16은 16-bit <strong>코드 유닛(code unit)</strong> 1~2개를 쓰고, CP949는 1~2바이트를 쓰지만 한글, 일부 한자, 자주 쓰는 기호만 표현할 수 있습니다.</p>
+          <h3>"길이"가 언어마다 다른 이유</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>텍스트</th><th>코드 포인트 (Python <code>len</code>)</th><th>UTF-16 유닛 (JS, Java, C# <code>length</code>)</th><th>UTF-8 바이트 (C <code>strlen</code>, Go <code>len</code>)</th><th>그래핌(grapheme, 사용자가 보는 글자)</th></tr></thead>
+              <tbody>
+                <tr><td><code>A</code></td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
+                <tr><td><code>한</code> (NFC)</td><td>1</td><td>1</td><td>3</td><td>1</td></tr>
+                <tr><td><code>한</code> (NFD: ᄒ + ᅡ + ᆫ)</td><td>3</td><td>3</td><td>9</td><td>1</td></tr>
+                <tr><td><code>😀</code> U+1F600</td><td>1</td><td>2</td><td>4</td><td>1</td></tr>
+                <tr><td><code>👍🏽</code> 엄지 + 피부색</td><td>2</td><td>4</td><td>8</td><td>1</td></tr>
+                <tr><td><code>👨‍👩‍👧</code> 가족(ZWJ로 결합)</td><td>5</td><td>8</td><td>18</td><td>1</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>U+FFFF보다 큰 코드 포인트는 UTF-16에서 <strong>서로게이트 쌍(surrogate pair)</strong>이 필요하므로 JavaScript에서 <code>"😀".length</code>는 2입니다. 코드 유닛 단위로 문자열을 자르면 쌍이 갈라져 깨진 <em>외톨이 서로게이트(lone surrogate)</em>가 남습니다. 사용자에게 보이는 글자 수를 제한할 때는 코드 포인트나 그래핌 분할(<code>Intl.Segmenter</code>)을 쓰세요.</p>
+          <h3>DB 컬럼 크기</h3>
+          <p>한글 음절 하나는 UTF-8에서 3바이트, CP949에서 2바이트입니다. AL32UTF8 데이터베이스의 Oracle <code>VARCHAR2(10 BYTE)</code>처럼 바이트 단위 컬럼에는 한글이 3자만 들어갑니다. MySQL의 <code>LENGTH()</code>는 바이트를, <code>CHAR_LENGTH()</code>는 문자 수를 세며, 이모지 같은 4바이트 문자를 저장하려면 <code>utf8mb4</code>가 필요합니다.</p>
+          <h3>NFC와 NFD</h3>
+          <p>눈에 같은 텍스트도 코드 포인트는 다를 수 있습니다. <strong>NFC</strong>(조합형)는 <code>한</code>을 코드 포인트 하나(U+D55C)로, <strong>NFD</strong>(분해형)는 첫가끝 자모 세 개(U+1112 U+1161 U+11AB)로 저장합니다. 화면에서는 같아 보여도 다른 문자열이라 검색, 중복 제거, 파일 찾기가 실패합니다. macOS는 오래전부터 파일 이름을 분해형으로 다뤄 와서, Mac에서 복사한 파일 이름이 다른 시스템에서 <code>ㅎㅏㄴㄱㅡㄹ</code>처럼 자모가 분리되어 보일 수 있습니다. 비교하거나 저장하기 전에 NFC로 정규화하세요(<code>str.normalize('NFC')</code>, Java <code>Normalizer</code>, .NET <code>string.Normalize()</code>, Python <code>unicodedata.normalize</code>). macOS에서는 <code>git config core.precomposeUnicode true</code>도 고려하세요.</p>
+          <p><strong>NFKC/NFKD</strong>는 호환 문자까지 바꿉니다. <code>ｆｕｌｌ</code>은 <code>full</code>, <code>①</code>은 <code>1</code>, <code>㎏</code>은 <code>kg</code>이 됩니다. 검색이나 식별자에는 도움이 되지만 서식이 사라지므로 원문을 보존해야 하는 텍스트에는 쓰지 마세요.</p>
+          <h3>한글 음절 조합 공식</h3>
+          <p>현대 한글 음절 11,172자(U+AC00–U+D7A3)는 목록이 아니라 계산으로 정해집니다. <code>코드 = 0xAC00 + (초성 × 21 + 중성) × 28 + 종성</code>이며 초성 19개, 중성 21개, 종성 28개("없음" 포함)입니다. Description 열은 이 공식으로 음절을 분해해 보여 줍니다.</p>
+          <h3>보이지 않는 문자</h3>
+          <p>웹 페이지, Word, 메신저, PDF에서 복사하면 보이지 않는 문자가 자주 따라옵니다. <code>U+00A0</code> 줄바꿈 없는 공백(NBSP), <code>U+200B</code> 폭 없는 공백(ZWSP), <code>U+FEFF</code> BOM, 소프트 하이픈(soft hyphen) 등입니다. 이런 문자는 문자열 비교, 식별자, CSV 헤더, 설정 키를 깨뜨립니다. <code>U+202E</code> RLO 같은 양방향(bidi) 제어 문자는 소스 코드가 화면에 보이는 모습과 컴파일러가 읽는 내용을 다르게 만들 수 있습니다("Trojan Source" 공격, CVE-2021-42574). U+E0000–U+E007F 태그 문자(tag character)는 보이지 않아 AI 도구를 노린 지시문 같은 텍스트를 숨기는 데 쓰일 수 있습니다.</p>
+          <h3>BOM(Byte Order Mark)</h3>
+          <p>파일 맨 앞의 BOM은 인코딩을 표시합니다. UTF-8은 <code>EF BB BF</code>, UTF-16LE는 <code>FF FE</code>, UTF-16BE는 <code>FE FF</code>입니다. Excel이 CSV를 UTF-8로 열려면 UTF-8 BOM이 필요하지만, BOM은 셸 스크립트의 shebang 줄을 깨뜨리고, JSON(RFC 8259)은 BOM으로 시작하면 안 됩니다.</p>
+          <h3>글자 깨짐(Mojibake)</h3>
+          <p>바이트를 쓴 인코딩과 다른 인코딩으로 읽으면 글자가 깨집니다. 잘못된 조합마다 알아볼 수 있는 패턴이 남습니다.</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>저장한 인코딩</th><th>읽은 인코딩</th><th><code>한글</code>이 바뀐 모습</th></tr></thead>
+              <tbody>
+                <tr><td>UTF-8</td><td>CP949</td><td><code>�쒓�</code></td></tr>
+                <tr><td>CP949</td><td>UTF-8</td><td><code>�ѱ�</code></td></tr>
+                <tr><td>UTF-8</td><td>Windows-1252 (Latin-1)</td><td><code>í•œê¸€</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p><code>U+FFFD</code>(�)는 디코더가 이미 읽을 수 없는 바이트를 만났다는 뜻입니다. 원래 바이트가 사라졌으므로 나중에 텍스트만으로는 복구할 수 없습니다. 텍스트를 읽은 곳의 인코딩을 고치세요. 원본 바이트가 있다면 <strong>Bytes</strong> 모드에 붙여 넣어 디코딩 결과를 비교할 수 있습니다.</p>
+          <h3>EUC-KR과 CP949</h3>
+          <p>EUC-KR은 한글 음절이 2,350자뿐인 KS X 1001을 기반으로 합니다. Microsoft의 CP949(통합형 한글 코드, Unified Hangul Code)는 나머지 8,822자를 더해 11,172자를 모두 표현합니다. <code>똠</code> 같은 음절은 CP949로 <code>8C 63</code>이고 EUC-KR에는 코드가 없습니다. 브라우저는 <code>euc-kr</code> 레이블을 CP949로 구현합니다(WHATWG Encoding Standard). Java는 <code>MS949</code>, Python은 <code>cp949</code>, .NET은 코드 페이지 949라고 부르며 .NET Core 이후에는 <code>CodePagesEncodingProvider</code>가 필요합니다. CP949는 이모지와 대부분의 다른 문자를 표현하지 못해 저장하면 <code>?</code>로 바뀝니다.</p>
+        </div>
+      </section>
+    </main>
+    <footer class="page-footer">
+      <span>Analysis runs locally in this browser. No input is uploaded or stored.</span>
+      <span>CP949 and legacy decodings use the browser's built-in WHATWG encoders.</span>
+    </footer>
+  </div>
+  <script>
+    'use strict';
+
+    const el = id => document.getElementById(id);
+    const MAX_INPUT = 1000000;
+    const MAX_TABLE_ROWS = 3000;
+    const MAX_REVEAL = 20000;
+    const MAX_HEX_SHOWN = 4096;
+    const MAX_PREVIEW = 2000;
+    const MAX_POSITIONS = 5;
+    const EXAMPLE_TEXT = [
+      'Café 한글 똠방각하 😀 👍🏽',
+      'NFD: ' + '한글'.normalize('NFD') + ' · e\u0301',
+      'Hidden: zero\u200Bwidth, no\u00A0break,\u3000ideographic, BOM\uFEFF',
+      'Bidi: \u202Eabc\u202C\tFullwidth: ｆｕｌｌ ① ㎏\r',
+      'Replacement: \uFFFD'
+    ].join('\n');
+    const EXAMPLE_BYTES = 'C7 D1 B1 DB 20 8C 63 B9 E6 B0 A2 C7 CF';
+    const HINTS = {
+      text: 'Paste any text. Every code point is analysed, including characters you cannot see.',
+      bytes: 'Paste bytes as hex (<code>ED 95 9C</code>, <code>0xED,0x95</code>, <code>\\xED\\x95</code>, <code>%ED%95</code>) or Base64. Each decoding is shown so you can find the encoding that produced readable text.'
+    };
+
+    const CHO = 'ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ';
+    const JUNG = 'ㅏㅐㅑㅒㅓㅔㅕㅖㅗㅘㅙㅚㅛㅜㅝㅞㅟㅠㅡㅢㅣ';
+    const JONG = ['', 'ㄱ', 'ㄲ', 'ㄳ', 'ㄴ', 'ㄵ', 'ㄶ', 'ㄷ', 'ㄹ', 'ㄺ', 'ㄻ', 'ㄼ', 'ㄽ', 'ㄾ', 'ㄿ', 'ㅀ', 'ㅁ', 'ㅂ', 'ㅄ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'];
+
+    // Special characters: [abbreviation, name, kind]. Kinds: ws (normal whitespace), control, space, invisible, bidi, joiner, replacement.
+    const SPECIAL = new Map();
+    ['NUL', 'SOH', 'STX', 'ETX', 'EOT', 'ENQ', 'ACK', 'BEL', 'BS', 'TAB', 'LF', 'VT', 'FF', 'CR', 'SO', 'SI', 'DLE', 'DC1', 'DC2', 'DC3', 'DC4', 'NAK', 'SYN', 'ETB', 'CAN', 'EM', 'SUB', 'ESC', 'FS', 'GS', 'RS', 'US']
+      .forEach((abbr, cp) => SPECIAL.set(cp, [abbr, `Control character ${abbr}`, 'control']));
+    for (let cp = 0x80; cp <= 0x9F; cp++) SPECIAL.set(cp, ['C1', 'C1 control character', 'control']);
+    [
+      [0x09, 'TAB', 'Character tabulation', 'ws'], [0x0A, 'LF', 'Line feed', 'ws'], [0x0D, 'CR', 'Carriage return', 'ws'],
+      [0x7F, 'DEL', 'Delete control character', 'control'], [0x85, 'NEL', 'Next line (C1 control)', 'control'],
+      [0xA0, 'NBSP', 'No-break space', 'space'], [0xAD, 'SHY', 'Soft hyphen', 'invisible'],
+      [0x34F, 'CGJ', 'Combining grapheme joiner', 'invisible'], [0x61C, 'ALM', 'Arabic letter mark', 'bidi'],
+      [0x115F, 'HCF', 'Hangul choseong filler', 'invisible'], [0x1160, 'HJF', 'Hangul jungseong filler', 'invisible'],
+      [0x180E, 'MVS', 'Mongolian vowel separator', 'invisible'],
+      [0x2000, 'NQSP', 'En quad', 'space'], [0x2001, 'MQSP', 'Em quad', 'space'], [0x2002, 'ENSP', 'En space', 'space'],
+      [0x2003, 'EMSP', 'Em space', 'space'], [0x2004, '3/MSP', 'Three-per-em space', 'space'], [0x2005, '4/MSP', 'Four-per-em space', 'space'],
+      [0x2006, '6/MSP', 'Six-per-em space', 'space'], [0x2007, 'FSP', 'Figure space', 'space'], [0x2008, 'PSP', 'Punctuation space', 'space'],
+      [0x2009, 'THSP', 'Thin space', 'space'], [0x200A, 'HSP', 'Hair space', 'space'],
+      [0x200B, 'ZWSP', 'Zero width space', 'invisible'], [0x200C, 'ZWNJ', 'Zero width non-joiner', 'joiner'], [0x200D, 'ZWJ', 'Zero width joiner', 'joiner'],
+      [0x200E, 'LRM', 'Left-to-right mark', 'bidi'], [0x200F, 'RLM', 'Right-to-left mark', 'bidi'],
+      [0x2028, 'LSEP', 'Line separator', 'space'], [0x2029, 'PSEP', 'Paragraph separator', 'space'],
+      [0x202A, 'LRE', 'Left-to-right embedding', 'bidi'], [0x202B, 'RLE', 'Right-to-left embedding', 'bidi'], [0x202C, 'PDF', 'Pop directional formatting', 'bidi'],
+      [0x202D, 'LRO', 'Left-to-right override', 'bidi'], [0x202E, 'RLO', 'Right-to-left override', 'bidi'],
+      [0x202F, 'NNBSP', 'Narrow no-break space', 'space'], [0x205F, 'MMSP', 'Medium mathematical space', 'space'],
+      [0x2060, 'WJ', 'Word joiner', 'invisible'], [0x2061, 'FA', 'Function application', 'invisible'], [0x2062, 'IT', 'Invisible times', 'invisible'],
+      [0x2063, 'IS', 'Invisible separator', 'invisible'], [0x2064, 'IP', 'Invisible plus', 'invisible'],
+      [0x2066, 'LRI', 'Left-to-right isolate', 'bidi'], [0x2067, 'RLI', 'Right-to-left isolate', 'bidi'], [0x2068, 'FSI', 'First strong isolate', 'bidi'],
+      [0x2069, 'PDI', 'Pop directional isolate', 'bidi'], [0x3000, 'IDSP', 'Ideographic space', 'space'], [0x3164, 'HF', 'Hangul filler', 'invisible'],
+      [0xFE0E, 'VS15', 'Variation selector-15 (text style)', 'joiner'], [0xFE0F, 'VS16', 'Variation selector-16 (emoji style)', 'joiner'],
+      [0xFEFF, 'BOM', 'Byte order mark (zero width no-break space)', 'invisible'], [0xFFA0, 'HWHF', 'Halfwidth Hangul filler', 'invisible'],
+      [0xFFFD, 'FFFD', 'Replacement character', 'replacement']
+    ].forEach(([cp, abbr, name, kind]) => SPECIAL.set(cp, [abbr, name, kind]));
+
+    const CATEGORIES = [
+      ['Lu', 'Uppercase letter'], ['Ll', 'Lowercase letter'], ['Lt', 'Titlecase letter'], ['Lm', 'Modifier letter'], ['Lo', 'Letter'],
+      ['Mn', 'Nonspacing mark'], ['Mc', 'Spacing mark'], ['Me', 'Enclosing mark'], ['Nd', 'Decimal digit'], ['Nl', 'Letter number'], ['No', 'Other number'],
+      ['Pc', 'Connector punctuation'], ['Pd', 'Dash'], ['Ps', 'Open punctuation'], ['Pe', 'Close punctuation'], ['Pi', 'Initial quote'], ['Pf', 'Final quote'], ['Po', 'Punctuation'],
+      ['Sm', 'Math symbol'], ['Sc', 'Currency symbol'], ['Sk', 'Modifier symbol'], ['So', 'Symbol'],
+      ['Zs', 'Space separator'], ['Zl', 'Line separator'], ['Zp', 'Paragraph separator'],
+      ['Cc', 'Control'], ['Cf', 'Format'], ['Cs', 'Surrogate'], ['Co', 'Private use'], ['Cn', 'Unassigned']
+    ].map(([code, name]) => [code, name, new RegExp(`^\\p{${code}}$`, 'u')]);
+    const SCRIPTS = ['Hangul', 'Han', 'Hiragana', 'Katakana', 'Latin', 'Greek', 'Cyrillic', 'Arabic', 'Hebrew', 'Thai', 'Devanagari', 'Common', 'Inherited']
+      .map(name => [name, new RegExp(`^\\p{Script=${name}}$`, 'u')]);
+    const BLOCKS = [
+      [0x0000, 0x007F, 'Basic Latin'], [0x0080, 0x00FF, 'Latin-1 Supplement'], [0x0100, 0x024F, 'Latin Extended'], [0x0300, 0x036F, 'Combining Diacritical Marks'],
+      [0x0370, 0x03FF, 'Greek and Coptic'], [0x0400, 0x04FF, 'Cyrillic'], [0x1100, 0x11FF, 'Hangul Jamo'], [0x2000, 0x206F, 'General Punctuation'],
+      [0x2070, 0x209F, 'Superscripts and Subscripts'], [0x20A0, 0x20CF, 'Currency Symbols'], [0x2100, 0x214F, 'Letterlike Symbols'], [0x2190, 0x21FF, 'Arrows'],
+      [0x2200, 0x22FF, 'Mathematical Operators'], [0x2460, 0x24FF, 'Enclosed Alphanumerics'], [0x2500, 0x257F, 'Box Drawing'], [0x25A0, 0x25FF, 'Geometric Shapes'],
+      [0x2600, 0x26FF, 'Miscellaneous Symbols'], [0x2700, 0x27BF, 'Dingbats'], [0x3000, 0x303F, 'CJK Symbols and Punctuation'], [0x3040, 0x309F, 'Hiragana'],
+      [0x30A0, 0x30FF, 'Katakana'], [0x3130, 0x318F, 'Hangul Compatibility Jamo'], [0x3200, 0x32FF, 'Enclosed CJK Letters and Months'], [0x3300, 0x33FF, 'CJK Compatibility'],
+      [0x3400, 0x4DBF, 'CJK Unified Ideographs Extension A'], [0x4E00, 0x9FFF, 'CJK Unified Ideographs'], [0xA960, 0xA97F, 'Hangul Jamo Extended-A'],
+      [0xAC00, 0xD7AF, 'Hangul Syllables'], [0xD7B0, 0xD7FF, 'Hangul Jamo Extended-B'], [0xD800, 0xDFFF, 'Surrogates'], [0xE000, 0xF8FF, 'Private Use Area'],
+      [0xF900, 0xFAFF, 'CJK Compatibility Ideographs'], [0xFE00, 0xFE0F, 'Variation Selectors'], [0xFF00, 0xFFEF, 'Halfwidth and Fullwidth Forms'], [0xFFF0, 0xFFFF, 'Specials'],
+      [0x1F300, 0x1F5FF, 'Misc Symbols and Pictographs'], [0x1F600, 0x1F64F, 'Emoticons'], [0x1F680, 0x1F6FF, 'Transport and Map Symbols'],
+      [0x1F900, 0x1F9FF, 'Supplemental Symbols and Pictographs'], [0x20000, 0x2FFFF, 'CJK Ideographs (Plane 2)'], [0xE0000, 0xE007F, 'Tags'], [0xE0100, 0xE01EF, 'Variation Selectors Supplement']
+    ];
+    const RE_MARK = /\p{M}/u;
+    const RE_FORMAT = /\p{Cf}/u;
+    const RE_EMOJI = /\p{Extended_Pictographic}/u;
+    const KIND_LEVEL = { control: 'warning', space: 'warning', invisible: 'warning', bidi: 'error', replacement: 'warning', surrogate: 'error', joiner: 'info', ws: '' };
+
+    const hex2 = b => b.toString(16).toUpperCase().padStart(2, '0');
+    const hexBytes = bytes => Array.from(bytes, hex2).join(' ');
+    const uplus = cp => 'U+' + cp.toString(16).toUpperCase().padStart(4, '0');
+    const isLoneSurrogate = cp => cp >= 0xD800 && cp <= 0xDFFF;
+
+    function getSpecial(cp) {
+      const known = SPECIAL.get(cp);
+      if (known) return known;
+      if (cp < 0x80) return null;
+      if (cp >= 0xFE00 && cp <= 0xFE0D) return ['VS' + (cp - 0xFE00 + 1), 'Variation selector', 'joiner'];
+      if (cp >= 0xE0100 && cp <= 0xE01EF) return ['VS' + (cp - 0xE0100 + 17), 'Variation selector', 'joiner'];
+      if (cp >= 0xE0000 && cp <= 0xE007F) return ['TAG', 'Tag character' + (cp >= 0xE0020 && cp <= 0xE007E ? ` (hidden "${String.fromCharCode(cp - 0xE0000)}")` : ''), 'invisible'];
+      if (!isLoneSurrogate(cp) && RE_FORMAT.test(String.fromCodePoint(cp))) return ['FMT', 'Format character', 'invisible'];
+      return null;
+    }
+
+    function hangulInfo(cp) {
+      if (cp >= 0xAC00 && cp <= 0xD7A3) {
+        const s = cp - 0xAC00, t = s % 28;
+        return `Hangul syllable ${CHO[Math.floor(s / 588)]} + ${JUNG[Math.floor((s % 588) / 28)]}${t ? ' + ' + JONG[t] : ''}`;
+      }
+      if (cp >= 0x1100 && cp <= 0x1112) return `Conjoining jamo, initial ${CHO[cp - 0x1100]} (NFD)`;
+      if (cp >= 0x1161 && cp <= 0x1175) return `Conjoining jamo, medial ${JUNG[cp - 0x1161]} (NFD)`;
+      if (cp >= 0x11A8 && cp <= 0x11C2) return `Conjoining jamo, final ${JONG[cp - 0x11A7]} (NFD)`;
+      if (cp >= 0x3131 && cp <= 0x318E) return 'Hangul compatibility jamo';
+      return '';
+    }
+
+    const describeCache = new Map();
+    function describe(cp) {
+      if (describeCache.has(cp)) return describeCache.get(cp);
+      const ch = isLoneSurrogate(cp) ? null : String.fromCodePoint(cp);
+      let category = 'Surrogate', script = '';
+      if (ch) {
+        const found = CATEGORIES.find(c => c[2].test(ch));
+        category = found ? found[1] : 'Unknown';
+        const s = SCRIPTS.find(x => x[1].test(ch));
+        script = s ? s[0] : 'Other script';
+      }
+      const block = BLOCKS.find(b => cp >= b[0] && cp <= b[1]);
+      const info = {
+        category, script,
+        block: block ? block[2] : `Plane ${cp >> 16}`,
+        mark: !!ch && RE_MARK.test(ch),
+        emoji: !!ch && RE_EMOJI.test(ch),
+        privateUse: (cp >= 0xE000 && cp <= 0xF8FF) || cp >= 0xF0000,
+        nonchar: (cp >= 0xFDD0 && cp <= 0xFDEF) || (cp & 0xFFFE) === 0xFFFE,
+        unassigned: category === 'Unassigned'
+      };
+      describeCache.set(cp, info);
+      return info;
+    }
+
+    function utf8Of(cp) {
+      if (isLoneSurrogate(cp)) return [0xEF, 0xBF, 0xBD];
+      if (cp < 0x80) return [cp];
+      if (cp < 0x800) return [0xC0 | cp >> 6, 0x80 | cp & 63];
+      if (cp < 0x10000) return [0xE0 | cp >> 12, 0x80 | cp >> 6 & 63, 0x80 | cp & 63];
+      return [0xF0 | cp >> 18, 0x80 | cp >> 12 & 63, 0x80 | cp >> 6 & 63, 0x80 | cp & 63];
+    }
+
+    function utf16Of(cp) {
+      if (cp < 0x10000) return [cp];
+      const v = cp - 0x10000;
+      return [0xD800 + (v >> 10), 0xDC00 + (v & 0x3FF)];
+    }
+
+    // CP949 encoder built once from the browser's WHATWG euc-kr decoder (17,048 two-byte codes).
+    let cp949Map;
+    function getCp949Map() {
+      if (cp949Map !== undefined) return cp949Map;
+      try {
+        const decoder = new TextDecoder('euc-kr', { fatal: true });
+        const map = new Map();
+        const pair = new Uint8Array(2);
+        for (let lead = 0x81; lead <= 0xFE; lead++) {
+          for (let trail = 0x41; trail <= 0xFE; trail++) {
+            pair[0] = lead; pair[1] = trail;
+            let s;
+            try { s = decoder.decode(pair); } catch { continue; }
+            const cp = s.codePointAt(0);
+            if (s.length === 1 && !map.has(cp)) map.set(cp, [lead, trail]);
+          }
+        }
+        cp949Map = map.size ? map : null;
+      } catch {
+        cp949Map = null;
+      }
+      return cp949Map;
+    }
+
+    // The KS X 1001 (EUC-KR) area uses lead and trail bytes A1-FE. Anything else is a CP949 extension.
+    const isCp949Extension = pair => pair.length === 2 && (pair[0] < 0xA1 || pair[1] < 0xA1);
+
+    function cp949Of(cp, map) {
+      if (cp < 0x80) return [cp];
+      return map.get(cp) || null;
+    }
+
+    function encodeCp949(text) {
+      const map = getCp949Map();
+      if (!map) return null;
+      const bytes = [];
+      let unmappable = 0, extension = 0;
+      for (const ch of text) {
+        const pair = cp949Of(ch.codePointAt(0), map);
+        if (!pair) { unmappable++; bytes.push(0x3F); continue; }
+        if (isCp949Extension(pair)) extension++;
+        bytes.push(...pair);
+      }
+      return { bytes: Uint8Array.from(bytes), unmappable, extension };
+    }
+
+    function utf16Bytes(text, littleEndian) {
+      const out = new Uint8Array(text.length * 2);
+      for (let i = 0; i < text.length; i++) {
+        const unit = text.charCodeAt(i);
+        out[i * 2] = littleEndian ? unit & 0xFF : unit >> 8;
+        out[i * 2 + 1] = littleEndian ? unit >> 8 : unit & 0xFF;
+      }
+      return out;
+    }
+
+    function toBase64(bytes) {
+      let binary = '';
+      for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+      return btoa(binary);
+    }
+
+    const wellFormed = text => text.replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g, '\uFFFD');
+    const jsonEscape = text => text.replace(/[^\x20-\x7E]|["\\]/g, c => {
+      const named = { '"': '\\"', '\\': '\\\\', '\n': '\\n', '\r': '\\r', '\t': '\\t' }[c];
+      return named || '\\u' + c.charCodeAt(0).toString(16).toUpperCase().padStart(4, '0');
+    });
+    const htmlEscape = text => Array.from(text, ch => {
+      const cp = ch.codePointAt(0);
+      return cp > 0x7E || cp < 0x20 || '&<>"\''.includes(ch) ? `&#x${cp.toString(16).toUpperCase()};` : ch;
+    }).join('');
+
+    function analyze(text) {
+      const result = {
+        codePoints: 0, supplementary: 0, lone: [], combining: 0, conjoiningJamo: 0, compatJamo: 0,
+        privateUse: 0, nonchar: 0, unassigned: 0, crlf: 0, lf: 0, cr: 0, lines: 1, found: new Map(), nonAscii: 0
+      };
+      let line = 1, col = 1;
+      const note = (key, abbr, name, kind, pos) => {
+        let entry = result.found.get(key);
+        if (!entry) { entry = { abbr, name, kind, count: 0, positions: [] }; result.found.set(key, entry); }
+        entry.count++;
+        if (entry.positions.length < MAX_POSITIONS) entry.positions.push(pos);
+      };
+      for (let i = 0; i < text.length;) {
+        const cp = text.codePointAt(i);
+        const size = cp > 0xFFFF ? 2 : 1;
+        result.codePoints++;
+        const pos = `${line}:${col}`;
+        if (cp === 0x0D) {
+          if (text.charCodeAt(i + 1) === 0x0A) { result.crlf++; result.codePoints++; i += 2; } else { result.cr++; i++; }
+          line++; col = 1;
+          continue;
+        }
+        if (cp === 0x0A) { result.lf++; line++; col = 1; i++; continue; }
+        if (cp >= 0x80) {
+          result.nonAscii++;
+          if (size === 2) result.supplementary++;
+          if (isLoneSurrogate(cp)) {
+            result.lone.push(pos);
+          } else {
+            const special = getSpecial(cp);
+            if (special && special[2] !== 'ws') note(special[0] + '|' + special[1], special[0], special[1], special[2], cp === 0xFEFF && i === 0 ? 'start' : pos);
+            if (cp >= 0x1100 && cp <= 0x11FF) result.conjoiningJamo++;
+            else if (cp >= 0x3131 && cp <= 0x318E) result.compatJamo++;
+            if (cp >= 0x300) {
+              const info = describe(cp);
+              if (info.mark) result.combining++;
+              if (info.privateUse) result.privateUse++;
+              if (info.nonchar) result.nonchar++;
+              if (info.unassigned) result.unassigned++;
+            }
+          }
+        } else if (cp < 0x20 && cp !== 0x09 || cp === 0x7F) {
+          const special = SPECIAL.get(cp);
+          note(special[0] + '|' + special[1], special[0], special[1], special[2], pos);
+        }
+        col++;
+        i += size;
+      }
+      result.lines = result.crlf + result.lf + result.cr + 1;
+      return result;
+    }
+
+    function graphemeCount(text) {
+      if (typeof Intl === 'undefined' || !Intl.Segmenter) return null;
+      let count = 0;
+      for (const _ of new Intl.Segmenter(undefined, { granularity: 'grapheme' }).segment(text)) count++;
+      return count;
+    }
+
+    function node(tag, className, text) {
+      const element = document.createElement(tag);
+      if (className) element.className = className;
+      if (text !== undefined) element.textContent = text;
+      return element;
+    }
+
+    function copyText(text, button) {
+      const done = () => {
+        if (!button) return;
+        const label = button.textContent;
+        button.textContent = 'Copied';
+        setTimeout(() => { button.textContent = label; }, 1200);
+      };
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(done, () => fallbackCopy(text, done));
+      } else {
+        fallbackCopy(text, done);
+      }
+    }
+
+    function fallbackCopy(text, done) {
+      const area = document.createElement('textarea');
+      area.value = text;
+      area.setAttribute('readonly', '');
+      area.style.position = 'fixed';
+      area.style.opacity = '0';
+      document.body.append(area);
+      area.select();
+      document.execCommand('copy');
+      area.remove();
+      done();
+    }
+
+    function copyButton(text, label) {
+      const button = node('button', 'button button-small', 'Copy');
+      button.type = 'button';
+      button.setAttribute('aria-label', `Copy ${label}`);
+      button.addEventListener('click', () => copyText(text, button));
+      return button;
+    }
+
+    function addRow(container, label, value, options = {}) {
+      const row = node('div', 'row');
+      const labelBox = node('span', 'row-label', label);
+      if (options.badge) {
+        labelBox.append(document.createElement('br'));
+        const badge = node('span', 'badge', options.badge[1]);
+        badge.dataset.kind = options.badge[0];
+        labelBox.append(badge);
+      }
+      const valueBox = node('span', 'row-value');
+      if (value instanceof Node) valueBox.append(value); else valueBox.textContent = value;
+      const buttons = node('span', 'row-buttons');
+      for (const extra of options.buttons || []) buttons.append(extra);
+      if (options.copy !== undefined) buttons.append(copyButton(options.copy, label));
+      row.append(labelBox, valueBox, buttons);
+      container.append(row);
+    }
+
+    function shownHex(bytes) {
+      if (bytes.length <= MAX_HEX_SHOWN) return hexBytes(bytes);
+      return hexBytes(bytes.subarray(0, MAX_HEX_SHOWN)) + ` … (${(bytes.length - MAX_HEX_SHOWN).toLocaleString('en-US')} more bytes; Copy gets all)`;
+    }
+
+    const preview = text => text.length > MAX_PREVIEW ? text.slice(0, MAX_PREVIEW) + ' …' : text;
+    const plural = (n, word) => `${n.toLocaleString('en-US')} ${word}${n === 1 || word.endsWith('jamo') ? '' : 's'}`;
+    const verb = (n, one, many) => n === 1 ? one : many;
+
+    function revealFragment(text) {
+      const frag = document.createDocumentFragment();
+      let buffer = '', count = 0;
+      const flush = () => { if (buffer) { frag.append(buffer); buffer = ''; } };
+      const mark = (label, kind, title) => {
+        flush();
+        const span = node('span', 'mk', label);
+        if (kind) span.dataset.kind = kind;
+        span.title = title;
+        frag.append(span);
+      };
+      for (let i = 0; i < text.length && count < MAX_REVEAL; count++) {
+        const cp = text.codePointAt(i);
+        const size = cp > 0xFFFF ? 2 : 1;
+        if (cp === 0x20) {
+          flush();
+          frag.append(node('span', 'sp', '·'));
+        } else if (cp === 0x09) {
+          mark('⇥', 'ws', 'U+0009 Tab');
+          buffer += '\t';
+        } else if (cp === 0x0D && text.charCodeAt(i + 1) === 0x0A) {
+          mark('␍↵', 'ws', 'U+000D U+000A CRLF');
+          buffer += '\n';
+          i++;
+        } else if (cp === 0x0D) {
+          mark('␍', 'ws', 'U+000D Carriage return');
+          buffer += '\n';
+        } else if (cp === 0x0A) {
+          mark('↵', 'ws', 'U+000A Line feed');
+          buffer += '\n';
+        } else if (isLoneSurrogate(cp)) {
+          mark('?' + cp.toString(16).toUpperCase(), '', `${uplus(cp)} Lone surrogate`);
+        } else {
+          const special = getSpecial(cp);
+          if (special && special[2] !== 'ws') {
+            mark(special[0], special[2] === 'space' || special[2] === 'joiner' ? special[2] : '', `${uplus(cp)} ${special[1]}`);
+            if (cp === 0x2028 || cp === 0x2029) buffer += '\n';
+          } else {
+            buffer += String.fromCodePoint(cp);
+          }
+        }
+        i += size;
+      }
+      flush();
+      return { frag, truncated: count >= MAX_REVEAL };
+    }
+
+    function stat(value, label) {
+      const box = node('div', 'stat');
+      box.append(node('div', 'stat-value', value), node('div', 'stat-label', label));
+      return box;
+    }
+
+    function findingsFor(text, a, cp949, isNfc) {
+      const list = [];
+      const where = positions => positions.map(p => p === 'start' ? 'start of text' : 'line:col ' + p).join(', ');
+      const more = entry => entry.count > entry.positions.length ? ', …' : '';
+      if (a.lone.length) list.push(['error', `${plural(a.lone.length, 'lone surrogate')} at ${a.lone.slice(0, MAX_POSITIONS).join(', ')}. Half of a UTF-16 pair is not valid Unicode; encoders replace it with U+FFFD. It usually comes from cutting a string by code units.`]);
+      const groups = { bidi: [], invisible: [], control: [], space: [], replacement: [], joiner: [] };
+      for (const entry of a.found.values()) groups[entry.kind].push(entry);
+      const describeEntries = entries => entries.map(e => `${e.abbr} (${e.name}) ×${e.count} at ${where(e.positions)}${more(e)}`).join('; ');
+      if (groups.bidi.length) list.push(['error', `Bidirectional control characters: ${describeEntries(groups.bidi)}. They can reorder how text is displayed and are used in "Trojan Source" attacks on source code.`]);
+      const bomAtStart = groups.invisible.find(e => e.abbr === 'BOM' && e.positions[0] === 'start');
+      if (bomAtStart && bomAtStart.count === 1) {
+        groups.invisible.splice(groups.invisible.indexOf(bomAtStart), 1);
+        list.push(['info', 'The text starts with U+FEFF, a byte order mark (BOM). Some parsers, shell scripts, and JSON readers reject it.']);
+      }
+      if (groups.invisible.length) list.push(['warning', `Invisible characters: ${describeEntries(groups.invisible)}. They break comparisons, identifiers, and keys without being seen.`]);
+      if (groups.control.length) list.push(['warning', `Control characters: ${describeEntries(groups.control)}.`]);
+      if (groups.space.length) list.push(['warning', `Unusual spaces or separators: ${describeEntries(groups.space)}. They look like a normal space or line break but do not match it.`]);
+      if (groups.replacement.length) list.push(['warning', `Replacement characters: ${describeEntries(groups.replacement)}. U+FFFD (�) means an earlier decoding step met bytes it could not read; the original bytes are lost.`]);
+      if (groups.joiner.length) list.push(['info', `Joiners and variation selectors: ${describeEntries(groups.joiner)}. These are normal inside emoji and some scripts.`]);
+      if (!isNfc) {
+        const nfcLength = Array.from(text.normalize('NFC')).length;
+        list.push(['warning', `The text is not in NFC. Normalizing to NFC turns ${plural(a.codePoints, 'code point')} into ${plural(nfcLength, 'code point')}.` + (a.conjoiningJamo ? ` It contains ${plural(a.conjoiningJamo, 'conjoining Hangul jamo')}, typical of decomposed (NFD) names from macOS.` : '')]);
+      } else if (a.conjoiningJamo) {
+        list.push(['info', `${plural(a.conjoiningJamo, 'conjoining Hangul jamo')} cannot be composed into modern syllables.`]);
+      }
+      if (a.compatJamo) list.push(['info', `${plural(a.compatJamo, 'Hangul compatibility jamo')} (such as ㅎ, ㅏ). These are standalone letters and are not combined by NFC.`]);
+      const endings = [a.crlf && 'CRLF', a.lf && 'LF', a.cr && 'CR'].filter(Boolean);
+      if (endings.length > 1) list.push(['warning', `Mixed line endings: CRLF ×${a.crlf}, LF ×${a.lf}, CR ×${a.cr}. Diffs and some parsers treat these lines differently.`]);
+      if (a.supplementary) list.push(['info', `${plural(a.supplementary, 'character')} outside the BMP (such as emoji) ${verb(a.supplementary, 'uses', 'use')} a surrogate pair, so JavaScript, Java, and C# count each of them as length 2.`]);
+      if (cp949 && cp949.unmappable) list.push(['info', `${plural(cp949.unmappable, 'character')} cannot be encoded in CP949 and would become "?" if saved as CP949/ANSI.`]);
+      if (cp949 && cp949.extension) list.push(['info', `${plural(cp949.extension, 'character')} ${verb(cp949.extension, 'uses', 'use')} the CP949 extension area (for example 똠). Strict EUC-KR (KS X 1001) has no code for them.`]);
+      if (a.privateUse) list.push(['info', `${plural(a.privateUse, 'private-use character')}. Their meaning depends on a specific font or application.`]);
+      if (a.unassigned || a.nonchar) list.push(['warning', `${plural(a.unassigned + a.nonchar, 'unassigned code point or noncharacter')}. They have no standard meaning.`]);
+      if (!list.some(f => f[0] === 'error' || f[0] === 'warning')) list.unshift(['ok', 'No hidden, control, or unusual characters found.']);
+      return list;
+    }
+
+    function renderText(text) {
+      const tooLong = text.length > MAX_INPUT;
+      const source = tooLong ? text.slice(0, MAX_INPUT) : text;
+      const a = analyze(source);
+      const utf8 = new TextEncoder().encode(source);
+      const hasNonAscii = a.nonAscii > 0;
+      const cp949 = hasNonAscii ? encodeCp949(source) : { bytes: utf8, unmappable: 0, extension: 0 };
+      const isNfc = source.normalize('NFC') === source;
+      const graphemes = graphemeCount(source);
+
+      const stats = el('stats');
+      stats.replaceChildren(
+        stat(a.codePoints.toLocaleString('en-US'), 'Code points (characters)'),
+        stat(source.length.toLocaleString('en-US'), 'UTF-16 code units (JS/Java/C# length)'),
+        stat(graphemes === null ? '—' : graphemes.toLocaleString('en-US'), 'Grapheme clusters (visible characters)'),
+        stat(utf8.length.toLocaleString('en-US'), 'UTF-8 bytes'),
+        stat((source.length * 2).toLocaleString('en-US'), 'UTF-16 bytes (no BOM)'),
+        stat(cp949 ? cp949.bytes.length.toLocaleString('en-US') : '—', cp949 ? (cp949.unmappable ? `CP949 bytes (${cp949.unmappable} as "?")` : 'CP949 bytes') : 'CP949 not available in this browser'),
+        stat(a.lines.toLocaleString('en-US'), `Lines · CRLF ${a.crlf} · LF ${a.lf} · CR ${a.cr}`),
+        stat(isNfc ? 'NFC' : 'Not NFC', isNfc ? (source.normalize('NFD') === source ? 'Normalization: NFC and NFD' : 'Normalization: composed') : 'Normalization: has decomposed parts')
+      );
+
+      const findings = findingsFor(source, a, cp949, isNfc);
+      if (tooLong) findings.unshift(['warning', `Only the first ${MAX_INPUT.toLocaleString('en-US')} UTF-16 code units of ${text.length.toLocaleString('en-US')} were analysed.`]);
+      const findingsBox = el('findings');
+      findingsBox.replaceChildren(...findings.map(([kind, message]) => {
+        const p = node('p', 'note', message);
+        p.dataset.kind = kind;
+        return p;
+      }));
+      const issueCount = findings.filter(f => f[0] === 'error' || f[0] === 'warning').length;
+      el('findings-sub').textContent = issueCount ? plural(issueCount, 'issue') : 'clean';
+
+      const { frag, truncated } = revealFragment(source);
+      el('reveal').replaceChildren(frag);
+      el('reveal-sub').textContent = truncated ? `first ${MAX_REVEAL.toLocaleString('en-US')} code points` : '';
+
+      const encodings = el('encodings');
+      encodings.replaceChildren();
+      const u16le = utf16Bytes(source, true), u16be = utf16Bytes(source, false);
+      addRow(encodings, `UTF-8 · ${plural(utf8.length, 'byte')}`, shownHex(utf8), { copy: hexBytes(utf8) });
+      addRow(encodings, `UTF-16LE · ${plural(u16le.length, 'byte')}`, shownHex(u16le), { copy: hexBytes(u16le) });
+      addRow(encodings, `UTF-16BE · ${plural(u16be.length, 'byte')}`, shownHex(u16be), { copy: hexBytes(u16be) });
+      if (cp949) {
+        addRow(encodings, `CP949 (EUC-KR) · ${plural(cp949.bytes.length, 'byte')}`, shownHex(cp949.bytes), {
+          copy: hexBytes(cp949.bytes),
+          badge: cp949.unmappable ? ['warning', `${cp949.unmappable} not encodable → 3F`] : null
+        });
+      } else {
+        addRow(encodings, 'CP949 (EUC-KR)', 'This browser has no euc-kr decoder to build the CP949 table from.');
+      }
+      const safe = wellFormed(source);
+      const percent = encodeURIComponent(safe);
+      addRow(encodings, 'Percent-encoding (encodeURIComponent)', preview(percent), { copy: percent });
+      const base64 = toBase64(utf8);
+      addRow(encodings, 'Base64 (UTF-8)', preview(base64), { copy: base64 });
+      const escaped = jsonEscape(source);
+      addRow(encodings, 'JSON / JS / Java / C# escape', preview(escaped), { copy: escaped });
+      const html = htmlEscape(source);
+      addRow(encodings, 'HTML numeric references', preview(html), { copy: html });
+      const points = [];
+      for (const ch of source) { points.push(uplus(ch.codePointAt(0))); if (points.length > 5000) break; }
+      addRow(encodings, 'Code points', preview(points.join(' ')), { copy: points.join(' ') });
+
+      const normalization = el('normalization');
+      normalization.replaceChildren();
+      let differs = 0;
+      for (const form of ['NFC', 'NFD', 'NFKC', 'NFKD']) {
+        const value = source.normalize(form);
+        const same = value === source;
+        if (!same) differs++;
+        addRow(normalization, `${form} · ${plural(Array.from(value).length, 'code point')}`, preview(value), {
+          copy: value,
+          badge: same ? ['ok', 'Same as input'] : ['info', 'Differs']
+        });
+      }
+      el('norm-sub').textContent = differs ? `${differs} of 4 forms differ` : 'all forms equal';
+
+      const mojibake = el('mojibake');
+      mojibake.replaceChildren();
+      el('mojibake-item').hidden = !hasNonAscii;
+      if (hasNonAscii) {
+        const sample = utf8.length > 4096 ? utf8.subarray(0, 4096) : utf8;
+        const decode = (label, bytes) => { try { return new TextDecoder(label).decode(bytes); } catch { return null; } };
+        const pairs = [
+          ['UTF-8 bytes read as CP949', decode('euc-kr', sample)],
+          ['CP949 bytes read as UTF-8', cp949 ? decode('utf-8', cp949.bytes.subarray(0, 4096)) : null],
+          ['UTF-8 bytes read as Windows-1252', decode('windows-1252', sample)],
+          ['UTF-16LE bytes read as UTF-8', decode('utf-8', u16le.subarray(0, 4096))]
+        ];
+        for (const [label, value] of pairs) if (value !== null) addRow(mojibake, label, preview(value), { copy: value });
+      }
+
+      el('result-sub').textContent = `${plural(a.codePoints, 'code point')} · ${plural(utf8.length, 'UTF-8 byte')}`;
+      const status = el('status');
+      const errors = findings.filter(f => f[0] === 'error').length;
+      status.textContent = issueCount ? `Analysed. ${plural(issueCount, 'finding')} need attention.` : 'Analysed. No hidden or unusual characters found.';
+      status.dataset.kind = errors ? 'error' : issueCount ? 'warning' : 'success';
+      renderTable(source);
+    }
+
+    function rowKind(cp, special, info) {
+      if (isLoneSurrogate(cp)) return 'error';
+      if (special && special[2] !== 'ws') return KIND_LEVEL[special[2]];
+      if (info && (info.unassigned || info.nonchar)) return 'warning';
+      if (info && (info.mark || info.privateUse || (cp >= 0x1100 && cp <= 0x11FF))) return 'info';
+      return '';
+    }
+
+    function renderTable(text) {
+      const body = el('chars');
+      body.replaceChildren();
+      const filter = el('table-filter').value;
+      const map = /[^\x00-\x7F]/.test(text) ? getCp949Map() : null;
+      let index = 0, shown = 0, matched = 0, line = 1, col = 1;
+      const rows = document.createDocumentFragment();
+      for (let i = 0; i < text.length;) {
+        const cp = text.codePointAt(i);
+        const size = isLoneSurrogate(cp) ? 1 : cp > 0xFFFF ? 2 : 1;
+        index++;
+        const special = isLoneSurrogate(cp) ? null : getSpecial(cp);
+        const info = cp >= 0x80 ? describe(cp) : null;
+        const kind = rowKind(cp, special, info);
+        const include = filter === 'all' || (filter === 'nonascii' && cp >= 0x80) || (filter === 'special' && kind !== '');
+        if (include) {
+          matched++;
+          if (shown < MAX_TABLE_ROWS) {
+            shown++;
+            rows.append(tableRow(index, `${line}:${col}`, cp, special, info, kind, map));
+          }
+        }
+        if (cp === 0x0A || (cp === 0x0D && text.charCodeAt(i + 1) !== 0x0A)) { line++; col = 1; } else { col++; }
+        i += size;
+      }
+      body.append(rows);
+      el('table-empty').hidden = matched > 0;
+      el('table-empty').textContent = text ? 'No code points match this filter.' : 'Characters appear here.';
+      el('table-count').textContent = text ? `${plural(matched, 'row')}` : '';
+      el('table-note').textContent = matched > shown ? `Showing the first ${MAX_TABLE_ROWS.toLocaleString('en-US')} of ${matched.toLocaleString('en-US')} rows. Use the filter to narrow the list.` : '';
+    }
+
+    function tableRow(index, position, cp, special, info, kind, map) {
+      const tr = document.createElement('tr');
+      if (kind) tr.dataset.kind = kind;
+      const glyph = node('td', 'glyph');
+      if (isLoneSurrogate(cp)) {
+        glyph.append(node('span', 'mk', '?'));
+      } else if (special) {
+        const pill = node('span', 'mk', special[2] === 'ws' ? { TAB: '⇥', LF: '↵', CR: '␍' }[special[0]] : special[0]);
+        if (special[2] === 'ws' || special[2] === 'space' || special[2] === 'joiner') pill.dataset.kind = special[2];
+        glyph.append(pill);
+      } else if (cp === 0x20) {
+        glyph.append(node('span', 'sp', '·'));
+      } else {
+        glyph.textContent = (info && info.mark ? '\u25CC' : '') + String.fromCodePoint(cp);
+      }
+      const units = utf16Of(cp).map(u => u.toString(16).toUpperCase().padStart(4, '0')).join(' ');
+      let cp949Cell;
+      if (cp < 0x80) cp949Cell = hex2(cp);
+      else if (!map) cp949Cell = '—';
+      else {
+        const pair = cp949Of(cp, map);
+        cp949Cell = pair ? hexBytes(pair) : 'not encodable';
+      }
+      const desc = node('td', 'desc');
+      const parts = [];
+      if (isLoneSurrogate(cp)) parts.push('Lone surrogate (invalid on its own)');
+      if (special) parts.push(special[1]);
+      const hangul = hangulInfo(cp);
+      if (hangul) parts.push(hangul);
+      if (info) parts.push(`${info.category} · ${info.script} · ${info.block}`);
+      else if (!special) parts.push(cp === 0x20 ? 'Space · Basic Latin' : `${describe(cp).category} · Basic Latin`);
+      desc.textContent = parts.join(' — ');
+      if (info && info.emoji) desc.append(node('span', 'tag', 'emoji'));
+      if (map && cp >= 0x80) {
+        const pair = cp949Of(cp, map);
+        if (pair && isCp949Extension(pair)) desc.append(node('span', 'tag', 'CP949 ext'));
+      }
+      if (cp > 0xFFFF) desc.append(node('span', 'tag', 'surrogate pair'));
+      tr.append(
+        node('td', 'mono', String(index)),
+        node('td', 'mono', position),
+        glyph,
+        node('td', 'mono', uplus(cp)),
+        node('td', 'mono', hexBytes(utf8Of(cp))),
+        node('td', 'mono', units),
+        node('td', 'mono', cp949Cell),
+        desc
+      );
+      return tr;
+    }
+
+    function parseBytes(raw, format) {
+      const text = raw.trim();
+      const hexBody = text.replace(/0x|\\x|%|[\s,:;-]/gi, '');
+      const looksHex = /^[0-9a-f]*$/i.test(hexBody);
+      if (format === 'hex' || (format === 'auto' && looksHex && hexBody.length % 2 === 0)) {
+        if (!looksHex) throw new Error('Hex input may contain only 0-9 and A-F, separated by spaces, commas, colons, or dashes, with optional 0x, \\x, or % prefixes.');
+        if (hexBody.length % 2) throw new Error('The hex input has an odd number of digits. Each byte needs two hex digits.');
+        return { bytes: Uint8Array.from(hexBody.match(/../g) || [], h => parseInt(h, 16)), format: 'hex' };
+      }
+      const b64 = text.replace(/\s+/g, '').replace(/-/g, '+').replace(/_/g, '/').replace(/=+$/, '');
+      if (!/^[A-Za-z0-9+/]*$/.test(b64) || b64.length % 4 === 1) {
+        throw new Error(format === 'base64' ? 'Not valid Base64.' : 'Not valid hex or Base64. Hex needs an even number of digits; Base64 uses A-Z, a-z, 0-9, +, / (or -, _).');
+      }
+      const binary = atob(b64 + '='.repeat((4 - b64.length % 4) % 4));
+      return { bytes: Uint8Array.from(binary, c => c.charCodeAt(0)), format: 'Base64' };
+    }
+
+    const DECODINGS = [
+      ['utf-8', 'UTF-8'], ['euc-kr', 'CP949 (EUC-KR)'], ['utf-16le', 'UTF-16LE'], ['utf-16be', 'UTF-16BE'], ['windows-1252', 'Windows-1252 (Latin-1)']
+    ];
+
+    function guessEncoding(bytes, valid) {
+      if (bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF) return ['utf-8', 'UTF-8 BOM'];
+      if (bytes[0] === 0xFF && bytes[1] === 0xFE) return ['utf-16le', 'UTF-16LE BOM'];
+      if (bytes[0] === 0xFE && bytes[1] === 0xFF) return ['utf-16be', 'UTF-16BE BOM'];
+      const zeros = [0, 0];
+      bytes.forEach((b, i) => { if (b === 0) zeros[i % 2]++; });
+      if (bytes.length >= 2 && bytes.length % 2 === 0 && zeros[0] + zeros[1] >= bytes.length / 4) {
+        return zeros[1] >= zeros[0] ? ['utf-16le', 'many zero bytes at odd offsets'] : ['utf-16be', 'many zero bytes at even offsets'];
+      }
+      if (bytes.every(b => b < 0x80)) return ['utf-8', 'ASCII only'];
+      if (valid['utf-8']) return ['utf-8', 'valid UTF-8'];
+      if (valid['euc-kr']) return ['euc-kr', 'valid CP949, invalid UTF-8'];
+      return [null, ''];
+    }
+
+    function renderBytes(raw) {
+      const notes = el('byte-notes');
+      const decodings = el('decodings');
+      decodings.replaceChildren();
+      const status = el('status');
+      let parsed;
+      try {
+        parsed = parseBytes(raw, el('byte-format').value);
+      } catch (error) {
+        const p = node('p', 'note', error.message);
+        p.dataset.kind = 'error';
+        notes.replaceChildren(p);
+        el('bytes-sub').textContent = '';
+        el('result-sub').textContent = '';
+        status.textContent = error.message;
+        status.dataset.kind = 'error';
+        return;
+      }
+      const bytes = parsed.bytes;
+      const valid = {};
+      const decoded = {};
+      for (const [label] of DECODINGS) {
+        try { decoded[label] = new TextDecoder(label, { ignoreBOM: true }).decode(bytes); } catch { decoded[label] = null; continue; }
+        try { new TextDecoder(label, { fatal: true, ignoreBOM: true }).decode(bytes); valid[label] = !(label.startsWith('utf-16') && bytes.length % 2); } catch { valid[label] = false; }
+      }
+      const [best, reason] = guessEncoding(bytes, valid);
+      const noteList = [['info', `${plural(bytes.length, 'byte')} read as ${parsed.format}: ${shownHex(bytes.subarray(0, 64))}${bytes.length > 64 ? ' …' : ''}`]];
+      if (best) noteList.push(['ok', `Most likely ${DECODINGS.find(d => d[0] === best)[1]} (${reason}).`]);
+      else noteList.push(['warning', 'No decoding is valid. The bytes may be truncated, binary data, or another encoding.']);
+      notes.replaceChildren(...noteList.map(([kind, message]) => { const p = node('p', 'note', message); p.dataset.kind = kind; return p; }));
+      el('bytes-sub').textContent = `${plural(bytes.length, 'byte')} · ${parsed.format}`;
+
+      for (const [label, name] of DECODINGS) {
+        if (decoded[label] === null) { addRow(decodings, name, 'Not supported by this browser.'); continue; }
+        const text = decoded[label];
+        const replacements = (text.match(/\uFFFD/g) || []).length;
+        const badge = valid[label] ? (label === best ? ['ok', 'Valid · most likely'] : ['ok', 'Valid']) : ['error', replacements ? `Invalid · ${replacements} × U+FFFD` : 'Invalid'];
+        const inspect = node('button', 'button button-small', 'Inspect');
+        inspect.type = 'button';
+        inspect.setAttribute('aria-label', `Inspect the ${name} decoding as text`);
+        inspect.addEventListener('click', () => {
+          state.text = text;
+          setMode('text');
+          el('status').textContent = `Inspecting the ${name} decoding.`;
+        });
+        addRow(decodings, name, revealFragment(preview(text)).frag, { copy: text, badge, buttons: [inspect] });
+      }
+      el('result-sub').textContent = plural(bytes.length, 'byte');
+      status.textContent = best ? `Decoded ${plural(bytes.length, 'byte')}. Select Inspect to analyse a decoding.` : 'No encoding decodes these bytes without errors.';
+      status.dataset.kind = best ? 'success' : 'warning';
+      el('chars').replaceChildren();
+      el('table-empty').hidden = false;
+      el('table-empty').textContent = 'Select Inspect on a decoding to list its characters.';
+      el('table-count').textContent = '';
+      el('table-note').textContent = '';
+    }
+
+    const state = { mode: 'text', text: '', bytes: '' };
+
+    function render() {
+      const value = el('input').value;
+      state[state.mode] = value;
+      const empty = value.length === 0;
+      el('empty').hidden = !empty;
+      el('text-results').hidden = empty || state.mode !== 'text';
+      el('byte-results').hidden = empty || state.mode !== 'bytes';
+      if (empty) {
+        el('result-sub').textContent = '';
+        el('status').textContent = state.mode === 'text' ? 'Enter or paste text. Results update as you type.' : 'Paste bytes as hex or Base64.';
+        el('status').dataset.kind = '';
+        el('chars').replaceChildren();
+        el('table-empty').hidden = false;
+        el('table-empty').textContent = 'Characters appear here.';
+        el('table-count').textContent = '';
+        el('table-note').textContent = '';
+        return;
+      }
+      if (state.mode === 'text') renderText(value); else renderBytes(value);
+    }
+
+    function setMode(mode) {
+      state.mode = mode;
+      el('mode-text').setAttribute('aria-pressed', String(mode === 'text'));
+      el('mode-bytes').setAttribute('aria-pressed', String(mode === 'bytes'));
+      el('input-label').textContent = mode === 'text' ? 'Text' : 'Bytes';
+      el('input-hint').innerHTML = HINTS[mode];
+      el('input').placeholder = mode === 'text' ? 'Paste text, e.g. 한글 😀 Café' : 'ED 95 9C EA B8 80';
+      el('format-field').hidden = mode !== 'bytes';
+      el('to-nfc').hidden = el('clean').hidden = el('clean-hint').hidden = mode !== 'text';
+      el('input').value = state[mode];
+      render();
+    }
+
+    function cleanText(text) {
+      let out = '', removed = 0, replaced = 0;
+      for (const ch of text) {
+        const cp = ch.codePointAt(0);
+        const special = isLoneSurrogate(cp) ? null : getSpecial(cp);
+        if (special && (special[2] === 'control' || special[2] === 'invisible' || special[2] === 'bidi')) { removed++; continue; }
+        if (special && special[2] === 'space') { out += cp === 0x2028 || cp === 0x2029 ? '\n' : ' '; replaced++; continue; }
+        out += ch;
+      }
+      return { out, removed, replaced };
+    }
+
+    let renderTimer = 0;
+    el('input').addEventListener('input', () => {
+      clearTimeout(renderTimer);
+      renderTimer = setTimeout(render, 150);
+    });
+    el('mode-text').addEventListener('click', () => setMode('text'));
+    el('mode-bytes').addEventListener('click', () => setMode('bytes'));
+    el('byte-format').addEventListener('change', render);
+    el('table-filter').addEventListener('change', () => { if (state.mode === 'text' && el('input').value) renderTable(el('input').value.slice(0, MAX_INPUT)); });
+    el('examples').addEventListener('click', () => {
+      el('input').value = state.mode === 'text' ? EXAMPLE_TEXT : EXAMPLE_BYTES;
+      render();
+    });
+    el('to-nfc').addEventListener('click', () => {
+      const before = el('input').value;
+      const after = before.normalize('NFC');
+      el('input').value = after;
+      render();
+      el('status').textContent = before === after ? 'The text was already in NFC.' : `Normalized to NFC: ${plural(Array.from(before).length, 'code point')} → ${Array.from(after).length.toLocaleString('en-US')}.`;
+    });
+    el('clean').addEventListener('click', () => {
+      const { out, removed, replaced } = cleanText(el('input').value);
+      el('input').value = out;
+      render();
+      el('status').textContent = removed || replaced ? `Removed ${plural(removed, 'hidden character')} and replaced ${plural(replaced, 'unusual space')}.` : 'No hidden characters to clean.';
+      el('status').dataset.kind = 'success';
+    });
+    el('clear').addEventListener('click', () => {
+      el('input').value = '';
+      render();
+      el('input').focus();
+    });
+
+    // Learn more language. Korean browsers start in Korean; the choice is remembered when storage is available.
+    function setLearnLanguage(lang) {
+      el('learn-en').hidden = lang !== 'en';
+      el('learn-ko').hidden = lang !== 'ko';
+      el('learn-lang-en').setAttribute('aria-pressed', String(lang === 'en'));
+      el('learn-lang-ko').setAttribute('aria-pressed', String(lang === 'ko'));
+    }
+    for (const lang of ['en', 'ko']) {
+      el(`learn-lang-${lang}`).addEventListener('click', () => {
+        setLearnLanguage(lang);
+        try { localStorage.setItem('dh-devutil-unicode-inspector-learn-lang', lang); } catch {}
+      });
+    }
+    let strLearnLang = /^ko(-|$)/i.test(navigator.language || '') ? 'ko' : 'en';
+    try { strLearnLang = localStorage.getItem('dh-devutil-unicode-inspector-learn-lang') || strLearnLang; } catch {}
+    setLearnLanguage(strLearnLang === 'ko' ? 'ko' : 'en');
+
+    setMode('text');
+  </script>
+</body>
+</html>

@@ -16,6 +16,7 @@ DH.DevUtil은 일상적인 개발 작업에 사용하는 가벼운 유틸리티 
 | Number Notation Converter | `1.23457E+15` 같은 E 표기를 정확한 일반 표기, 천 단위 구분, 공학 표기, SI 접두어, 한국어 단위로 바꾸고 double·float32 저장값 확인 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.number-notation.html) | [소스 보기](./tools/DH.DevUtil.number-notation.html) | [사용 안내](./docs/NUMBER_NOTATION_CONVERTER.ko.md) |
 | Symmetric Encryption Simulator (Base) | AES, ARIA, 3DES, DES(ECB/CBC)와 padding 선택, 공유 Key/IV, 고정 IV로 같은 결과를 재현하며 대칭 암호화 학습 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.symmetric-encryption-simulator-base.html) | [소스 보기](./tools/DH.DevUtil.symmetric-encryption-simulator-base.html) | [사용 안내](./docs/SYMMETRIC_ENCRYPTION_SIMULATOR_BASE.ko.md) |
 | Symmetric Encryption Simulator | AES-GCM/CBC/CTR 암복호화와 CBC padding 비교 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.symmetric-encryption-simulator.html) | [소스 보기](./tools/DH.DevUtil.symmetric-encryption-simulator.html) | [사용 안내](./docs/SYMMETRIC_ENCRYPTION_SIMULATOR.ko.md) |
+| Unicode · Encoding Inspector | 코드 포인트, UTF-8/UTF-16/CP949 바이트, NFC/NFD 정규화, 폭 없는 공백·양방향 제어 문자 같은 숨은 문자, 글자 깨짐(mojibake)을 확인하고 16진수·Base64 바이트를 디코딩 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.unicode-inspector.html) | [소스 보기](./tools/DH.DevUtil.unicode-inspector.html) | [사용 안내](./docs/UNICODE_ENCODING_INSPECTOR.ko.md) |
 | DH.MarkDown.Flow | Source·WYSIWYG·Split 편집, Mermaid 다이어그램, Markdown/HTML/PDF/Word 내보내기를 지원하는 로컬 우선 Markdown 편집기 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.MarkDown.Flow/index.html)<br>[오프라인 버전 다운로드 (우클릭 → 다른 이름으로 링크 저장)](https://raw.githubusercontent.com/cyberkdh/DH.DevUtil/main/tools/DH.MarkDown.Flow/index_local.html) | [파일 보기](./tools/DH.MarkDown.Flow/) | [사용 안내](./docs/MARKDOWN_FLOW.ko.md) |
 
 온라인 데모는 GitHub Pages에서 정적 HTML 도구를 실행합니다. 소스 링크는 GitHub에서 HTML 코드를 보여줄 뿐 도구를 실행하지 않습니다. 오프라인으로 사용하려면 저장소를 clone하거나 도구 HTML 파일을 내려받아 브라우저에서 여세요. DH.MarkDown.Flow는 `index_local.html`을 여세요. `index.html`은 웹 서버가 필요합니다.
@@ -49,6 +50,12 @@ RFC 7616 challenge 생성, Client response 계산, Server 검증과 계산 상�
 AES-GCM, AES-CBC, AES-CTR로 암호화하고, 키를 제외한 JSON 패키지를 만들어 복호화와 처리 상세를 확인할 수 있습니다. 자세한 기능과 사용 방법은 [Symmetric Encryption Simulator 안내](./docs/SYMMETRIC_ENCRYPTION_SIMULATOR.ko.md)를 참고하세요.
 
 ![Symmetric Encryption Simulator 화면 미리보기](./docs/images/DH.DevUtil.symmetric-encryption-simulator.png)
+
+## Unicode · Encoding Inspector 미리보기
+
+모든 코드 포인트를 UTF-8, UTF-16, CP949 바이트와 함께 보고, 숨은 문자와 NFC/NFD 차이를 찾고, 글자 깨짐을 미리 볼 수 있습니다. 자세한 기능과 사용 방법은 [Unicode · Encoding Inspector 안내](./docs/UNICODE_ENCODING_INSPECTOR.ko.md)를 참고하세요.
+
+![Unicode · Encoding Inspector 화면 미리보기](./docs/images/DH.DevUtil.unicode-inspector.png)
 
 ## DH.MarkDown.Flow 미리보기
 
