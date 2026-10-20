@@ -8,6 +8,20 @@ Notable changes to DH.DevUtil are listed here. The newest changes appear first.
 
 ### Added
 
+- Add CIDR Calculator for local IPv4 network, mask, host-range, binary, and subnet-split calculations with English and Korean UI.
+
+- Add Text · JSON Diff for local line-based text comparison, JSON formatting, color-coded additions/removals, English/Korean UI, and a screenshot.
+- Add multiple Text · JSON Diff samples and local file1/file2 drag-and-drop loading.
+- Make the file1/file2 editor textareas themselves the drag-and-drop targets.
+- Normalize UTF-8 BOM and CRLF/LF/CR line endings before Text · JSON Diff comparison.
+- Add Unified, Side-by-side, Inline, and JSON Path views with whitespace/case filters, changed-only mode, and context-line selection.
+- Add Word, Character, Moved lines, Summary, JSON Tree, Patch, and Change heatmap views, plus blank-line/comment/property-order/trailing-comma ignore options.
+- Add a viewport-sized scroll area for Diff result and local file saving for the current Diff view.
+- Hide the page scrollbar visually while preserving page scrolling, so the Diff result scrollbar is the primary visible scrollbar.
+- Add Collapse/Expand control to the Comparison input panel.
+- Add Color Converter for HEX, RGB, HSL, HSV, and OKLCH conversion, color previews, WCAG contrast checks, and English/Korean learning text.
+- Add Timestamp Converter for ISO 8601, Unix seconds/milliseconds/microseconds/nanoseconds, Windows FILETIME, .NET Ticks, and calendar duration arithmetic, with English and Korean guides and a screenshot.
+- Add Regex Tester, a browser-local JavaScript `RegExp` learning tool that displays matches, numbered and named capture groups, indexes, replacement previews, common examples, and regex flavor notes, with English and Korean guides and a screenshot.
 - Add Unicode · Encoding Inspector, which shows code points, UTF-8/UTF-16/CP949 bytes, grapheme counts, NFC/NFD/NFKC/NFKD forms, hidden characters (zero-width, bidi controls, BOM, unusual spaces, lone surrogates) with line:column positions, mojibake previews, and a per-character table with Hangul decomposition. Bytes mode decodes hex or Base64 as UTF-8, CP949, UTF-16LE/BE, and Windows-1252. Adds English and Korean guides, README entries, and a screenshot.
 - Add DH.MarkDown.Flow, a local-first Markdown editor with Source, WYSIWYG, and Split modes, Mermaid diagram preview, rendering themes, and Markdown/HTML/PDF/Word export. It ships as a web build (`index.html`) and a standalone single-file build (`index_local.html`) with its license and third-party notices, and adds English and Korean guides, README entries, and a screenshot.
 - Add Number Notation Converter, which converts E notation, powers of ten, digit-separated, hex/binary/octal, and hex-float input into exact plain, grouped, scientific, engineering, SI-prefix, and Korean-unit forms, shows the exact IEEE 754 double/float32 stored values, warns about integers above 2<sup>53</sup> − 1 and Excel's 15-digit limit, and explains them in English and Korean.
@@ -24,6 +38,22 @@ Notable changes to DH.DevUtil are listed here. The newest changes appear first.
 
 ### Improved
 
+- Expand the Color Converter contrast preview from one sample sentence to a small interface preview with heading, paragraph, link, button, and input styles.
+- Place the Color Converter WCAG controls/results beside the preview on desktop and add small, body, large, and heading text samples.
+- Add buttons to apply the selected color to the WCAG foreground or background, and to swap the two contrast colors.
+- Add optimized contrast color suggestions: best black/white contrast and hue-preserving AA/AAA candidates, each with an apply action for foreground or background.
+- Add target contrast selection, neutral-gray recommendations, and a derived Primary/Surface/Dark/Canvas starter palette.
+- Show current foreground/background in the suggested palette and display all suggested contrast colors in the right-side preview.
+- Show each suggested color in a paired sample box using the actual counterpart foreground or background color.
+- Add the counterpart label and HEX value inside every suggested palette swatch.
+- Format Timestamp Converter local date/time using the selected UI locale, including Korean date and AM/PM formatting while preserving standard ISO output.
+- Show the selected `datetime-local` value again in a localized preview below the native browser control.
+- Integrate the 14-lesson Regex Guide into the Regex Tester page; the guide button now scrolls to in-page lessons and each sample loads into the current tester without opening another document.
+- Present the integrated Regex Guide as an internal modal popup with close button, backdrop click, Escape-key close, and focus return.
+- Expand the integrated Regex Guide to 33 samples covering URLs, UUIDs, IPv4, SemVer, colors, filenames, JSON, CSV, HTML, Markdown, environment variables, SQL parameters, dates, times, and more.
+- Add a full English/Korean interface switch to Regex Tester, including localized flags, examples, statuses, match details, and a Korean screenshot.
+- Add Regex flavor preview for JavaScript, Python, .NET, Java, PCRE2, and Rust, including notes for flags that are handled by matching APIs rather than compilation options.
+- Add standalone Regex Guide with step-by-step lessons, practical samples, performance warnings, English/Korean UI, and Try in Tester links.
 - Add JWT Inspector parse-segment and detailed HS256 signature verification views.
 - Support PKCS#7, ANSI X.923, Zero, and NoPadding options in AES-CBC.
 - HTTP Digest Authentication Simulator shows Server-side calculation details for successful and failed response verification.

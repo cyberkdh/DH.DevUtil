@@ -14,6 +14,11 @@ DH.DevUtil은 일상적인 개발 작업에 사용하는 가벼운 유틸리티 
 | HTTP Digest Authentication Simulator | RFC 7616 challenge, Digest response, Server 검증 흐름 시뮬레이션 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.http-digest-auth-simulator.html) | [소스 보기](./tools/DH.DevUtil.http-digest-auth-simulator.html) | [사용 안내](./docs/HTTP_DIGEST_AUTH_SIMULATOR.ko.md) |
 | JWT Inspector | 테스트 JWT 생성(HS256), 일반 JWT 파싱 및 HS256 서명 검증 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.jwt-inspector.html) | [소스 보기](./tools/DH.DevUtil.jwt-inspector.html) | [사용 안내](./docs/JWT_INSPECTOR.ko.md) |
 | Number Notation Converter | `1.23457E+15` 같은 E 표기를 정확한 일반 표기, 천 단위 구분, 공학 표기, SI 접두어, 한국어 단위로 바꾸고 double·float32 저장값 확인 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.number-notation.html) | [소스 보기](./tools/DH.DevUtil.number-notation.html) | [사용 안내](./docs/NUMBER_NOTATION_CONVERTER.ko.md) |
+| Regex Tester | JavaScript 정규식 테스트, match·capture group 확인, replacement 미리보기, 정규식 문법 학습 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.regex-tester.html) | [소스 보기](./tools/DH.DevUtil.regex-tester.html) | [사용 안내](./docs/REGEX_TESTER.ko.md) |
+| Timestamp Converter | ISO, Unix, FILETIME, .NET Ticks 변환과 calendar duration 더하기·빼기 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.timestamp-converter.html) | [소스 보기](./tools/DH.DevUtil.timestamp-converter.html) | [사용 안내](./docs/TIMESTAMP_CONVERTER.ko.md) |
+| Color Converter | HEX, RGB, HSL, HSV, OKLCH 변환, 색상 조합 미리보기, WCAG 대비율 확인 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.color-converter.html) | [소스 보기](./tools/DH.DevUtil.color-converter.html) | [사용 안내](./docs/COLOR_CONVERTER.ko.md) |
+| Text · JSON Diff | 일반 텍스트와 형식화된 JSON을 로컬에서 비교하고 추가·삭제 줄 확인 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.text-json-diff.html) | [소스 보기](./tools/DH.DevUtil.text-json-diff.html) | [사용 안내](./docs/TEXT_JSON_DIFF.ko.md) |
+| CIDR Calculator | IPv4 네트워크 범위, 마스크, 호스트 수, 이진수, 서브넷 분할 계산 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.cidr-calculator.html) | [소스 보기](./tools/DH.DevUtil.cidr-calculator.html) | [사용 안내](./docs/CIDR_CALCULATOR.ko.md) |
 | Symmetric Encryption Simulator (Base) | AES, ARIA, 3DES, DES(ECB/CBC)와 padding 선택, 공유 Key/IV, 고정 IV로 같은 결과를 재현하며 대칭 암호화 학습 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.symmetric-encryption-simulator-base.html) | [소스 보기](./tools/DH.DevUtil.symmetric-encryption-simulator-base.html) | [사용 안내](./docs/SYMMETRIC_ENCRYPTION_SIMULATOR_BASE.ko.md) |
 | Symmetric Encryption Simulator | AES-GCM/CBC/CTR 암복호화와 CBC padding 비교 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.symmetric-encryption-simulator.html) | [소스 보기](./tools/DH.DevUtil.symmetric-encryption-simulator.html) | [사용 안내](./docs/SYMMETRIC_ENCRYPTION_SIMULATOR.ko.md) |
 | Unicode · Encoding Inspector | 코드 포인트, UTF-8/UTF-16/CP949 바이트, NFC/NFD 정규화, 폭 없는 공백·양방향 제어 문자 같은 숨은 문자, 글자 깨짐(mojibake)을 확인하고 16진수·Base64 바이트를 디코딩 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.unicode-inspector.html) | [소스 보기](./tools/DH.DevUtil.unicode-inspector.html) | [사용 안내](./docs/UNICODE_ENCODING_INSPECTOR.ko.md) |
@@ -38,6 +43,38 @@ RFC 7616 challenge 생성, Client response 계산, Server 검증과 계산 상�
 `1.23457E+15` 같은 E 표기를 정확한 10진 변환으로 읽기 쉬운 숫자로 바꾸고, double·float32에 실제로 저장되는 값을 확인할 수 있습니다. 자세한 기능과 사용 방법은 [Number Notation Converter 안내](./docs/NUMBER_NOTATION_CONVERTER.ko.md)를 참고하세요.
 
 ![Number Notation Converter 화면 미리보기](./docs/images/DH.DevUtil.number-notation.png)
+
+## Regex Tester 미리보기
+
+JavaScript 정규식을 테스트하고 모든 match·capture group을 확인하며 replacement token 결과를 미리 볼 수 있습니다. 프로그래밍 언어별 정규식 flavor 차이와 기본 문법도 학습할 수 있습니다. 자세한 기능과 사용 방법은 [Regex Tester 안내](./docs/REGEX_TESTER.ko.md)를 참고하세요.
+
+![Regex Tester 화면 미리보기](./docs/images/DH.DevUtil.regex-tester.png)
+
+[Regex Tester 안의 초보자용 Regex 학습 가이드 열기](./tools/DH.DevUtil.regex-tester.html#guide-lessons)에서 단계별 문법 설명과 실행 가능한 예제를 볼 수 있습니다.
+
+## Timestamp Converter 미리보기
+
+ISO 8601, Unix 단위, Windows FILETIME, .NET Ticks 사이를 변환하고 calendar duration을 날짜에 더하거나 뺄 수 있습니다. 자세한 기능과 사용 방법은 [Timestamp Converter 안내](./docs/TIMESTAMP_CONVERTER.ko.md)를 참고하세요.
+
+![Timestamp Converter 화면 미리보기](./docs/images/DH.DevUtil.timestamp-converter.png)
+
+## Color Converter 미리보기
+
+HEX 색상을 RGB, HSL, HSV, OKLCH로 변환하고 전경색·배경색 조합을 미리 보며 WCAG 대비율을 확인할 수 있습니다. 자세한 기능과 사용 방법은 [Color Converter 안내](./docs/COLOR_CONVERTER.ko.md)를 참고하세요.
+
+![Color Converter 화면 미리보기](./docs/images/DH.DevUtil.color-converter.png)
+
+## Text · JSON Diff 미리보기
+
+일반 텍스트와 형식화된 JSON을 로컬에서 비교하고 추가·삭제 줄을 확인할 수 있습니다. 자세한 기능과 사용 방법은 [Text · JSON Diff 안내](./docs/TEXT_JSON_DIFF.ko.md)를 참고하세요.
+
+![Text · JSON Diff 화면 미리보기](./docs/images/DH.DevUtil.text-json-diff.png)
+
+## CIDR Calculator 미리보기
+
+IPv4 네트워크 범위, 마스크, 호스트 수, 이진수, 서브넷 분할을 로컬에서 계산합니다. 자세한 기능과 사용 방법은 [CIDR Calculator 안내](./docs/CIDR_CALCULATOR.ko.md)를 참고하세요.
+
+![CIDR Calculator 화면 미리보기](./docs/images/DH.DevUtil.cidr-calculator.png)
 
 ## Symmetric Encryption Simulator (Base) 미리보기
 

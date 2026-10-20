@@ -1,0 +1,511 @@
+<!--
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//	Projects		: DH.DevUtil
+//	Author			: CYBERKDH
+//	Module			: Regex Tester
+//	History			: 2026-10-19 Initial implementation (JavaScript RegExp tester and learning guide)
+//	Copyrights		: Copyright (C)CYBERKDH. All Rights Reserved.
+//////////////////////////////////////////////////////////////////////////////////////////////////
+-->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Regex Tester | DH.DevUtil</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #182230;
+      --muted: #5d6b7a;
+      --line: #d9e1e8;
+      --surface: #fff;
+      --canvas: #f3f6f9;
+      --blue: #155eef;
+      --blue-dark: #1249bd;
+      --blue-soft: #eff4ff;
+      --green: #067647;
+      --red: #b42318;
+      --amber-bg: #fffaeb;
+      --amber-line: #fedf89;
+      --code: #f6f8fa;
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body { margin: 0; min-width: 320px; color: var(--ink); background: var(--canvas); }
+    button, input, textarea { font: inherit; }
+    .shell { max-width: 1440px; margin: 0 auto; padding: 24px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+    .brand { display: inline-flex; gap: 10px; align-items: center; color: var(--ink); font-weight: 700; text-decoration: none; }
+    .brand-mark { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 9px; color: #fff; background: var(--blue); }
+    .topbar-note, .intro-copy, .hint, .footer-note { color: var(--muted); }
+    .intro { display: flex; justify-content: space-between; gap: 24px; align-items: end; margin-bottom: 20px; }
+    .eyebrow { margin: 0 0 8px; color: var(--blue); font-size: .78rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(1.8rem, 4vw, 2.5rem); letter-spacing: -.04em; }
+    .intro-copy { max-width: 600px; margin: 0; line-height: 1.55; }
+    .workspace { display: grid; grid-template-columns: minmax(280px, 400px) minmax(0, 1fr); gap: 16px; align-items: start; }
+    .pane { min-width: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); box-shadow: 0 2px 6px #1822300a; }
+    .pane-head { display: flex; min-height: 64px; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+    .pane-title { margin: 0; font-size: 1rem; }
+    .pane-index { color: var(--muted); font-size: .75rem; font-weight: 700; }
+    .pane-content { display: grid; gap: 16px; padding: 18px; }
+    .field { display: grid; gap: 7px; min-width: 0; }
+    label { font-size: .86rem; font-weight: 650; }
+    input[type="text"], textarea { width: 100%; min-width: 0; padding: 10px 11px; border: 1px solid #c9d2dc; border-radius: 7px; color: var(--ink); background: #fff; }
+    input[type="text"]:focus, textarea:focus, button:focus-visible { outline: 3px solid #84adff80; outline-offset: 1px; border-color: var(--blue); }
+    input[type="text"], textarea, .mono { font-family: Consolas, "Courier New", monospace; }
+    textarea { min-height: 210px; resize: vertical; line-height: 1.55; }
+    .pattern-input { font-size: 1.02rem; }
+    .hint, .footer-note { margin: 0; font-size: .78rem; line-height: 1.5; }
+    .button { min-height: 38px; padding: 8px 12px; border: 1px solid #c9d2dc; border-radius: 7px; color: var(--ink); background: #fff; cursor: pointer; font-weight: 650; }
+    .button:hover:not(:disabled) { background: #f3f6f9; }
+    .button-primary { border-color: var(--blue); color: #fff; background: var(--blue); }
+    .button-primary:hover:not(:disabled) { background: var(--blue-dark); }
+    .button-small { min-height: 30px; padding: 4px 9px; font-size: .78rem; }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .status { min-width: 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: 7px; color: var(--muted); background: #fafbfc; font-size: .83rem; line-height: 1.45; overflow-wrap: anywhere; }
+    .status[data-kind="success"] { color: var(--green); border-color: #abefc6; background: #ecfdf3; }
+    .status[data-kind="error"] { color: var(--red); border-color: #fecdca; background: #fef3f2; }
+    .status[data-kind="warning"] { color: #8a4b08; border-color: var(--amber-line); background: var(--amber-bg); }
+    .flags { display: flex; flex-wrap: wrap; gap: 7px; }
+    .flag { display: inline-flex; gap: 5px; align-items: center; padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; color: var(--muted); background: #fafbfc; font: .8rem Consolas, monospace; cursor: pointer; }
+    .flag:has(input:checked) { border-color: #9ab8ff; color: var(--blue-dark); background: var(--blue-soft); }
+    .flag input { accent-color: var(--blue); }
+    .examples { display: grid; gap: 7px; }
+    .example { display: grid; gap: 3px; width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 7px; color: var(--ink); background: #fff; text-align: left; cursor: pointer; }
+    .example:hover { border-color: #9ab8ff; background: var(--blue-soft); }
+    .example-name { font-weight: 700; }
+    .example-code { color: var(--muted); font: .76rem Consolas, monospace; overflow-wrap: anywhere; }
+    .results { display: grid; gap: 14px; }
+    .summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .stat { padding: 12px; border: 1px solid var(--line); border-radius: 8px; background: #fafbfc; }
+    .stat-label { color: var(--muted); font-size: .75rem; }
+    .stat-value { margin-top: 3px; font-size: 1.15rem; font-weight: 700; }
+    .match { min-width: 0; padding: 14px; border: 1px solid var(--line); border-radius: 9px; background: #fff; }
+    .match-head { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: baseline; margin-bottom: 10px; }
+    .match-title { font-weight: 700; }
+    .match-meta { color: var(--muted); font: .78rem Consolas, monospace; }
+    .match-value { margin: 0 0 11px; padding: 9px 10px; border-radius: 6px; color: #172b4d; background: var(--blue-soft); font: .86rem/1.5 Consolas, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .groups { display: grid; gap: 6px; }
+    .group { display: grid; grid-template-columns: minmax(100px, 180px) minmax(0, 1fr); gap: 10px; padding: 7px 0; border-top: 1px solid #edf0f3; font-size: .82rem; }
+    .group-name { color: var(--muted); font-weight: 650; }
+    .group-value { font-family: Consolas, "Courier New", monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .replace { display: grid; gap: 10px; }
+    .replace-output { min-height: 80px; margin: 0; padding: 10px; border: 1px solid var(--line); border-radius: 7px; background: var(--code); font: .84rem/1.5 Consolas, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .flavor-grid { display: grid; grid-template-columns: minmax(180px, 250px) minmax(0, 1fr); gap: 14px; align-items: start; }
+    .flavor-output { min-height: 150px; margin: 0; padding: 12px; border: 1px solid var(--line); border-radius: 7px; background: var(--code); font: .82rem/1.55 Consolas, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .lessons { display: grid; gap: 12px; }
+    .lesson { overflow: hidden; border: 1px solid var(--line); border-radius: 9px; background: #fff; }
+    .lesson-head { display: flex; align-items: baseline; gap: 10px; padding: 11px 13px; border-bottom: 1px solid var(--line); background: #fafbfc; }
+    .lesson-number { color: var(--muted); font: .76rem Consolas, monospace; }
+    .lesson-title { margin: 0; font-size: .92rem; }
+    .lesson-body { display: grid; gap: 10px; padding: 13px; }
+    .lesson-copy, .lesson-tip { margin: 0; color: var(--muted); font-size: .83rem; line-height: 1.55; }
+    .lesson-tip { padding: 9px 11px; border-left: 3px solid var(--blue); background: var(--blue-soft); }
+    .lesson-sample { display: grid; grid-template-columns: minmax(0, 1fr) minmax(180px, .7fr); gap: 10px; }
+    .lesson-side { display: grid; gap: 6px; align-content: start; }
+    .sample-label { color: var(--muted); font-size: .7rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+    .lesson pre { margin: 0; padding: 9px; border-radius: 6px; background: var(--code); font: .78rem/1.5 Consolas, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+    body.modal-open { overflow: hidden; }
+    .guide-modal { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 5vh 5vw; background: #18223099; }
+    .guide-dialog { display: grid; width: min(1120px, 100%); max-height: 90vh; overflow: hidden auto; }
+    .guide-dialog .pane-head { position: sticky; top: 0; z-index: 1; background: var(--surface); }
+    .guide-close { min-width: 34px; }
+    details.item { border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+    summary.item-head { display: flex; align-items: center; gap: 10px; padding: 12px 14px; cursor: pointer; list-style: none; font-weight: 700; }
+    summary.item-head::-webkit-details-marker { display: none; }
+    summary.item-head::before { content: ""; width: 7px; height: 7px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(-45deg); }
+    details[open] > summary.item-head::before { transform: rotate(45deg); }
+    .item-body { padding: 0 14px 14px; line-height: 1.6; }
+    .item-body p { margin: 10px 0 0; }
+    .item-body code { padding: 2px 4px; border-radius: 4px; background: var(--code); }
+    .learn { margin-top: 16px; }
+    .learn-head { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+    .language-switch { display: flex; gap: 6px; }
+    .language-switch button[aria-pressed="true"] { color: #fff; border-color: var(--blue); background: var(--blue); }
+    .language-switch button[aria-pressed="true"]:hover:not(:disabled) { color: #fff; border-color: var(--blue-dark); background: var(--blue-dark); }
+    .language-switch button[aria-pressed="false"]:hover:not(:disabled) { color: var(--blue-dark); border-color: #9ab8ff; background: var(--blue-soft); }
+    .learn-copy { color: var(--muted); font-size: .88rem; line-height: 1.65; }
+    .learn-copy p { margin: 12px 0 0; }
+    .learn-copy ul { margin: 10px 0 0; padding-left: 20px; }
+    .footer { display: flex; justify-content: space-between; gap: 16px; margin-top: 18px; padding: 14px 2px; }
+    @media (max-width: 900px) { .workspace { grid-template-columns: 1fr; } .intro { display: block; } .intro-copy { margin-top: 12px; } }
+    @media (max-width: 600px) { .shell { padding: 14px; } .summary { grid-template-columns: 1fr; } .group, .flavor-grid, .lesson-sample { grid-template-columns: 1fr; gap: 8px; } .footer { display: block; } .footer-note + .footer-note { margin-top: 8px; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar"><a class="brand" href="../README.md"><span class="brand-mark">DH</span><span>DH.DevUtil</span></a><div class="actions"><button id="guide" class="button button-small" data-i18n="guideButton" type="button">Regex Guide</button><div class="language-switch ui-language"><button class="button button-small" data-ui-lang="en" aria-pressed="true" type="button">English</button><button class="button button-small" data-ui-lang="ko" aria-pressed="false" type="button">한국어</button></div></div></header>
+    <section class="intro"><div><p class="eyebrow" data-i18n="eyebrow">Text &amp; validation</p><h1>Regex Tester</h1></div><p class="intro-copy" data-i18n="intro">Build, test, and learn JavaScript regular expressions. See every match, capture group, index, and replacement result without sending your text anywhere.</p></section>
+    <section class="workspace">
+      <section class="pane">
+        <div class="pane-head"><h2 class="pane-title" data-i18n="patternTitle">Pattern</h2><span class="pane-index">01</span></div>
+        <div class="pane-content">
+          <div class="field"><label for="pattern" data-i18n="patternLabel">Regular expression</label><input id="pattern" class="pattern-input" type="text" spellcheck="false" value="(?&lt;user&gt;[A-Za-z0-9._%+-]+)@(?&lt;domain&gt;[A-Za-z0-9.-]+\.[A-Za-z]{2,})"><p class="hint" data-i18n="patternHint">Enter the pattern without surrounding slashes, for example <span class="mono">\\d+</span>.</p></div>
+          <div class="field"><label data-i18n="flagsLabel">Flags</label><div id="flags" class="flags"></div><p class="hint" data-i18n="flagsHint">Use <span class="mono">g</span> to find all matches. Without it, JavaScript returns only the first match.</p></div>
+          <div class="field"><label for="test-text" data-i18n="testLabel">Test string</label><textarea id="test-text" spellcheck="false">Contact alice@example.com or bob.dev+test@sub.example.org.</textarea></div>
+          <div class="actions"><button id="examples" class="button button-primary" data-i18n="loadExample" type="button">Load example</button><button id="clear" class="button" data-i18n="clear" type="button">Clear</button></div>
+          <div id="status" class="status" data-kind="success" role="status"></div>
+          <div class="field"><label data-i18n="quickExamples">Quick examples</label><div id="example-list" class="examples"></div></div>
+        </div>
+      </section>
+      <section class="pane">
+        <div class="pane-head"><h2 class="pane-title" data-i18n="matchesTitle">Matches &amp; replacement</h2><span class="pane-index">02</span></div>
+        <div class="pane-content results">
+          <div id="summary" class="summary"></div>
+          <div id="matches"></div>
+          <div class="replace"><label for="replacement" data-i18n="replacementLabel">Replacement</label><input id="replacement" type="text" spellcheck="false" data-i18n-placeholder="replacementPlaceholder" placeholder="For example: <$&gt; or $&lt;user&gt;"><p class="hint" data-i18n="replacementHint">Supports JavaScript replacement tokens such as <span class="mono">$&amp;</span>, <span class="mono">$1</span>, and <span class="mono">$&lt;name&gt;</span>.</p><pre id="replace-output" class="replace-output"></pre><button id="copy-replacement" class="button button-small" data-i18n="copyResult" type="button">Copy result</button></div>
+        </div>
+      </section>
+    </section>
+    <section class="pane learn">
+      <div class="pane-head"><h2 class="pane-title" data-i18n="flavorTitle">Regex flavor preview</h2><span class="pane-index">03</span></div>
+      <div class="pane-content flavor-grid"><div class="field"><label for="flavor" data-i18n="flavorLabel">Language / engine</label><select id="flavor"></select><p class="hint" id="flavor-note"></p></div><pre id="flavor-output" class="flavor-output"></pre></div>
+    </section>
+    <div id="guide-lessons" class="guide-modal" hidden><section class="pane guide-dialog" role="dialog" aria-modal="true" aria-labelledby="guide-title"><div class="pane-head"><h2 id="guide-title" class="pane-title" data-i18n="guideTitle">Regex Guide lessons</h2><button id="guide-close" class="button button-small guide-close" data-i18n="guideClose" type="button" aria-label="Close">×</button></div><div class="pane-content"><p class="hint" data-i18n="guideIntro">Read a lesson, change one part of the pattern, and use the sample button to load it into the Tester.</p><div id="guide-list" class="lessons"></div></div></section></div>
+    <section class="pane learn">
+      <div class="pane-head learn-head"><h2 class="pane-title" data-i18n="learnTitle">Learn more</h2><div class="language-switch"><button class="button button-small" data-learn-lang="en" aria-pressed="true" type="button">English</button><button class="button button-small" data-learn-lang="ko" aria-pressed="false" type="button">한국어</button></div></div>
+      <div id="learn-en" class="pane-content learn-copy"><p><strong>What is a regex?</strong> A regular expression is a small language for describing text. Literal characters match themselves; character classes such as <code>\d</code> match a category; quantifiers such as <code>+</code> control repetition; parentheses create groups.</p><p><strong>Read from left to right:</strong> <code>^</code> and <code>$</code> anchor the text, <code>[...]</code> chooses one character, <code>(...)</code> groups a pattern, <code>?</code> makes something optional, and <code>|</code> means “or”. Start with a small pattern and test it against examples.</p><p><strong>Flavor matters:</strong> this page uses the browser's JavaScript <code>RegExp</code> engine. Python, .NET, Java, PCRE2, Rust, and other engines share many basics but differ in named-group syntax, lookbehind support, Unicode properties, replacement syntax, and flags. Always check the target language before copying a pattern.</p><p><strong>Safety:</strong> Regular expressions can be slow when nested quantifiers cause catastrophic backtracking. Keep patterns specific, avoid ambiguous constructs such as <code>(a+)+</code>, and never use an unreviewed regex for untrusted large input in a critical service.</p></div>
+      <div id="learn-ko" class="pane-content learn-copy" hidden><p><strong>정규식(regular expression)이란?</strong> 텍스트의 모양을 표현하는 작은 언어입니다. 일반 문자는 그대로 일치하고, <code>\d</code> 같은 character class는 문자 종류를, <code>+</code> 같은 quantifier는 반복 횟수를, 괄호는 group을 표현합니다.</p><p><strong>왼쪽에서 오른쪽으로 읽으세요.</strong> <code>^</code>와 <code>$</code>는 문자열의 시작·끝, <code>[...]</code>는 문자 하나 선택, <code>(...)</code>는 group, <code>?</code>는 선택 항목, <code>|</code>는 “또는”을 뜻합니다. 작은 패턴부터 만들고 테스트 문자열을 추가하는 방식이 가장 쉽습니다.</p><p><strong>언어별 flavor가 다릅니다.</strong> 이 페이지는 브라우저의 JavaScript <code>RegExp</code> engine을 사용합니다. Python, .NET, Java, PCRE2, Rust 등은 기본 문법이 비슷하지만 named group 문법, lookbehind, Unicode property, replacement 문법, flag 지원이 다를 수 있습니다. 실제 사용할 언어의 문서를 확인하세요.</p><p><strong>성능 주의:</strong> 중첩 quantifier는 catastrophic backtracking으로 매우 느려질 수 있습니다. <code>(a+)+</code>처럼 모호한 패턴을 피하고, 중요한 서비스에서 검증되지 않은 정규식으로 큰 외부 입력을 처리하지 마세요.</p></div>
+    </section>
+    <footer class="footer"><p class="footer-note" data-i18n="privacyFooter">All processing happens in this browser. No input is uploaded or stored.</p><p class="footer-note" data-i18n="engineFooter">Engine: JavaScript RegExp</p></footer>
+  </main>
+  <script>
+    'use strict';
+    const el = id => document.getElementById(id);
+    const uiText = {
+      en: { guideButton: 'Regex Guide', guideTitle: 'Regex Guide lessons', guideClose: 'Close', guideIntro: 'Read a lesson, change one part of the pattern, and use the sample button to load it into the Tester.', guideTry: 'Try in Tester', guidePattern: 'Pattern', guideFlags: 'Flags', guideTest: 'Test string', guideTip: 'Tip', eyebrow: 'Text & validation', intro: 'Build, test, and learn JavaScript regular expressions. See every match, capture group, index, and replacement result without sending your text anywhere.', patternTitle: 'Pattern', patternLabel: 'Regular expression', patternHint: 'Enter the pattern without surrounding slashes, for example <span class="mono">\\\\d+</span>.', flagsLabel: 'Flags', flagsHint: 'Use <span class="mono">g</span> to find all matches. Without it, JavaScript returns only the first match.', testLabel: 'Test string', loadExample: 'Load example', clear: 'Clear', quickExamples: 'Quick examples', matchesTitle: 'Matches & replacement', replacementLabel: 'Replacement', replacementPlaceholder: 'For example: <$&gt; or $&lt;user&gt;', replacementHint: 'Supports JavaScript replacement tokens such as <span class="mono">$&amp;</span>, <span class="mono">$1</span>, and <span class="mono">$&lt;name&gt;</span>.', copyResult: 'Copy result', flavorTitle: 'Regex flavor preview', flavorLabel: 'Language / engine', learnTitle: 'Learn more', privacyFooter: 'All processing happens in this browser. No input is uploaded or stored.', engineFooter: 'Engine: JavaScript RegExp', matches: 'Matches', characters: 'Characters', flags: 'Flags', none: 'none', match: 'Match', index: 'index', length: 'length', emptyMatch: '(empty match)', noGroups: 'No capture groups in this match.', noMatches: 'No matches. Try changing the pattern, flags, or test string.', validNoMatches: 'Valid pattern. No matches found.', found: 'found.', invalid: 'Invalid regular expression: ', fix: 'Fix the pattern or flags and try again.', limit: 'Showing the first 1,000 matches to keep the page responsive.', copied: 'Replacement result copied.', undefined: 'undefined', empty: '(empty)', global: 'global', ignoreCase: 'ignore case', multiline: 'multiline', dotAll: 'dotAll', unicode: 'unicode', sticky: 'sticky' },
+      ko: { guideButton: 'Regex 학습 가이드', guideTitle: 'Regex 학습 가이드', guideClose: '닫기', guideIntro: 'lesson을 읽고 pattern의 한 부분을 바꿔 보세요. 샘플 버튼을 누르면 현재 Tester 입력값으로 불러옵니다.', guideTry: 'Tester에서 실행', guidePattern: 'Pattern', guideFlags: 'Flags', guideTest: '테스트 문자열', guideTip: 'Tip', eyebrow: '텍스트·검증', intro: 'JavaScript 정규식을 만들고 테스트하며 학습하세요. 입력값을 외부로 보내지 않고 모든 match, capture group, index, replacement 결과를 확인할 수 있습니다.', patternTitle: 'Pattern', patternLabel: '정규식(regular expression)', patternHint: '양쪽 slash를 제외한 pattern을 입력하세요. 예: <span class="mono">\\\\d+</span>', flagsLabel: 'Flags', flagsHint: '모든 match를 찾으려면 <span class="mono">g</span>를 사용하세요. 없으면 JavaScript는 첫 번째 match만 반환합니다.', testLabel: '테스트 문자열', loadExample: '예제 불러오기', clear: '지우기', quickExamples: '빠른 예제', matchesTitle: 'Match와 replacement', replacementLabel: 'Replacement', replacementPlaceholder: '예: <$&gt; 또는 $&lt;user&gt;', replacementHint: 'JavaScript replacement token인 <span class="mono">$&amp;</span>, <span class="mono">$1</span>, <span class="mono">$&lt;name&gt;</span> 등을 지원합니다.', copyResult: '결과 복사', flavorTitle: '언어별 정규식 미리보기', flavorLabel: '언어 / engine', learnTitle: '더 알아보기', privacyFooter: '모든 처리는 이 브라우저에서 이루어집니다. 입력값은 업로드하거나 저장하지 않습니다.', engineFooter: 'Engine: JavaScript RegExp', matches: 'Match 수', characters: '문자 수', flags: 'Flags', none: '없음', match: 'Match', index: 'index', length: '길이', emptyMatch: '(빈 match)', noGroups: '이 match에는 capture group이 없습니다.', noMatches: '일치하는 결과가 없습니다. pattern, flag 또는 테스트 문자열을 바꿔 보세요.', validNoMatches: '유효한 pattern이지만 일치하는 결과가 없습니다.', found: '발견됨.', invalid: '유효하지 않은 정규식: ', fix: 'pattern 또는 flag를 수정한 뒤 다시 시도하세요.', limit: '페이지 반응성을 위해 처음 1,000개의 match만 표시합니다.', copied: 'Replacement 결과를 복사했습니다.', undefined: 'undefined', empty: '(빈 값)', global: 'global', ignoreCase: '대소문자 무시', multiline: '여러 줄', dotAll: 'dotAll', unicode: 'unicode', sticky: 'sticky' }
+    };
+    let uiLanguage = 'en';
+    const flagDefinitions = [{ key: 'g', label: 'global', labelKey: 'global' }, { key: 'i', label: 'ignore case', labelKey: 'ignoreCase' }, { key: 'm', label: 'multiline', labelKey: 'multiline' }, { key: 's', label: 'dotAll', labelKey: 'dotAll' }, { key: 'u', label: 'unicode', labelKey: 'unicode' }, { key: 'y', label: 'sticky', labelKey: 'sticky' }];
+    const examples = [
+      { name: 'Email addresses', nameKo: '이메일 주소', pattern: '(?<user>[A-Za-z0-9._%+-]+)@(?<domain>[A-Za-z0-9.-]+\\.[A-Za-z]{2,})', flags: 'g', text: 'Contact alice@example.com or bob.dev+test@sub.example.org.', replacement: '[$<user>]@$<domain>' },
+      { name: 'Log levels', nameKo: '로그 level', pattern: '\\b(INFO|WARN|ERROR)\\b', flags: 'g', text: '[INFO] Started\\n[WARN] Slow response\\n[ERROR] Timeout', replacement: 'level=$1' },
+      { name: 'Capture a date', nameKo: '날짜 capture', pattern: '(?<year>\\d{4})-(?<month>\\d{2})-(?<day>\\d{2})', flags: 'g', text: 'Release dates: 2026-10-19 and 2027-01-05.', replacement: '$<day>/$<month>/$<year>' },
+      { name: 'Trim extra spaces', nameKo: '여러 공백 정리', pattern: '[ \\t]+', flags: 'g', text: 'too    many   spaces', replacement: ' ' }
+    ];
+    const flavors = {
+      javascript: { name: 'JavaScript', note: 'This is the engine used by this tool. Flags are passed to the RegExp constructor.', noteKo: '이 도구가 실제로 사용하는 engine입니다. Flags는 RegExp 생성자의 두 번째 인자로 전달됩니다.' },
+      python: { name: 'Python re', note: 'g is handled by finditer/findall, u is the default for str, and y has no direct equivalent.', noteKo: 'g는 finditer/findall 같은 API로 처리하고, u는 str에서 기본값이며, y에는 직접 대응하는 flag가 없습니다.' },
+      dotnet: { name: '.NET Regex', note: 'g is handled by Matches, u is the default Unicode behavior, and y has no direct equivalent.', noteKo: 'g는 Matches API로 처리하고, u는 기본 Unicode 동작이며, y에는 직접 대응하는 flag가 없습니다.' },
+      java: { name: 'Java Pattern', note: 'g is handled by Matcher.find(), while flags are Pattern constants.', noteKo: 'g는 Matcher.find()로 처리하고, 나머지 flag는 Pattern 상수로 표현합니다.' },
+      pcre2: { name: 'PCRE2', note: 'g is handled by repeated pcre2_match calls; u maps to UTF/UCP options.', noteKo: 'g는 pcre2_match를 반복 호출해 처리하고, u는 UTF/UCP option 조합으로 표현합니다.' },
+      rust: { name: 'Rust regex', note: 'g is handled by find_iter(); most flags use inline modifiers such as (?im).', noteKo: 'g는 find_iter()로 처리하고, 대부분의 flag는 (?im) 같은 inline modifier로 표현합니다.' }
+    };
+    const guideSamples = [
+      { title: 'Literal characters', titleKo: '일반 문자(literal)', copy: 'Literal characters match themselves. Start with the smallest possible pattern.', copyKo: '일반 문자는 자기 자신과 일치합니다. 가장 작은 pattern부터 시작하세요.', pattern: 'cat', flags: 'g', test: 'cat scatter CAT', tip: 'g finds both lowercase cat matches, including the one inside scatter. Add i to include CAT, or add boundaries when you need a whole word.', tipKo: 'g는 소문자 cat 두 개를 모두 찾으며 scatter 안의 cat도 포함합니다. CAT까지 포함하려면 i를 추가하고, 단어 전체가 필요하면 boundary를 추가하세요.' },
+      { title: 'Character classes', titleKo: '문자 집합(character class)', copy: 'Square brackets match one character from a set. A leading ^ negates the set.', copyKo: '대괄호는 집합 안의 문자 하나와 일치합니다. 맨 앞의 ^는 집합을 제외한다는 뜻입니다.', pattern: '[aeiou]', flags: 'gi', test: 'Regex makes text searchable.', tip: '[aeiou] finds one vowel at a time; g finds every vowel and i ignores case.', tipKo: '[aeiou]는 모음 한 글자씩 찾습니다. g는 모두 찾고 i는 대소문자를 무시합니다.' },
+      { title: 'Shorthand classes', titleKo: '축약 문자 집합', copy: 'Use \\d for digits, \\w for word characters, and \\s for whitespace.', copyKo: '\\d는 숫자, \\w는 word 문자, \\s는 whitespace를 뜻합니다.', pattern: '\\d+', flags: 'g', test: 'Order 12, then 305 items.', tip: 'The + quantifier joins adjacent digits into one number.', tipKo: '+ quantifier가 이어진 숫자를 하나의 number로 묶습니다.' },
+      { title: 'Quantifiers', titleKo: '반복 수량자(quantifier)', copy: '*, +, ?, and {n,m} control how many times a pattern repeats.', copyKo: '*, +, ?, {n,m}은 pattern의 반복 횟수를 제어합니다.', pattern: 'colou?r', flags: 'gi', test: 'color colour COLOR colourless', tip: '? makes the u optional, so both color and colour match.', tipKo: '?가 u를 선택 사항으로 만들어 color와 colour가 모두 일치합니다.' },
+      { title: 'Greedy and lazy', titleKo: 'Greedy와 lazy', copy: 'Quantifiers are greedy by default. Add ? to make a repeated match lazy.', copyKo: 'Quantifier는 기본적으로 greedy입니다. 뒤에 ?를 붙이면 lazy하게 최소 범위만 찾습니다.', pattern: '<.*?>', flags: 'g', test: '<b>one</b><i>two</i>', tip: '.*? stops at the nearest > instead of consuming the whole string.', tipKo: '.*?는 전체 문자열을 먹지 않고 가장 가까운 >에서 멈춥니다.' },
+      { title: 'Anchors and boundaries', titleKo: 'Anchor와 boundary', copy: '^ and $ anchor the input; \\b marks a word boundary.', copyKo: '^와 $는 입력의 시작·끝을 고정하고, \\b는 word boundary입니다.', pattern: '^ERROR\\b', flags: 'gm', test: 'INFO Started\nERROR Failed\nERROR_CODE 42', tip: 'm checks every line, while \\b prevents ERROR_CODE from matching.', tipKo: 'm은 각 줄을 검사하고, \\b는 ERROR_CODE와의 일치를 막습니다.' },
+      { title: 'Groups and alternation', titleKo: 'Group과 alternation', copy: 'Parentheses group a pattern. The | operator means “or”.', copyKo: '괄호는 pattern을 묶고 |는 “또는”을 뜻합니다.', pattern: '(GET|POST) /([^ ]+)', flags: 'g', test: 'GET /users POST /login DELETE /admin', tip: 'Group 1 captures the method and group 2 captures the path.', tipKo: 'Group 1은 method, group 2는 path를 capture합니다.' },
+      { title: 'Named groups', titleKo: 'Named group', copy: 'Name a group with (?<name>...) to make results easier to read.', copyKo: '(?<name>...) 형식으로 group에 이름을 붙이면 결과를 읽기 쉽습니다.', pattern: '(?<year>\\d{4})-(?<month>\\d{2})-(?<day>\\d{2})', flags: 'g', test: 'Dates: 2026-10-19 and 2027-01-05.', tip: 'Python uses (?P<name>...), so check the target engine.', tipKo: 'Python은 (?P<name>...)을 사용하므로 대상 engine을 확인하세요.' },
+      { title: 'Lookahead', titleKo: 'Lookahead', copy: '(?=...) requires following text without consuming it.', copyKo: '(?=...)는 뒤에 특정 text가 있어야 하지만 소비하지 않습니다.', pattern: '\\d+(?= USD)', flags: 'g', test: '10 USD, 20 EUR, 30 USD', tip: 'Only numbers before USD match; USD stays outside the match.', tipKo: 'USD 앞의 숫자만 match되고 USD는 match에 포함되지 않습니다.' },
+      { title: 'Email shape', titleKo: '이메일 형태 검사', copy: 'Combine classes, quantifiers, a literal dot, and named groups.', copyKo: '문자 집합, quantifier, literal dot, named group을 조합합니다.', pattern: '(?<user>[A-Za-z0-9._%+-]+)@(?<domain>[A-Za-z0-9.-]+\\.[A-Za-z]{2,})', flags: 'g', test: 'alice@example.com bob.dev+test@sub.example.org', tip: 'This is a shape check, not a complete email standard validator.', tipKo: '실무 형태 검사이며 완전한 이메일 표준 validator는 아닙니다.' },
+      { title: 'Log extraction', titleKo: '로그 추출', copy: 'Use groups to extract timestamp, level, and message from logs.', copyKo: 'Group으로 log의 시간, level, message를 추출합니다.', pattern: '^\\[(?<time>[^\\]]+)\\]\\s+(?<level>INFO|WARN|ERROR)\\s+(?<message>.*)$', flags: 'gm', test: '[10:15:02] INFO Started\n[10:15:04] WARN Slow response\n[10:15:09] ERROR Timeout', tip: 'The negated class [^\\]]+ reads until the closing bracket.', tipKo: '부정 문자 집합 [^\\]]+가 닫는 대괄호 전까지 읽습니다.' },
+      { title: 'Whitespace cleanup', titleKo: '공백 정리', copy: 'Match runs of spaces or tabs and replace them with one space.', copyKo: '연속된 space·tab을 찾아 공백 하나로 바꿉니다.', pattern: '[ \\t]+', flags: 'g', test: 'too    many\tspaces', tip: 'Use the Replacement field with a single space.', tipKo: 'Replacement 필드에 공백 하나를 입력해 보세요.' },
+      { title: 'URL query values', titleKo: 'URL query 값 추출', copy: 'Capture a query value until the next ampersand or the end.', copyKo: '다음 ampersand 또는 문자열 끝까지 query 값을 capture합니다.', pattern: '(?:^|&)page=([^&]*)', flags: 'g', test: 'sort=name&page=3&size=20', tip: 'The non-capturing group keeps the separator out of the useful capture.', tipKo: 'Non-capturing group으로 separator를 필요한 capture에서 제외합니다.' },
+      { title: 'Performance warning', titleKo: '성능 주의', copy: 'Nested quantifiers can cause heavy backtracking on large input.', copyKo: '중첩 quantifier는 큰 입력에서 많은 backtracking을 일으킬 수 있습니다.', pattern: '^(a+)+$', flags: '', test: 'aaaaaaaaaaaaaaaaab', tip: 'This pattern is intentionally risky. Prefer simpler patterns and input limits.', tipKo: '의도적으로 위험한 예입니다. 단순한 pattern과 입력 길이 제한을 사용하세요.' },
+      { title: 'Whole words', titleKo: '단어 전체', copy: 'Use word boundaries to match a word without matching it inside a longer word.', copyKo: 'Word boundary로 긴 단어 안에 포함된 문자열이 아니라 단어 전체를 찾습니다.', pattern: '\\bcat\\b', flags: 'gi', test: 'cat scatter bobcat CAT', tip: 'The boundaries match cat and CAT, but not scatter or bobcat.', tipKo: 'boundary가 cat과 CAT은 찾지만 scatter와 bobcat은 제외합니다.' },
+      { title: 'Phone numbers', titleKo: '전화번호', copy: 'Allow common separators while keeping the digit groups readable.', copyKo: '자주 쓰는 구분자를 허용하면서 숫자 그룹을 읽기 쉽게 찾습니다.', pattern: '\\+82[- .]?\\d{1,2}[- .]?\\d{3,4}[- .]?\\d{4}', flags: 'g', test: '+82-10-1234-5678, +82 2 123 4567', tip: 'This is a format example, not a complete phone-number validator.', tipKo: '형식 예제이며 모든 전화번호를 검증하는 validator는 아닙니다.' },
+      { title: 'IPv4 addresses', titleKo: 'IPv4 주소', copy: 'Match four numeric octets with a range from 0 to 255.', copyKo: '0부터 255까지의 숫자 네 그룹으로 IPv4 주소를 찾습니다.', pattern: '\\b(?:25[0-5]|2[0-4]\\d|1?\\d?\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|1?\\d?\\d)){3}\\b', flags: 'g', test: 'Server 192.168.0.10, invalid 999.1.1.1', tip: 'The alternation limits each octet to the valid range.', tipKo: 'Alternation으로 각 octet의 유효 범위를 제한합니다.' },
+      { title: 'UUID', titleKo: 'UUID', copy: 'Match the common hexadecimal UUID layout with version and variant positions.', copyKo: '일반적인 16진수 UUID 구조와 version·variant 위치를 찾습니다.', pattern: '\\b[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\\b', flags: 'gi', test: 'id=550e8400-e29b-41d4-a716-446655440000', tip: 'A regex checks shape; it does not prove that the identifier exists.', tipKo: '정규식은 형태만 검사하며 해당 identifier의 존재를 보장하지 않습니다.' },
+      { title: 'Semantic versions', titleKo: 'Semantic version', copy: 'Find version strings with an optional v prefix and prerelease suffix.', copyKo: '선택적인 v prefix와 prerelease suffix를 포함한 version을 찾습니다.', pattern: '\\bv?\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?\\b', flags: 'g', test: 'v1.2.3, 2.0.0-beta.1, version 3', tip: 'This covers a useful subset of SemVer, not every specification rule.', tipKo: '유용한 SemVer 부분집합이며 모든 specification 규칙을 검사하지는 않습니다.' },
+      { title: 'Hex colors', titleKo: 'Hex 색상 코드', copy: 'Match three- or six-digit hexadecimal CSS colors.', copyKo: '3자리 또는 6자리 16진수 CSS 색상 코드를 찾습니다.', pattern: '#(?:[0-9a-f]{3}|[0-9a-f]{6})\\b', flags: 'gi', test: 'color: #fff; border: #155eef; bad: #12', tip: 'Put the longer alternative first when alternatives can overlap.', tipKo: 'Alternation이 겹칠 수 있으면 긴 항목을 먼저 배치하세요.' },
+      { title: 'File extensions', titleKo: '파일 확장자', copy: 'Find image filenames while accepting several common extensions.', copyKo: '여러 이미지 확장자를 허용해 파일 이름을 찾습니다.', pattern: '\\b[\\w.-]+\\.(?:png|jpe?g|gif|webp)\\b', flags: 'gi', test: 'logo.png photo.jpeg icon.svg hero.webp', tip: 'The ? makes the e in jpeg optional, matching jpg and jpeg.', tipKo: '?가 e를 선택 사항으로 만들어 jpg와 jpeg를 모두 찾습니다.' },
+      { title: 'URLs', titleKo: 'URL', copy: 'Find HTTP and HTTPS URLs up to the next whitespace character.', copyKo: '다음 whitespace 전까지 HTTP·HTTPS URL을 찾습니다.', pattern: 'https?://[^\\s]+', flags: 'gi', test: 'Docs: https://example.com/guide?q=1 and http://localhost:8080.', tip: 'URL parsing has many edge cases; use a URL parser when you need full validation.', tipKo: 'URL은 예외가 많으므로 완전한 검증에는 URL parser를 사용하세요.' },
+      { title: 'JSON keys', titleKo: 'JSON key', copy: 'Capture a quoted JSON key before its colon.', copyKo: '콜론 앞의 따옴표로 감싼 JSON key를 capture합니다.', pattern: '"([^"\\\\]+)"\\s*:', flags: 'g', test: '{"name":"Ada", "age": 36}', tip: 'Use a JSON parser for nested structure; this is only a quick inspection pattern.', tipKo: '중첩 구조에는 JSON parser를 사용하고, 이 pattern은 빠른 확인에만 사용하세요.' },
+      { title: 'Quoted strings', titleKo: '따옴표 문자열', copy: 'Use a backreference so the closing quote matches the opening quote.', copyKo: 'Backreference로 닫는 따옴표가 여는 따옴표와 같은 종류인지 확인합니다.', pattern: '(["\'])(?:(?!\\1|\\\\).|\\\\.)*\\1', flags: 'g', test: '"double quoted" and \'single quoted\'', tip: 'The negative lookahead prevents the lazy-looking body from crossing its closing quote.', tipKo: 'Negative lookahead가 닫는 따옴표를 넘어가지 않게 합니다.' },
+      { title: 'CSV fields', titleKo: 'CSV field', copy: 'Separate simple CSV fields, including a basic quoted field form.', copyKo: '간단한 따옴표 field를 포함한 CSV field를 구분합니다.', pattern: '(?:^|,)(?:"([^"]*(?:""[^"]*)*)"|([^",]*))', flags: 'g', test: 'Ada,42,"New York, NY",active', tip: 'CSV has escaping rules; use a CSV parser for production data.', tipKo: 'CSV는 escaping 규칙이 있으므로 production data에는 CSV parser를 사용하세요.' },
+      { title: 'HTML tags', titleKo: 'HTML tag', copy: 'Find opening and closing-looking tags for quick text inspection.', copyKo: '텍스트를 빠르게 살펴볼 때 HTML opening·closing tag 형태를 찾습니다.', pattern: '<\\/?[A-Za-z][^>]*>', flags: 'g', test: '<p>Hello <strong>world</strong>.</p>', tip: 'Do not use this as a complete HTML parser or sanitizer.', tipKo: '완전한 HTML parser나 sanitizer 대신 사용하지 마세요.' },
+      { title: 'Markdown headings', titleKo: 'Markdown heading', copy: 'With m, match a heading at the beginning of every line.', copyKo: 'm을 사용해 각 줄의 시작에 있는 heading을 찾습니다.', pattern: '^#{1,6}\\s+(.+)$', flags: 'gm', test: '# Title\nbody\n### Details', tip: 'Group 1 contains the heading text without the # marks.', tipKo: 'Group 1에는 # 기호를 제외한 heading text가 들어갑니다.' },
+      { title: 'TODO comments', titleKo: 'TODO 주석', copy: 'Extract TODO messages from line comments.', copyKo: 'line comment에서 TODO message를 추출합니다.', pattern: '//\\s*TODO:?\\s*(.+)$', flags: 'gm', test: '// TODO: add tests\nconst x = 1; // TODO fix naming', tip: 'The m flag makes $ stop at each line ending.', tipKo: 'm flag가 $를 각 줄 끝에서 동작하게 합니다.' },
+      { title: 'Environment variables', titleKo: '환경 변수', copy: 'Find ${NAME} placeholders with a conventional identifier name.', copyKo: '일반적인 identifier 이름을 가진 ${NAME} placeholder를 찾습니다.', pattern: '\\$\\{[A-Za-z_][A-Za-z0-9_]*\\}', flags: 'g', test: 'url=${API_URL} port=${PORT} bad=${123}', tip: 'The first character rule prevents a placeholder from starting with a digit.', tipKo: '첫 문자 규칙으로 숫자로 시작하는 placeholder를 제외합니다.' },
+      { title: 'SQL parameters', titleKo: 'SQL parameter', copy: 'Find named parameters such as :userId in a query template.', copyKo: 'query template의 :userId 같은 named parameter를 찾습니다.', pattern: ':[A-Za-z_][A-Za-z0-9_]*', flags: 'g', test: 'SELECT * FROM users WHERE id=:userId AND role=:role', tip: 'This finds placeholders; it does not make string concatenation safe.', tipKo: 'placeholder를 찾을 뿐이며 문자열 연결을 안전하게 만들지는 않습니다.' },
+      { title: 'Times', titleKo: '시간', copy: 'Match 24-hour times with optional seconds.', copyKo: '초가 선택적인 24시간 형식의 시간을 찾습니다.', pattern: '\\b(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d)?\\b', flags: 'g', test: 'Start 09:30, end 18:45:10, invalid 25:00', tip: 'The hour and minute ranges are limited separately.', tipKo: '시와 분의 범위를 각각 제한합니다.' },
+      { title: 'ISO dates', titleKo: 'ISO 날짜', copy: 'Find the YYYY-MM-DD shape used by many APIs and logs.', copyKo: '많은 API와 log에서 사용하는 YYYY-MM-DD 형태를 찾습니다.', pattern: '\\b\\d{4}-\\d{2}-\\d{2}\\b', flags: 'g', test: 'Created 2026-10-19; not 2026/10/19', tip: 'This checks the shape only; it will not reject February 30.', tipKo: '형태만 검사하므로 2월 30일 같은 날짜는 거부하지 않습니다.' },
+      { title: 'Trim line whitespace', titleKo: '줄 양끝 공백 정리', copy: 'Find leading or trailing spaces on every line.', copyKo: '각 줄의 앞뒤 공백을 찾습니다.', pattern: '^[ \\t]+|[ \\t]+$', flags: 'gm', test: '  first line  \nsecond line\t\n  third  ', tip: 'Use the replacement field with an empty value to remove the whitespace.', tipKo: 'Replacement를 빈 값으로 두면 공백을 제거할 수 있습니다.' }
+    ];
+    let lastResult = { replacement: '' };
+
+    function node(tag, className, text) {
+      const item = document.createElement(tag);
+      if (className) item.className = className;
+      if (text !== undefined) item.textContent = text;
+      return item;
+    }
+
+    function t(key) {
+      return uiText[uiLanguage][key] || uiText.en[key] || key;
+    }
+
+    function setUiLanguage(language) {
+      uiLanguage = language === 'ko' ? 'ko' : 'en';
+      document.documentElement.lang = uiLanguage;
+      document.querySelectorAll('[data-i18n]').forEach(item => { item.innerHTML = t(item.dataset.i18n); });
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(item => { item.placeholder = t(item.dataset.i18nPlaceholder); });
+      document.querySelectorAll('[data-ui-lang]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.uiLang === uiLanguage)));
+      renderFlags();
+      renderExamples();
+      renderFlavor();
+      renderGuideLessons();
+      render();
+      try { localStorage.setItem('dh-devutil-regex-tester-ui-lang', uiLanguage); } catch (error) { /* storage is optional */ }
+    }
+
+    function copyText(value) {
+      if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(value);
+      const area = document.createElement('textarea');
+      area.value = value;
+      area.style.position = 'fixed';
+      area.style.opacity = '0';
+      document.body.appendChild(area);
+      area.select();
+      document.execCommand('copy');
+      area.remove();
+      return Promise.resolve();
+    }
+
+    function selectedFlags() {
+      return flagDefinitions.filter(item => el('flag-' + item.key).checked).map(item => item.key).join('');
+    }
+
+    function renderFlags() {
+      const container = el('flags');
+      container.replaceChildren();
+      flagDefinitions.forEach(item => {
+        const label = node('label', 'flag');
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = 'flag-' + item.key;
+        checkbox.value = item.key;
+        checkbox.checked = item.key === 'g' || item.key === 'u';
+        checkbox.addEventListener('change', render);
+        label.append(checkbox, document.createTextNode(item.key + ' ' + t(item.labelKey)));
+        container.appendChild(label);
+      });
+    }
+
+    function setStatus(text, kind) {
+      el('status').textContent = text;
+      el('status').dataset.kind = kind;
+    }
+
+    function renderSummary(count, length) {
+      const summary = el('summary');
+      summary.replaceChildren();
+      [[t('matches'), String(count)], [t('characters'), String(length)], [t('flags'), selectedFlags() || t('none')]].forEach(pair => {
+        const stat = node('div', 'stat');
+        stat.append(node('div', 'stat-label', pair[0]), node('div', 'stat-value mono', pair[1]));
+        summary.appendChild(stat);
+      });
+    }
+
+    function renderMatch(match, index) {
+      const card = node('article', 'match');
+      const head = node('div', 'match-head');
+      head.append(node('span', 'match-title', t('match') + ' ' + (index + 1)), node('span', 'match-meta', t('index') + ' ' + match.index + ' · ' + t('length') + ' ' + match[0].length));
+      const value = node('pre', 'match-value', match[0] || t('emptyMatch'));
+      const groups = node('div', 'groups');
+      const names = match.groups ? Object.keys(match.groups) : [];
+      for (let i = 1; i < match.length; i += 1) {
+        const row = node('div', 'group');
+        row.append(node('span', 'group-name', '$' + i), node('span', 'group-value', match[i] === undefined ? t('undefined') : match[i] || t('empty')));
+        groups.appendChild(row);
+      }
+      names.forEach(name => {
+        const row = node('div', 'group');
+        row.append(node('span', 'group-name', '$<' + name + '>'), node('span', 'group-value', match.groups[name] === undefined ? t('undefined') : match.groups[name] || t('empty')));
+        groups.appendChild(row);
+      });
+      if (!groups.childElementCount) groups.appendChild(node('p', 'hint', t('noGroups')));
+      card.append(head, value, groups);
+      return card;
+    }
+
+    function render() {
+      const pattern = el('pattern').value;
+      const text = el('test-text').value;
+      const flags = selectedFlags();
+      renderFlavor();
+      const matches = el('matches');
+      matches.replaceChildren();
+      try {
+        const regex = new RegExp(pattern, flags);
+        const found = [];
+        if (regex.global || regex.sticky) {
+          let match;
+          while ((match = regex.exec(text)) !== null) {
+            found.push(match);
+            if (match[0] === '') regex.lastIndex += 1;
+            if (found.length >= 1000) break;
+          }
+        } else {
+          const match = regex.exec(text);
+          if (match) found.push(match);
+        }
+        renderSummary(found.length, text.length);
+        found.forEach((match, index) => matches.appendChild(renderMatch(match, index)));
+        if (!found.length) matches.appendChild(node('div', 'status', t('noMatches')));
+        const replacement = el('replacement').value;
+        lastResult.replacement = text.replace(regex, replacement);
+        el('replace-output').textContent = lastResult.replacement;
+        setStatus(found.length ? found.length + ' ' + t('match') + (uiLanguage === 'en' && found.length !== 1 ? 'es' : '') + ' ' + t('found') : t('validNoMatches'), found.length ? 'success' : 'warning');
+        if (found.length >= 1000) setStatus(t('limit'), 'warning');
+      } catch (error) {
+        renderSummary(0, text.length);
+        el('replace-output').textContent = '';
+        setStatus(t('invalid') + error.message, 'error');
+        matches.appendChild(node('div', 'status', t('fix')));
+        lastResult.replacement = '';
+      }
+    }
+
+    function loadExample(example) {
+      el('pattern').value = example.pattern;
+      el('test-text').value = example.text.replaceAll('\\n', '\\n');
+      el('replacement').value = example.replacement;
+      flagDefinitions.forEach(item => { el('flag-' + item.key).checked = example.flags.includes(item.key); });
+      render();
+    }
+
+    function renderExamples() {
+      const list = el('example-list');
+      list.replaceChildren();
+      examples.forEach(example => {
+        const button = node('button', 'example');
+        button.type = 'button';
+        button.append(node('span', 'example-name', uiLanguage === 'ko' ? example.nameKo : example.name), node('span', 'example-code', '/' + example.pattern + '/' + example.flags));
+        button.addEventListener('click', () => loadExample(example));
+        list.appendChild(button);
+      });
+    }
+
+    function flavorCode(key, pattern, flags) {
+      const flavorPattern = key === 'python' ? pattern.replace(/\(\?<([A-Za-z_$][\w$]*)>/g, '(?P<$1>') : pattern;
+      const quoted = JSON.stringify(flavorPattern);
+      const options = { i: 'IGNORECASE', m: 'MULTILINE', s: 'DOTALL' };
+      if (key === 'javascript') return 'const regex = new RegExp(' + quoted + ', ' + JSON.stringify(flags) + ');\nconst match = regex.exec(text);';
+      if (key === 'python') {
+        const values = [...flags].filter(flag => options[flag]).map(flag => 're.' + options[flag]);
+        return 'import re\nregex = re.compile(' + quoted + (values.length ? ', ' + values.join(' | ') : '') + ')\nfor match in regex.finditer(text):\n    print(match.group(0))';
+      }
+      if (key === 'dotnet') {
+        const values = [...flags].filter(flag => options[flag]).map(flag => 'RegexOptions.' + (flag === 'i' ? 'IgnoreCase' : flag === 'm' ? 'Multiline' : 'Singleline'));
+        return 'var regex = new Regex(' + quoted + (values.length ? ', ' + values.join(' | ') : '') + ');\nforeach (Match match in regex.Matches(text)) { }';
+      }
+      if (key === 'java') {
+        const values = [...flags].filter(flag => options[flag]).map(flag => 'Pattern.' + (flag === 'i' ? 'CASE_INSENSITIVE' : flag === 'm' ? 'MULTILINE' : 'DOTALL'));
+        return 'Pattern pattern = Pattern.compile(' + quoted + (values.length ? ', ' + values.join(' | ') : '') + ');\nMatcher matcher = pattern.matcher(text);\nwhile (matcher.find()) { }';
+      }
+      if (key === 'pcre2') {
+        const values = [...flags].filter(flag => flag === 'i' || flag === 'm' || flag === 's').map(flag => 'PCRE2_' + (flag === 'i' ? 'CASELESS' : flag === 'm' ? 'MULTILINE' : 'DOTALL'));
+        if (flags.includes('u')) values.push('PCRE2_UTF | PCRE2_UCP');
+        return 'pcre2_compile(' + quoted + ', ' + (values.join(' | ') || '0') + ');\n/* Repeat pcre2_match() for global matching. */';
+      }
+      const inline = [...flags].filter(flag => flag === 'i' || flag === 'm' || flag === 's').join('');
+      return 'let regex = regex::Regex::new(r"' + (inline ? '(?' + inline + ')' : '') + flavorPattern.replaceAll('"', '\\"') + '").unwrap();\nfor match in regex.find_iter(text) { }';
+    }
+
+    function renderFlavor() {
+      const select = el('flavor');
+      const selected = select.value || 'javascript';
+      if (!select.options.length) Object.entries(flavors).forEach(([key, flavor]) => select.add(new Option(flavor.name, key)));
+      select.value = flavors[selected] ? selected : 'javascript';
+      const flavor = flavors[select.value];
+      el('flavor-output').textContent = flavorCode(select.value, el('pattern').value, selectedFlags());
+      el('flavor-note').textContent = uiLanguage === 'ko' ? flavor.noteKo : flavor.note;
+    }
+
+    function loadGuideSample(sample) {
+      el('pattern').value = sample.pattern;
+      el('test-text').value = sample.test;
+      flagDefinitions.forEach(item => { el('flag-' + item.key).checked = sample.flags.includes(item.key); });
+      render();
+      closeGuide();
+      el('pattern').focus();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function renderGuideLessons() {
+      const container = el('guide-list');
+      container.replaceChildren();
+      guideSamples.forEach((sample, index) => {
+        const lesson = node('article', 'lesson');
+        const head = node('div', 'lesson-head');
+        head.append(node('span', 'lesson-number', String(index + 1).padStart(2, '0')), node('h3', 'lesson-title', uiLanguage === 'ko' ? sample.titleKo : sample.title));
+        const body = node('div', 'lesson-body');
+        body.appendChild(node('p', 'lesson-copy', uiLanguage === 'ko' ? sample.copyKo : sample.copy));
+        const sampleBox = node('div', 'lesson-sample');
+        const patternBox = document.createElement('div');
+        patternBox.append(node('div', 'sample-label', t('guidePattern')), node('pre', '', '/' + sample.pattern + '/' + sample.flags));
+        const side = node('div', 'lesson-side');
+        side.append(node('div', 'sample-label', t('guideFlags')), node('pre', '', sample.flags || t('none')), node('div', 'sample-label', t('guideTest')), node('pre', '', sample.test));
+        const tryButton = node('button', 'button button-primary', t('guideTry'));
+        tryButton.type = 'button';
+        tryButton.addEventListener('click', () => loadGuideSample(sample));
+        side.appendChild(tryButton);
+        sampleBox.append(patternBox, side);
+        body.appendChild(sampleBox);
+        body.appendChild(node('p', 'lesson-tip', t('guideTip') + ': ' + (uiLanguage === 'ko' ? sample.tipKo : sample.tip)));
+        lesson.append(head, body);
+        container.appendChild(lesson);
+      });
+    }
+
+    function openGuide() {
+      el('guide-lessons').hidden = false;
+      document.body.classList.add('modal-open');
+      el('guide-close').focus();
+    }
+
+    function closeGuide() {
+      el('guide-lessons').hidden = true;
+      document.body.classList.remove('modal-open');
+      el('guide').focus();
+    }
+
+    function setLearnLanguage(language) {
+      el('learn-en').hidden = language !== 'en';
+      el('learn-ko').hidden = language !== 'ko';
+      document.querySelectorAll('[data-learn-lang]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.learnLang === language)));
+      try { localStorage.setItem('dh-devutil-regex-tester-learn-lang', language); } catch (error) { /* storage is optional */ }
+    }
+
+    function loadQueryInput() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('pattern')) el('pattern').value = params.get('pattern');
+      if (params.has('flags')) flagDefinitions.forEach(item => { el('flag-' + item.key).checked = params.get('flags').includes(item.key); });
+      if (params.has('text')) el('test-text').value = params.get('text');
+      if (params.has('replacement')) el('replacement').value = params.get('replacement');
+    }
+
+    renderFlags();
+    renderExamples();
+    ['pattern', 'test-text', 'replacement'].forEach(id => el(id).addEventListener('input', render));
+    el('examples').addEventListener('click', () => loadExample(examples[0]));
+    el('clear').addEventListener('click', () => { el('pattern').value = ''; el('test-text').value = ''; el('replacement').value = ''; render(); });
+    el('flavor').addEventListener('change', renderFlavor);
+    el('guide').addEventListener('click', openGuide);
+    el('guide-close').addEventListener('click', closeGuide);
+    el('guide-lessons').addEventListener('click', event => { if (event.target === el('guide-lessons')) closeGuide(); });
+    document.addEventListener('keydown', event => { if (event.key === 'Escape' && !el('guide-lessons').hidden) closeGuide(); });
+    el('copy-replacement').addEventListener('click', () => copyText(lastResult.replacement).then(() => setStatus(t('copied'), 'success')));
+    document.querySelectorAll('[data-learn-lang]').forEach(button => button.addEventListener('click', () => setLearnLanguage(button.dataset.learnLang)));
+    document.querySelectorAll('[data-ui-lang]').forEach(button => button.addEventListener('click', () => setUiLanguage(button.dataset.uiLang)));
+    let initialUiLanguage = 'en';
+    try { if (navigator.language.toLowerCase().startsWith('ko')) initialUiLanguage = 'ko'; initialUiLanguage = localStorage.getItem('dh-devutil-regex-tester-ui-lang') || initialUiLanguage; } catch (error) { /* storage is optional */ }
+    setUiLanguage(initialUiLanguage);
+    loadQueryInput();
+    let language = 'en';
+    try { if (navigator.language.toLowerCase().startsWith('ko')) language = 'ko'; language = localStorage.getItem('dh-devutil-regex-tester-learn-lang') || language; } catch (error) { /* storage is optional */ }
+    setLearnLanguage(language);
+    render();
+    if (window.location.hash === '#guide-lessons') openGuide();
+  </script>
+</body>
+</html>

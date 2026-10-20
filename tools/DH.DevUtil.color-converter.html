@@ -1,0 +1,183 @@
+<!--
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//	Projects		: DH.DevUtil
+//	Author			: CYBERKDH
+//	Module			: Color Converter
+//	History			: 2026-10-20 Initial implementation (color conversion and contrast learning)
+//	Copyrights		: Copyright (C)CYBERKDH. All Rights Reserved.
+//////////////////////////////////////////////////////////////////////////////////////////////////
+-->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Color Converter | DH.DevUtil</title>
+  <style>
+    :root { color-scheme: light; --ink: #182230; --muted: #5d6b7a; --line: #d9e1e8; --surface: #fff; --canvas: #f3f6f9; --blue: #155eef; --blue-dark: #1249bd; --blue-soft: #eff4ff; --green: #067647; --red: #b42318; --amber-bg: #fffaeb; --amber-line: #fedf89; font-family: "Segoe UI", Arial, sans-serif; }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body { margin: 0; min-width: 320px; color: var(--ink); background: var(--canvas); }
+    button, input { font: inherit; }
+    .shell { max-width: 1440px; margin: 0 auto; padding: 24px; }
+    .topbar, .intro { display: flex; justify-content: space-between; gap: 18px; }
+    .topbar { align-items: center; margin-bottom: 28px; }
+    .brand { display: inline-flex; gap: 10px; align-items: center; color: var(--ink); font-weight: 700; text-decoration: none; }
+    .brand-mark { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 9px; color: #fff; background: var(--blue); }
+    .actions, .language-switch, .button-row { display: flex; flex-wrap: wrap; gap: 7px; }
+    .button { min-height: 36px; padding: 7px 11px; border: 1px solid #c9d2dc; border-radius: 7px; color: var(--ink); background: #fff; cursor: pointer; font-weight: 650; }
+    .button:hover:not(:disabled) { background: #f3f6f9; }
+    .button-primary, .language-switch button[aria-pressed="true"] { border-color: var(--blue); color: #fff; background: var(--blue); }
+    .button-primary:hover:not(:disabled), .language-switch button[aria-pressed="true"]:hover:not(:disabled) { border-color: var(--blue-dark); background: var(--blue-dark); }
+    .language-switch button[aria-pressed="false"]:hover:not(:disabled) { border-color: #9ab8ff; color: var(--blue-dark); background: var(--blue-soft); }
+    .button-small { min-height: 30px; padding: 4px 9px; font-size: .78rem; }
+    .intro { align-items: end; margin-bottom: 20px; }
+    .eyebrow { margin: 0 0 8px; color: var(--blue); font-size: .78rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(1.8rem, 4vw, 2.5rem); letter-spacing: -.04em; }
+    .intro-copy, .hint, .footer-note, .note { color: var(--muted); }
+    .intro-copy { max-width: 650px; margin: 0; line-height: 1.55; }
+    .workspace { display: grid; grid-template-columns: minmax(280px, 420px) minmax(0, 1fr); gap: 16px; align-items: start; }
+    .pane { min-width: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); box-shadow: 0 2px 6px #1822300a; }
+    .pane-head { display: flex; min-height: 64px; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+    .pane-title { margin: 0; font-size: 1rem; }
+    .pane-index { color: var(--muted); font-size: .75rem; font-weight: 700; }
+    .pane-content { display: grid; gap: 16px; padding: 18px; }
+    .field { display: grid; gap: 7px; min-width: 0; }
+    label { font-weight: 700; }
+    input[type="text"] { width: 100%; min-height: 42px; padding: 9px 11px; border: 1px solid #bdcad8; border-radius: 7px; color: var(--ink); background: #fff; }
+    input[type="text"]:focus, input[type="color"]:focus, button:focus-visible { outline: 3px solid #9ab8ff; outline-offset: 1px; }
+    input[type="color"] { width: 100%; height: 48px; padding: 4px; border: 1px solid #bdcad8; border-radius: 7px; background: #fff; cursor: pointer; }
+    .hint, .note { margin: 0; font-size: .82rem; line-height: 1.5; }
+    .status { padding: 10px 12px; border: 1px solid #a6f4c5; border-radius: 7px; color: var(--green); background: #ecfdf3; }
+    .status[data-kind="error"] { border-color: #fecdca; color: var(--red); background: #fef3f2; }
+    .swatches { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .swatch { min-height: 88px; display: flex; align-items: end; padding: 10px; border: 1px solid #bdcad8; border-radius: 9px; color: #fff; text-shadow: 0 1px 3px #000; font-weight: 700; }
+    .swatch.light { color: var(--ink); text-shadow: none; }
+    .result-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .result { display: grid; gap: 4px; padding: 12px; border: 1px solid var(--line); border-radius: 8px; background: #fbfcfd; }
+    .result-label { color: var(--muted); font-size: .8rem; }
+    .result-value { overflow-wrap: anywhere; font-family: Consolas, monospace; font-weight: 700; }
+    .contrast-pane { grid-column: 1 / -1; }
+    .contrast { display: grid; gap: 12px; }
+    .contrast-layout { display: grid; grid-template-columns: minmax(280px, .85fr) minmax(420px, 1.15fr); gap: 18px; align-items: start; }
+    .contrast-controls { display: grid; gap: 12px; }
+    .contrast-preview { display: grid; gap: 14px; padding: 18px; border: 1px solid #bdcad8; border-radius: 9px; }
+    .contrast-preview h3, .contrast-preview p { margin: 0; }
+    .contrast-preview h3 { font-size: 1.35rem; }
+    .contrast-preview p { line-height: 1.55; }
+    .contrast-preview a { color: inherit; font-weight: 700; }
+    .preview-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .preview-button { padding: 8px 12px; border: 2px solid currentColor; border-radius: 6px; color: inherit; background: transparent; font-weight: 700; }
+    .preview-input { width: 100%; padding: 8px 10px; border: 2px solid currentColor; border-radius: 6px; color: inherit; background: transparent; }
+    .preview-caption { font-size: .78rem; opacity: .82; }
+    .preview-suggestions { display: grid; gap: 8px; padding-top: 10px; border-top: 1px solid currentColor; }
+    .preview-suggestions-title { font-size: .8rem; font-weight: 700; }
+    .preview-suggestion-list { display: flex; flex-wrap: wrap; gap: 8px; }
+    .preview-suggestion { display: inline-flex; align-items: center; gap: 5px; font-family: Consolas, monospace; font-size: .75rem; font-weight: 700; }
+    .optimization { display: grid; gap: 10px; padding-top: 4px; border-top: 1px solid var(--line); }
+    .optimization h3 { margin: 0; font-size: 1rem; }
+    .optimization-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .recommendation-card { display: grid; gap: 8px; padding: 10px; border: 1px solid var(--line); border-radius: 8px; background: #fbfcfd; }
+    .recommendation-head { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+    .recommendation-head h4 { margin: 0; font-size: .9rem; }
+    .recommendation-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: .82rem; }
+    .recommendation-color { display: inline-flex; align-items: center; gap: 6px; font-family: Consolas, monospace; font-weight: 700; }
+    .color-dot { width: 16px; height: 16px; border: 1px solid #9aa8b6; border-radius: 50%; }
+    .recommendation-sample { display: grid; min-height: 42px; place-items: center; padding: 7px 9px; border: 1px solid #bdcad8; border-radius: 6px; font-family: Consolas, monospace; font-size: .78rem; font-weight: 700; }
+    .palette-swatch { display: grid; align-content: end; gap: 4px; text-align: left; }
+    .palette-swatch-title { font-weight: 700; }
+    .palette-swatch-meta { font-family: Consolas, monospace; font-size: .72rem; opacity: .86; }
+    .preview-samples { display: grid; gap: 8px; }
+    .preview-sample { margin: 0; }
+    .preview-sample-small { font-size: .78rem; }
+    .preview-sample-body { font-size: 1rem; line-height: 1.55; }
+    .preview-sample-large { font-size: 1.35rem; font-weight: 700; }
+    .preview-sample-heading { font-size: 1.8rem; font-weight: 800; letter-spacing: -.03em; }
+    .contrast-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .badge { display: inline-block; padding: 3px 7px; border-radius: 999px; font-size: .78rem; font-weight: 700; }
+    .pass { color: var(--green); background: #dcfae6; }
+    .fail { color: var(--red); background: #fee4e2; }
+    .learn { grid-column: 1 / -1; }
+    .learn-content { display: grid; gap: 12px; line-height: 1.6; }
+    .learn-content p, .learn-content ul { margin: 0; }
+    code { padding: 1px 4px; border-radius: 4px; background: #eef2f6; font-family: Consolas, monospace; }
+    @media (max-width: 980px) { .contrast-layout { grid-template-columns: 1fr; } }
+    @media (max-width: 820px) { .shell { padding: 16px; } .topbar, .intro { align-items: flex-start; flex-direction: column; } .workspace { grid-template-columns: 1fr; } .learn, .contrast-pane { grid-column: auto; } }
+    @media (max-width: 480px) { .result-grid, .contrast-row, .optimization-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="#"><span class="brand-mark">DH</span><span>DH.DevUtil</span></a>
+      <div class="actions"><div class="language-switch" aria-label="Language"><button class="button button-small" data-lang="en" aria-pressed="true" type="button">English</button><button class="button button-small" data-lang="ko" aria-pressed="false" type="button">한국어</button></div></div>
+    </header>
+    <section class="intro"><div><p class="eyebrow" data-i18n="eyebrow">Visual & design</p><h1 data-i18n="title">Color Converter</h1></div><p class="intro-copy" data-i18n="intro">Convert common color formats, check WCAG contrast, and learn how color spaces describe the same color.</p></section>
+    <div class="workspace">
+      <section class="pane"><div class="pane-head"><h2 class="pane-title" data-i18n="inputTitle">Color input</h2><span class="pane-index">01</span></div><div class="pane-content">
+        <div class="field"><label for="color-picker" data-i18n="picker">Color picker</label><input id="color-picker" type="color" value="#155eef"></div>
+        <div class="field"><label for="color-input" data-i18n="hexLabel">HEX color</label><input id="color-input" type="text" value="#155EEF" spellcheck="false" autocomplete="off"><p class="hint" data-i18n="hexHint">Enter #RGB, #RGBA, #RRGGBB, or #RRGGBBAA.</p></div>
+        <div id="input-status" class="status"></div>
+        <div class="button-row"><button id="copy-hex" class="button button-primary" type="button" data-i18n="copyHex">Copy HEX</button><button id="reset" class="button" type="button" data-i18n="reset">Reset</button></div>
+        <div class="button-row"><button id="apply-foreground" class="button" type="button" data-i18n="applyForeground">Apply to foreground</button><button id="apply-background" class="button" type="button" data-i18n="applyBackground">Apply to background</button></div>
+      </div></section>
+      <section class="pane"><div class="pane-head"><h2 class="pane-title" data-i18n="resultTitle">Color values</h2><span class="pane-index">02</span></div><div class="pane-content">
+        <div class="swatches"><div id="swatch" class="swatch"><span id="swatch-label">#155EEF</span></div><div id="checker" class="swatch light"><span data-i18n="preview">Preview</span></div></div>
+        <div id="values" class="result-grid"></div>
+        <p class="note" data-i18n="alphaNote">Alpha is shown as a percentage and preserved in CSS color output when it is not fully opaque.</p>
+        <div class="optimization"><h3 data-i18n="paletteTitle">Suggested palette</h3><p class="note" data-i18n="paletteNote">A small UI palette based on the selected color and current contrast colors.</p><div id="palette" class="swatches"></div></div>
+      </div></section>
+      <section class="pane contrast-pane"><div class="pane-head"><h2 class="pane-title" data-i18n="contrastTitle">WCAG contrast checker</h2><span class="pane-index">03</span></div><div class="pane-content contrast-layout">
+        <div class="contrast-controls"><div class="contrast-row"><div class="field"><label for="foreground" data-i18n="foreground">Foreground</label><input id="foreground" type="text" value="#182230" spellcheck="false"></div><div class="field"><label for="background" data-i18n="background">Background</label><input id="background" type="text" value="#FFFFFF" spellcheck="false"></div></div><div class="button-row"><button id="swap-contrast" class="button" type="button" data-i18n="swapContrast">Swap contrast colors</button></div><div id="contrast-result"></div><div class="optimization"><h3 data-i18n="optimizationTitle">Optimized contrast colors</h3><p class="note" data-i18n="optimizationNote">Compare several strategies and apply a recommendation to the selected side.</p><div class="contrast-row"><div class="field"><label for="recommendation-target" data-i18n="recommendationTarget">Apply recommendation to</label><select id="recommendation-target"><option value="foreground" data-i18n="foreground">Foreground</option><option value="background" data-i18n="background">Background</option></select></div><div class="field"><label for="recommendation-ratio" data-i18n="recommendationRatio">Target contrast</label><select id="recommendation-ratio"><option value="3">3:1</option><option value="4.5" selected>4.5:1</option><option value="7">7:1</option><option value="10">10:1</option></select></div></div><div id="recommendations" class="optimization-grid"></div></div><p class="note" data-i18n="contrastNote">WCAG 2 contrast uses relative luminance. Normal text needs 4.5:1 for AA and 7:1 for AAA; large text needs 3:1 and 4.5:1.</p></div>
+        <div id="contrast-preview" class="contrast-preview"><div class="preview-samples"><h3 class="preview-sample preview-sample-heading" data-i18n="previewHeading">Readable interface preview</h3><p class="preview-sample preview-sample-small" data-i18n="previewSmall">Small text · 12px</p><p class="preview-sample preview-sample-body" data-i18n="previewBody">This paragraph shows how normal-sized text looks on the selected background.</p><p class="preview-sample preview-sample-large" data-i18n="previewLarge">Large text · 22px</p></div><a href="#" data-i18n="previewLink">Read more</a><div class="preview-actions"><button class="preview-button" type="button" data-i18n="previewButton">Primary action</button><input class="preview-input" type="text" data-i18n-placeholder="previewField" placeholder="Input preview"></div><span class="preview-caption" data-i18n="previewCaption">The same foreground/background colors are used throughout this sample.</span><div class="preview-suggestions"><span class="preview-suggestions-title" data-i18n="previewSuggested">Suggested colors</span><div id="preview-suggestion-list" class="preview-suggestion-list"></div></div></div>
+      </div></section>
+      <section class="pane learn"><div class="pane-head"><h2 class="pane-title" data-i18n="learnTitle">Learn more</h2><div class="language-switch"><button class="button button-small" data-learn-lang="en" aria-pressed="true" type="button">English</button><button class="button button-small" data-learn-lang="ko" aria-pressed="false" type="button">한국어</button></div></div><div class="pane-content learn-content" id="learn-en"><p><strong>HEX</strong> stores red, green, blue, and optional alpha as hexadecimal pairs. <strong>RGB</strong> describes channel intensity from 0 to 255. <strong>HSL</strong> separates hue, saturation, and lightness, while <strong>HSV</strong> uses value instead of lightness.</p><p><strong>OKLCH</strong> is a perceptual color space: lightness, chroma, and hue are designed to track visual differences more consistently than RGB.</p><ul><li>Contrast ratio is calculated from relative luminance, not from channel averages.</li><li>Use OKLCH for design adjustments, but check the final sRGB color for clipping and accessibility.</li><li>All processing happens in this browser tab.</li></ul></div><div class="pane-content learn-content" id="learn-ko" hidden><p><strong>HEX</strong>는 빨강·초록·파랑과 선택적인 alpha를 16진수로 표현합니다. <strong>RGB</strong>는 각 채널을 0~255로 표현하고, <strong>HSL</strong>은 색상·채도·명도를, <strong>HSV</strong>는 명도 대신 value를 사용합니다.</p><p><strong>OKLCH</strong>는 지각 기반 색상 공간(perceptual color space)으로, RGB보다 사람이 느끼는 색 차이를 더 일정하게 다루도록 설계되었습니다.</p><ul><li>대비율(contrast ratio)은 채널 평균이 아니라 상대 휘도(relative luminance)로 계산합니다.</li><li>디자인 색상 조정에는 OKLCH를 사용할 수 있지만, 최종 sRGB 색상의 clipping과 접근성도 확인해야 합니다.</li><li>모든 처리는 현재 브라우저 탭에서 이루어집니다.</li></ul></div></section>
+    </div>
+    <p class="footer-note" data-i18n="footer">No value is uploaded. This is a standalone HTML tool.</p>
+  </main>
+  <script>
+    const translations = {
+      en: { eyebrow: 'Visual & design', title: 'Color Converter', intro: 'Convert common color formats, check WCAG contrast, and learn how color spaces describe the same color.', inputTitle: 'Color input', picker: 'Color picker', hexLabel: 'HEX color', hexHint: 'Enter #RGB, #RGBA, #RRGGBB, or #RRGGBBAA.', copyHex: 'Copy HEX', reset: 'Reset', applyForeground: 'Apply to foreground', applyBackground: 'Apply to background', swapContrast: 'Swap contrast colors', resultTitle: 'Color values', preview: 'Preview', alphaNote: 'Alpha is shown as a percentage and preserved in CSS color output when it is not fully opaque.', contrastTitle: 'WCAG contrast checker', foreground: 'Foreground', background: 'Background', sampleText: 'Accessible sample text', previewHeading: 'Readable interface preview', previewSmall: 'Small text · 12px', previewBody: 'This paragraph shows how normal-sized text looks on the selected background.', previewLarge: 'Large text · 22px', previewLink: 'Read more', previewButton: 'Primary action', previewField: 'Input preview', previewCaption: 'The same foreground/background colors are used throughout this sample.', previewSuggested: 'Suggested colors', paletteTitle: 'Suggested palette', paletteNote: 'A small UI palette based on the selected color and current contrast colors.', optimizationTitle: 'Optimized contrast colors', optimizationNote: 'Compare several strategies and apply a recommendation to the selected side.', recommendationTarget: 'Apply recommendation to', recommendationRatio: 'Target contrast', bestBlackWhite: 'Best black/white', neutralGray: 'Neutral gray', hueAA: 'Keep hue · target', hueAAA: 'Keep hue · AAA', apply: 'Apply', contrastNote: 'WCAG 2 contrast uses relative luminance. Normal text needs 4.5:1 for AA and 7:1 for AAA; large text needs 3:1 and 4.5:1.', learnTitle: 'Learn more', footer: 'No value is uploaded. This is a standalone HTML tool.', valid: 'Valid color', invalid: 'Enter a valid HEX color.', copied: 'Copied', ratio: 'Contrast ratio', normal: 'Normal text', large: 'Large text', aa: 'AA', aaa: 'AAA', pass: 'Pass', fail: 'Fail', hex: 'HEX', rgba: 'RGB / alpha', hsl: 'HSL', hsv: 'HSV', oklch: 'OKLCH' },
+      ko: { eyebrow: '색상·디자인', title: 'Color Converter', intro: '색상 형식을 변환하고 WCAG 대비율을 확인하며 같은 색상을 색상 공간별로 학습하세요.', inputTitle: '색상 입력', picker: '색상 선택', hexLabel: 'HEX 색상', hexHint: '#RGB, #RGBA, #RRGGBB 또는 #RRGGBBAA를 입력하세요.', copyHex: 'HEX 복사', reset: '초기화', applyForeground: '전경색에 적용', applyBackground: '배경색에 적용', swapContrast: '전경색·배경색 교체', resultTitle: '색상 값', preview: '미리보기', alphaNote: 'Alpha는 백분율로 표시하며 완전 불투명하지 않으면 CSS 색상 결과에도 유지합니다.', contrastTitle: 'WCAG 대비율 검사', foreground: '전경색', background: '배경색', sampleText: '접근 가능한 샘플 텍스트', previewHeading: '읽기 쉬운 인터페이스 미리보기', previewSmall: '작은 글자 · 12px', previewBody: '이 문단은 선택한 배경 위에서 일반 크기 텍스트가 어떻게 보이는지 보여줍니다.', previewLarge: '큰 글자 · 22px', previewLink: '자세히 보기', previewButton: '주요 작업', previewField: '입력창 미리보기', previewCaption: '이 샘플 전체에 같은 전경색과 배경색을 사용합니다.', previewSuggested: '추천 색상', paletteTitle: '추천 컬러 팔레트', paletteNote: '선택 색상과 현재 대비 색상을 기반으로 작은 UI 팔레트를 만듭니다.', optimizationTitle: '최적 대조색 추천', optimizationNote: '여러 전략을 비교하고 선택한 대상에 추천 색상을 적용하세요.', recommendationTarget: '추천 적용 대상', recommendationRatio: '목표 대비율', bestBlackWhite: '흑백 중 최적', neutralGray: '중립 회색', hueAA: 'Hue 유지 · 목표값', hueAAA: 'Hue 유지 · AAA', apply: '적용', contrastNote: 'WCAG 2 대비율은 상대 휘도로 계산합니다. 일반 텍스트는 AA 4.5:1, AAA 7:1, 큰 텍스트는 AA 3:1, AAA 4.5:1이 필요합니다.', learnTitle: '학습 가이드', footer: '값을 외부로 전송하지 않습니다. 독립 실행형 HTML 도구입니다.', valid: '유효한 색상', invalid: '올바른 HEX 색상을 입력하세요.', copied: '복사됨', ratio: '대비율', normal: '일반 텍스트', large: '큰 텍스트', aa: 'AA', aaa: 'AAA', pass: '통과', fail: '미달', hex: 'HEX', rgba: 'RGB / alpha', hsl: 'HSL', hsv: 'HSV', oklch: 'OKLCH' }
+    };
+    let language = localStorage.getItem('dhdevutil-language') || 'en';
+    const el = id => document.getElementById(id);
+    const t = key => translations[language][key];
+    function clamp(value, min, max) { return Math.min(max, Math.max(min, value)); }
+    function parseHex(value) {
+      const text = value.trim().replace(/^#/, '');
+      if (![3, 4, 6, 8].includes(text.length) || !/^[\da-fA-F]+$/.test(text)) return null;
+      const expanded = text.length < 5 ? [...text].map(char => char + char).join('') : text;
+      return { r: parseInt(expanded.slice(0, 2), 16), g: parseInt(expanded.slice(2, 4), 16), b: parseInt(expanded.slice(4, 6), 16), a: expanded.length === 8 ? parseInt(expanded.slice(6, 8), 16) / 255 : 1 };
+    }
+    function hex(color, includeAlpha = false) { const value = '#' + [color.r, color.g, color.b].map(channel => channel.toString(16).padStart(2, '0')).join(''); return includeAlpha || color.a < 1 ? value + Math.round(color.a * 255).toString(16).padStart(2, '0') : value; }
+    function rgb(color) { return color.a < 1 ? `rgba(${color.r}, ${color.g}, ${color.b}, ${color.a.toFixed(3)})` : `rgb(${color.r}, ${color.g}, ${color.b})`; }
+    function hsl(color) { const r = color.r / 255, g = color.g / 255, b = color.b / 255, max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min; let h = 0, s = 0, l = (max + min) / 2; if (d) { s = d / (1 - Math.abs(2 * l - 1)); if (max === r) h = 60 * (((g - b) / d) % 6); else if (max === g) h = 60 * ((b - r) / d + 2); else h = 60 * ((r - g) / d + 4); } if (h < 0) h += 360; return `hsl(${h.toFixed(1)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%${color.a < 1 ? ` / ${color.a.toFixed(3)}` : ''})`; }
+    function hsv(color) { const r = color.r / 255, g = color.g / 255, b = color.b / 255, max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min; let h = 0; if (d) { if (max === r) h = 60 * (((g - b) / d) % 6); else if (max === g) h = 60 * ((b - r) / d + 2); else h = 60 * ((r - g) / d + 4); } if (h < 0) h += 360; const s = max ? d / max : 0; return `hsv(${h.toFixed(1)} ${Math.round(s * 100)}% ${Math.round(max * 100)}%${color.a < 1 ? ` / ${color.a.toFixed(3)}` : ''})`; }
+    function rgbToHsl(color) { const r = color.r / 255, g = color.g / 255, b = color.b / 255, max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min; let h = 0, s = 0, l = (max + min) / 2; if (d) { s = d / (1 - Math.abs(2 * l - 1)); if (max === r) h = ((g - b) / d) % 6; else if (max === g) h = (b - r) / d + 2; else h = (r - g) / d + 4; h *= 60; } if (h < 0) h += 360; return { h, s, l }; }
+    function hslToRgb(h, s, l) { const chroma = (1 - Math.abs(2 * l - 1)) * s, x = chroma * (1 - Math.abs((h / 60) % 2 - 1)), m = l - chroma / 2; let r = 0, g = 0, b = 0; if (h < 60) [r, g, b] = [chroma, x, 0]; else if (h < 120) [r, g, b] = [x, chroma, 0]; else if (h < 180) [r, g, b] = [0, chroma, x]; else if (h < 240) [r, g, b] = [0, x, chroma]; else if (h < 300) [r, g, b] = [x, 0, chroma]; else [r, g, b] = [chroma, 0, x]; return { r: Math.round((r + m) * 255), g: Math.round((g + m) * 255), b: Math.round((b + m) * 255), a: 1 }; }
+    function contrastRatio(foreground, background) { return (Math.max(luminance(foreground), luminance(background)) + .05) / (Math.min(luminance(foreground), luminance(background)) + .05); }
+    function bestBlackWhite(other, target) { const candidates = [{ r: 0, g: 0, b: 0, a: 1 }, { r: 255, g: 255, b: 255, a: 1 }]; return candidates.sort((a, b) => contrastRatio(target === 'foreground' ? b : b, target === 'foreground' ? other : other) - contrastRatio(target === 'foreground' ? a : a, target === 'foreground' ? other : other))[0]; }
+    function hueRecommendation(base, other, target, minimum) { const hslValue = rgbToHsl(base), candidates = []; for (let index = 0; index <= 200; index += 1) { const candidate = hslToRgb(hslValue.h, hslValue.s, index / 200); const ratio = contrastRatio(target === 'foreground' ? candidate : other, target === 'foreground' ? other : candidate); if (ratio >= minimum) candidates.push({ candidate, ratio, distance: Math.abs(index / 200 - hslValue.l) }); } candidates.sort((a, b) => a.distance - b.distance); return candidates[0] || { candidate: hslToRgb(hslValue.h, hslValue.s, hslValue.l < .5 ? 0 : 1), ratio: 0 }; }
+    function neutralRecommendation(base, other, target, minimum) { const baseLuminance = luminance(base), candidates = []; for (let channel = 0; channel <= 255; channel += 1) { const candidate = { r: channel, g: channel, b: channel, a: 1 }, ratio = contrastRatio(target === 'foreground' ? candidate : other, target === 'foreground' ? other : candidate); if (ratio >= minimum) candidates.push({ candidate, distance: Math.abs(luminance(candidate) - baseLuminance) }); } candidates.sort((a, b) => a.distance - b.distance); return candidates[0] ? candidates[0].candidate : (baseLuminance > .5 ? { r: 0, g: 0, b: 0, a: 1 } : { r: 255, g: 255, b: 255, a: 1 }); }
+    function renderRecommendations() { const foreground = parseHex(el('foreground').value), background = parseHex(el('background').value), target = el('recommendation-target').value, minimum = Number(el('recommendation-ratio').value), other = target === 'foreground' ? background : foreground, base = target === 'foreground' ? foreground : background, container = el('recommendations'); if (!foreground || !background) { container.textContent = t('invalid'); return; } const choices = [{ label: t('bestBlackWhite'), color: bestBlackWhite(other, target) }, { label: t('neutralGray'), color: neutralRecommendation(base, other, target, minimum) }, { label: t('hueAA'), color: hueRecommendation(base, other, target, minimum).candidate }, { label: t('hueAAA'), color: hueRecommendation(base, other, target, 7).candidate }]; container.replaceChildren(...choices.map(choice => { const ratio = contrastRatio(target === 'foreground' ? choice.color : other, target === 'foreground' ? other : choice.color); const card = document.createElement('div'); card.className = 'recommendation-card'; const head = document.createElement('div'); head.className = 'recommendation-head'; head.innerHTML = `<h4></h4><button class="button button-small" type="button">${t('apply')}</button>`; head.children[0].textContent = choice.label; const sample = document.createElement('div'); sample.className = 'recommendation-sample'; sample.style.color = hex(target === 'foreground' ? choice.color : other); sample.style.background = hex(target === 'foreground' ? other : choice.color); sample.textContent = `${hex(choice.color).toUpperCase()} · ${ratio.toFixed(2)}:1`; const row = document.createElement('div'); row.className = 'recommendation-row'; row.innerHTML = `<span class="recommendation-color"><span class="color-dot"></span><span></span></span>`; row.querySelector('.color-dot').style.background = hex(choice.color); row.querySelector('.recommendation-color span:last-child').textContent = hex(choice.color).toUpperCase(); head.children[1].addEventListener('click', () => { el(target).value = hex(choice.color).toUpperCase(); renderContrast(); }); card.append(head, sample, row); return card; })); const previewList = el('preview-suggestion-list'); previewList.replaceChildren(...choices.map(choice => { const item = document.createElement('span'); item.className = 'preview-suggestion'; item.style.color = hex(target === 'foreground' ? choice.color : other); item.style.background = hex(target === 'foreground' ? other : choice.color); item.style.padding = '4px 6px'; item.style.borderRadius = '4px'; item.textContent = hex(choice.color).toUpperCase(); return item; })); }
+    function oklch(color) { const r = color.r / 255, g = color.g / 255, b = color.b / 255; const toLinear = value => value <= .04045 ? value / 12.92 : Math.pow((value + .055) / 1.055, 2.4); const lr = toLinear(r), lg = toLinear(g), lb = toLinear(b); const l = 0.4122214708 * lr + 0.5363325363 * lg + 0.0514459929 * lb, m = 0.2119034982 * lr + 0.6806995451 * lg + 0.1073969566 * lb, s = 0.0883024619 * lr + 0.2817188376 * lg + 0.6299787005 * lb; const L = 0.2104542553 * Math.cbrt(l) + 0.793617785 * Math.cbrt(m) - 0.0040720468 * Math.cbrt(s); const A = 1.9779984951 * Math.cbrt(l) - 2.428592205 * Math.cbrt(m) + 0.4505937099 * Math.cbrt(s); const B = 0.0259040371 * Math.cbrt(l) + 0.7827717662 * Math.cbrt(m) - 0.808675766 * Math.cbrt(s); const C = Math.sqrt(A * A + B * B), H = (Math.atan2(B, A) * 180 / Math.PI + 360) % 360; return `oklch(${(L * 100).toFixed(1)}% ${C.toFixed(3)} ${H.toFixed(1)}${color.a < 1 ? ` / ${color.a.toFixed(3)}` : ''})`; }
+    function luminance(color) { const channel = value => { const c = value / 255; return c <= .03928 ? c / 12.92 : Math.pow((c + .055) / 1.055, 2.4); }; return .2126 * channel(color.r) + .7152 * channel(color.g) + .0722 * channel(color.b); }
+    function setLanguage(next) { language = next; localStorage.setItem('dhdevutil-language', language); document.documentElement.lang = language; document.querySelectorAll('[data-i18n]').forEach(node => { node.textContent = t(node.dataset.i18n); }); document.querySelectorAll('[data-i18n-placeholder]').forEach(node => { node.placeholder = t(node.dataset.i18nPlaceholder); }); document.querySelectorAll('[data-lang]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.lang === language))); document.querySelectorAll('[data-learn-lang]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.learnLang === language))); el('learn-en').hidden = language !== 'en'; el('learn-ko').hidden = language !== 'ko'; render(); }
+    function renderValues(color) { const values = [[t('hex'), hex(color)], [t('rgba'), rgb(color)], [t('hsl'), hsl(color)], [t('hsv'), hsv(color)], [t('oklch'), oklch(color)], ['Alpha', `${Math.round(color.a * 100)}%`]]; el('values').replaceChildren(...values.map(([label, value]) => { const item = document.createElement('div'); item.className = 'result'; item.innerHTML = `<span class="result-label"></span><span class="result-value"></span>`; item.children[0].textContent = label; item.children[1].textContent = value; return item; })); }
+    function renderContrast() { const fg = parseHex(el('foreground').value), bg = parseHex(el('background').value); const result = el('contrast-result'); if (!fg || !bg) { result.innerHTML = `<span class="badge fail">${t('invalid')}</span>`; renderRecommendations(); return; } const ratio = contrastRatio(fg, bg); el('contrast-preview').style.color = `rgb(${fg.r} ${fg.g} ${fg.b})`; el('contrast-preview').style.background = `rgb(${bg.r} ${bg.g} ${bg.b})`; result.innerHTML = `<strong>${t('ratio')}: ${ratio.toFixed(2)}:1</strong><div class="contrast-row"><div>${t('normal')} · AA <span class="badge ${ratio >= 4.5 ? 'pass' : 'fail'}">${ratio >= 4.5 ? t('pass') : t('fail')}</span><br>${t('normal')} · AAA <span class="badge ${ratio >= 7 ? 'pass' : 'fail'}">${ratio >= 7 ? t('pass') : t('fail')}</span></div><div>${t('large')} · AA <span class="badge ${ratio >= 3 ? 'pass' : 'fail'}">${ratio >= 3 ? t('pass') : t('fail')}</span><br>${t('large')} · AAA <span class="badge ${ratio >= 4.5 ? 'pass' : 'fail'}">${ratio >= 4.5 ? t('pass') : t('fail')}</span></div></div>`; renderRecommendations(); }
+    function renderPalette(color) { const hslValue = rgbToHsl(color), foreground = parseHex(el('foreground').value) || { r: 24, g: 34, b: 48, a: 1 }, background = parseHex(el('background').value) || { r: 255, g: 255, b: 255, a: 1 }, palette = [foreground, background, color, hslToRgb(hslValue.h, Math.min(1, hslValue.s * .85), .92), hslToRgb(hslValue.h, Math.min(1, hslValue.s * 1.05), .18), { r: 255, g: 255, b: 255, a: 1 }]; const labels = ['Foreground', 'Background', 'Primary', 'Surface', 'Dark', 'Canvas']; const counterparts = [background, foreground, bestBlackWhite(palette[2], 'foreground'), bestBlackWhite(palette[3], 'foreground'), bestBlackWhite(palette[4], 'foreground'), bestBlackWhite(palette[5], 'foreground')]; const metaLabels = language === 'ko' ? ['배경색', '전경색', '추천 전경색', '추천 전경색', '추천 전경색', '추천 전경색'] : ['Background', 'Foreground', 'Suggested text', 'Suggested text', 'Suggested text', 'Suggested text']; el('palette').replaceChildren(...palette.map((item, index) => { const swatch = document.createElement('div'); swatch.className = 'swatch palette-swatch' + (index === 1 || index === 3 || index === 5 ? ' light' : ''); swatch.style.background = hex(item); const title = document.createElement('span'); title.className = 'palette-swatch-title'; title.textContent = `${labels[index]} ${hex(item).toUpperCase()}`; const meta = document.createElement('span'); meta.className = 'palette-swatch-meta'; meta.textContent = `${metaLabels[index]} ${hex(counterparts[index]).toUpperCase()}`; swatch.append(title, meta); return swatch; })); }
+    function render() { const color = parseHex(el('color-input').value); if (!color) { el('input-status').textContent = t('invalid'); el('input-status').dataset.kind = 'error'; return; } const value = hex(color, true); el('input-status').textContent = t('valid'); el('input-status').dataset.kind = 'success'; el('color-picker').value = hex(color); el('swatch').style.background = value; el('swatch-label').textContent = value.toUpperCase(); el('checker').style.background = `repeating-conic-gradient(#eef2f6 0 25%, #fff 0 50%) 50% / 20px 20px`; el('checker').style.color = `rgb(${color.r} ${color.g} ${color.b})`; renderValues(color); renderPalette(color); renderContrast(); }
+    document.querySelectorAll('[data-lang]').forEach(button => button.addEventListener('click', () => setLanguage(button.dataset.lang)));
+    document.querySelectorAll('[data-learn-lang]').forEach(button => button.addEventListener('click', () => setLanguage(button.dataset.learnLang)));
+    el('color-input').addEventListener('input', render); el('foreground').addEventListener('input', () => { renderContrast(); const color = parseHex(el('color-input').value); if (color) renderPalette(color); }); el('background').addEventListener('input', () => { renderContrast(); const color = parseHex(el('color-input').value); if (color) renderPalette(color); }); el('recommendation-target').addEventListener('change', renderRecommendations); el('recommendation-ratio').addEventListener('change', renderRecommendations); el('color-picker').addEventListener('input', event => { el('color-input').value = event.target.value.toUpperCase(); render(); });
+    el('apply-foreground').addEventListener('click', () => { const color = parseHex(el('color-input').value); if (!color) return; el('foreground').value = hex(color, true).toUpperCase(); renderContrast(); });
+    el('apply-background').addEventListener('click', () => { const color = parseHex(el('color-input').value); if (!color) return; el('background').value = hex(color, true).toUpperCase(); renderContrast(); });
+    el('swap-contrast').addEventListener('click', () => { const foreground = el('foreground').value; el('foreground').value = el('background').value; el('background').value = foreground; renderContrast(); });
+    el('copy-hex').addEventListener('click', async () => { const color = parseHex(el('color-input').value); if (!color) return; await navigator.clipboard.writeText(hex(color, true).toUpperCase()); const button = el('copy-hex'); const original = t('copyHex'); button.textContent = t('copied'); setTimeout(() => button.textContent = original, 1200); });
+    el('reset').addEventListener('click', () => { el('color-input').value = '#155EEF'; el('foreground').value = '#182230'; el('background').value = '#FFFFFF'; render(); });
+    setLanguage(language);
+  </script>
+</body>
+</html>

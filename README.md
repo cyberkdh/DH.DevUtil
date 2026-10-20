@@ -14,6 +14,11 @@ DH.DevUtil is a collection of lightweight utilities for everyday development tas
 | HTTP Digest Authentication Simulator | Simulate RFC 7616 challenges, Digest responses, and server verification. | [Run (Ctrl-click for a new tab)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.http-digest-auth-simulator.html) | [View source](./tools/DH.DevUtil.http-digest-auth-simulator.html) | [Guide](./docs/HTTP_DIGEST_AUTH_SIMULATOR.md) |
 | JWT Inspector | Generate demo JWTs with HS256, parse compact JWTs, and verify HS256 signatures. | [Run (Ctrl-click for a new tab)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.jwt-inspector.html) | [View source](./tools/DH.DevUtil.jwt-inspector.html) | [Guide](./docs/JWT_INSPECTOR.md) |
 | Number Notation Converter | Turn E notation such as `1.23457E+15` into exact plain, grouped, engineering, SI, and Korean-unit forms, and see what a double or float32 stores. | [Run (Ctrl-click for a new tab)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.number-notation.html) | [View source](./tools/DH.DevUtil.number-notation.html) | [Guide](./docs/NUMBER_NOTATION_CONVERTER.md) |
+| Regex Tester | Test JavaScript regular expressions, inspect matches and capture groups, preview replacements, and learn common regex syntax. | [Run (Ctrl-click for a new tab)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.regex-tester.html) | [View source](./tools/DH.DevUtil.regex-tester.html) | [Guide](./docs/REGEX_TESTER.md) |
+| Timestamp Converter | Convert ISO, Unix, FILETIME, and .NET Ticks values, and add or subtract calendar durations. | [Run (Ctrl-click for a new tab)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.timestamp-converter.html) | [View source](./tools/DH.DevUtil.timestamp-converter.html) | [Guide](./docs/TIMESTAMP_CONVERTER.md) |
+| Color Converter | Convert HEX, RGB, HSL, HSV, and OKLCH colors, preview combinations, and check WCAG contrast. | [Run (Ctrl-click for a new tab)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.color-converter.html) | [View source](./tools/DH.DevUtil.color-converter.html) | [Guide](./docs/COLOR_CONVERTER.md) |
+| Text · JSON Diff | Compare plain text or formatted JSON locally and inspect additions and removals line by line. | [Run (Ctrl-click for a new tab)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.text-json-diff.html) | [View source](./tools/DH.DevUtil.text-json-diff.html) | [Guide](./docs/TEXT_JSON_DIFF.md) |
+| CIDR Calculator | Calculate IPv4 network ranges, masks, host counts, binary values, and subnet splits. | [Run (Ctrl-click for a new tab)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.cidr-calculator.html) | [View source](./tools/DH.DevUtil.cidr-calculator.html) | [Guide](./docs/CIDR_CALCULATOR.md) |
 | Symmetric Encryption Simulator (Base) | Learn symmetric encryption with AES, ARIA, 3DES, and DES in ECB/CBC mode, selectable padding, one shared key and IV, and a fixed IV for reproducible ciphertext. | [Run (Ctrl-click for a new tab)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.symmetric-encryption-simulator-base.html) | [View source](./tools/DH.DevUtil.symmetric-encryption-simulator-base.html) | [Guide](./docs/SYMMETRIC_ENCRYPTION_SIMULATOR_BASE.md) |
 | Symmetric Encryption Simulator | Encrypt/decrypt with AES-GCM/CBC/CTR and compare CBC padding schemes. | [Run (Ctrl-click for a new tab)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.symmetric-encryption-simulator.html) | [View source](./tools/DH.DevUtil.symmetric-encryption-simulator.html) | [Guide](./docs/SYMMETRIC_ENCRYPTION_SIMULATOR.md) |
 | Unicode · Encoding Inspector | Inspect code points, UTF-8/UTF-16/CP949 bytes, NFC/NFD normalization, hidden characters such as zero-width spaces and bidi controls, and mojibake; decode hex or Base64 bytes. | [Run (Ctrl-click for a new tab)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.unicode-inspector.html) | [View source](./tools/DH.DevUtil.unicode-inspector.html) | [Guide](./docs/UNICODE_ENCODING_INSPECTOR.md) |
@@ -38,6 +43,38 @@ Generate demo JWTs, parse compact tokens, and inspect HS256 signature verificati
 Turn E notation such as `1.23457E+15` into readable numbers with exact decimal conversion, and see what a double or float32 actually stores. See the [Number Notation Converter guide](./docs/NUMBER_NOTATION_CONVERTER.md) for features and usage.
 
 ![Number Notation Converter preview](./docs/images/DH.DevUtil.number-notation.png)
+
+## Regex Tester preview
+
+Test JavaScript regular expressions, inspect every match and capture group, preview replacement tokens, and learn why regex flavors differ between programming languages. See the [Regex Tester guide](./docs/REGEX_TESTER.md) for features and usage.
+
+![Regex Tester preview](./docs/images/DH.DevUtil.regex-tester.png)
+
+[Open the beginner-friendly Regex Guide](./tools/DH.DevUtil.regex-tester.html#guide-lessons) inside the Regex Tester with step-by-step lessons and runnable examples.
+
+## Timestamp Converter preview
+
+Convert timestamps between ISO 8601, Unix units, Windows FILETIME, and .NET Ticks, then calculate a new date by adding or subtracting a calendar duration. See the [Timestamp Converter guide](./docs/TIMESTAMP_CONVERTER.md) for features and usage.
+
+![Timestamp Converter preview](./docs/images/DH.DevUtil.timestamp-converter.png)
+
+## Color Converter preview
+
+Convert HEX colors to RGB, HSL, HSV, and OKLCH, preview foreground/background combinations, and check WCAG contrast. See the [Color Converter guide](./docs/COLOR_CONVERTER.md) for features and usage.
+
+![Color Converter preview](./docs/images/DH.DevUtil.color-converter.png)
+
+## Text · JSON Diff preview
+
+Compare plain text or formatted JSON locally and inspect added and removed lines. See the [Text · JSON Diff guide](./docs/TEXT_JSON_DIFF.md) for features and usage.
+
+![Text · JSON Diff preview](./docs/images/DH.DevUtil.text-json-diff.png)
+
+## CIDR Calculator preview
+
+Calculate IPv4 network ranges, masks, host counts, binary values, and split subnets locally. See the [CIDR Calculator guide](./docs/CIDR_CALCULATOR.md) for features and usage.
+
+![CIDR Calculator preview](./docs/images/DH.DevUtil.cidr-calculator.png)
 
 ## Symmetric Encryption Simulator (Base) preview
 

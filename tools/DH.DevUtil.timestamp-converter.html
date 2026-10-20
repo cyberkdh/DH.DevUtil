@@ -1,0 +1,237 @@
+<!--
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//	Projects		: DH.DevUtil
+//	Author			: CYBERKDH
+//	Module			: Timestamp Converter
+//	History			: 2026-10-19 Initial implementation (timestamp conversion and duration arithmetic)
+//	Copyrights		: Copyright (C)CYBERKDH. All Rights Reserved.
+//////////////////////////////////////////////////////////////////////////////////////////////////
+-->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Timestamp Converter | DH.DevUtil</title>
+  <style>
+    :root { color-scheme: light; --ink: #182230; --muted: #5d6b7a; --line: #d9e1e8; --surface: #fff; --canvas: #f3f6f9; --blue: #155eef; --blue-dark: #1249bd; --blue-soft: #eff4ff; --green: #067647; --red: #b42318; --amber-bg: #fffaeb; --amber-line: #fedf89; --code: #f6f8fa; font-family: "Segoe UI", Arial, sans-serif; }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body { margin: 0; min-width: 320px; color: var(--ink); background: var(--canvas); }
+    button, input, select { font: inherit; }
+    .shell { max-width: 1440px; margin: 0 auto; padding: 24px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 28px; }
+    .brand { display: inline-flex; gap: 10px; align-items: center; color: var(--ink); font-weight: 700; text-decoration: none; }
+    .brand-mark { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 9px; color: #fff; background: var(--blue); }
+    .actions, .language-switch { display: flex; flex-wrap: wrap; gap: 7px; }
+    .button { min-height: 36px; padding: 7px 11px; border: 1px solid #c9d2dc; border-radius: 7px; color: var(--ink); background: #fff; cursor: pointer; font-weight: 650; }
+    .button:hover:not(:disabled) { background: #f3f6f9; }
+    .button-primary, .language-switch button[aria-pressed="true"] { border-color: var(--blue); color: #fff; background: var(--blue); }
+    .button-primary:hover:not(:disabled), .language-switch button[aria-pressed="true"]:hover:not(:disabled) { border-color: var(--blue-dark); background: var(--blue-dark); }
+    .language-switch button[aria-pressed="false"]:hover:not(:disabled) { border-color: #9ab8ff; color: var(--blue-dark); background: var(--blue-soft); }
+    .button-small { min-height: 30px; padding: 4px 9px; font-size: .78rem; }
+    .intro { display: flex; justify-content: space-between; gap: 24px; align-items: end; margin-bottom: 20px; }
+    .eyebrow { margin: 0 0 8px; color: var(--blue); font-size: .78rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(1.8rem, 4vw, 2.5rem); letter-spacing: -.04em; }
+    .intro-copy, .hint, .footer-note { color: var(--muted); }
+    .intro-copy { max-width: 620px; margin: 0; line-height: 1.55; }
+    .workspace { display: grid; grid-template-columns: minmax(280px, 430px) minmax(0, 1fr); gap: 16px; align-items: start; }
+    .pane { min-width: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); box-shadow: 0 2px 6px #1822300a; }
+    .pane-head { display: flex; min-height: 64px; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+    .pane-title { margin: 0; font-size: 1rem; }
+    .pane-index { color: var(--muted); font-size: .75rem; font-weight: 700; }
+    .pane-content { display: grid; gap: 16px; padding: 18px; }
+    .field { display: grid; gap: 7px; min-width: 0; }
+    label { font-size: .86rem; font-weight: 650; }
+    input, select { width: 100%; min-width: 0; padding: 10px 11px; border: 1px solid #c9d2dc; border-radius: 7px; color: var(--ink); background: #fff; }
+    input:focus, select:focus, button:focus-visible { outline: 3px solid #84adff80; outline-offset: 1px; border-color: var(--blue); }
+    input, .mono, pre { font-family: Consolas, "Courier New", monospace; }
+    .hint, .footer-note { margin: 0; font-size: .78rem; line-height: 1.5; }
+    .status { padding: 10px 12px; border: 1px solid var(--line); border-radius: 7px; color: var(--muted); background: #fafbfc; font-size: .83rem; line-height: 1.45; overflow-wrap: anywhere; }
+    .status[data-kind="success"] { color: var(--green); border-color: #abefc6; background: #ecfdf3; }
+    .status[data-kind="error"] { color: var(--red); border-color: #fecdca; background: #fef3f2; }
+    .status[data-kind="warning"] { color: #8a4b08; border-color: var(--amber-line); background: var(--amber-bg); }
+    .results { display: grid; gap: 10px; }
+    .result-row { display: grid; grid-template-columns: minmax(130px, 180px) minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px solid #edf0f3; }
+    .result-label { color: var(--muted); font-size: .82rem; font-weight: 650; }
+    .result-value { min-width: 0; padding: 8px 9px; border-radius: 6px; background: var(--code); font-size: .82rem; overflow-wrap: anywhere; }
+    .copy-button { min-height: 30px; padding: 4px 8px; font-size: .75rem; }
+    .duration-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .duration-grid .field { gap: 5px; }
+    .duration-grid label { color: var(--muted); font-size: .76rem; }
+    .note { padding: 10px 12px; border: 1px solid var(--amber-line); border-radius: 7px; color: #8a4b08; background: var(--amber-bg); font-size: .8rem; line-height: 1.5; }
+    .learn { margin-top: 16px; }
+    .learn-copy { color: var(--muted); font-size: .88rem; line-height: 1.65; }
+    .learn-copy p { margin: 0 0 12px; }
+    .learn-copy code { padding: 2px 4px; border-radius: 4px; background: var(--code); font-family: Consolas, monospace; }
+    .footer { display: flex; justify-content: space-between; gap: 16px; margin-top: 18px; padding: 14px 2px; }
+    @media (max-width: 900px) { .workspace { grid-template-columns: 1fr; } .intro { display: block; } .intro-copy { margin-top: 12px; } }
+    @media (max-width: 600px) { .shell { padding: 14px; } .duration-grid { grid-template-columns: repeat(2, 1fr); } .result-row { grid-template-columns: 1fr; gap: 5px; } .footer { display: block; } .footer-note + .footer-note { margin-top: 8px; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar"><a class="brand" href="../README.md"><span class="brand-mark">DH</span><span>DH.DevUtil</span></a><div class="language-switch"><button class="button button-small" data-lang="en" aria-pressed="true" type="button">English</button><button class="button button-small" data-lang="ko" aria-pressed="false" type="button">한국어</button></div></header>
+    <section class="intro"><div><p class="eyebrow" data-i18n="eyebrow">Time &amp; date</p><h1>Timestamp Converter</h1></div><p class="intro-copy" data-i18n="intro">Convert timestamps between common developer formats and calculate dates by adding or subtracting a calendar duration.</p></section>
+    <section class="workspace">
+      <section class="pane">
+        <div class="pane-head"><h2 class="pane-title" data-i18n="convertTitle">Convert a timestamp</h2><span class="pane-index">01</span></div>
+        <div class="pane-content">
+          <div class="field"><label for="input-value" data-i18n="inputLabel">Value</label><input id="input-value" type="text" spellcheck="false" value="2026-10-19T12:34:56.789Z"><p class="hint" data-i18n="inputHint">Enter an ISO date, Unix timestamp, FILETIME, or .NET Ticks.</p></div>
+          <div class="field"><label for="input-kind" data-i18n="kindLabel">Interpret as</label><select id="input-kind"><option value="auto">Auto detect</option><option value="iso">ISO 8601 / date text</option><option value="seconds">Unix seconds</option><option value="milliseconds">Unix milliseconds</option><option value="microseconds">Unix microseconds</option><option value="nanoseconds">Unix nanoseconds</option><option value="filetime">Windows FILETIME</option><option value="ticks">.NET Ticks</option></select></div>
+          <div class="actions"><button id="now" class="button button-primary" data-i18n="now" type="button">Use current time</button><button id="examples" class="button" data-i18n="examples" type="button">Load example</button><button id="clear" class="button" data-i18n="clear" type="button">Clear</button></div>
+          <div id="status" class="status" data-kind="success" role="status"></div>
+        </div>
+      </section>
+      <section class="pane">
+        <div class="pane-head"><h2 class="pane-title" data-i18n="resultsTitle">Converted values</h2><span class="pane-index">02</span></div>
+        <div id="results" class="pane-content results"></div>
+      </section>
+    </section>
+    <section class="pane learn">
+      <div class="pane-head"><h2 class="pane-title" data-i18n="durationTitle">Add or subtract a duration</h2><span class="pane-index">03</span></div>
+      <div class="pane-content">
+        <div class="field"><label for="duration-base" data-i18n="baseLabel">Base date and time</label><input id="duration-base" type="datetime-local" step="1"><p id="duration-local-preview" class="hint"></p></div>
+        <div class="field"><label for="duration-operation" data-i18n="operationLabel">Operation</label><select id="duration-operation"><option value="add">Add (+)</option><option value="subtract">Subtract (-)</option></select></div>
+        <div class="duration-grid"><div class="field"><label for="years" data-i18n="years">Years</label><input id="years" type="number" value="0" step="1"></div><div class="field"><label for="months" data-i18n="months">Months</label><input id="months" type="number" value="0" step="1"></div><div class="field"><label for="days" data-i18n="days">Days</label><input id="days" type="number" value="0" step="1"></div><div class="field"><label for="hours" data-i18n="hours">Hours</label><input id="hours" type="number" value="0" step="1"></div><div class="field"><label for="minutes" data-i18n="minutes">Minutes</label><input id="minutes" type="number" value="0" step="1"></div><div class="field"><label for="seconds" data-i18n="seconds">Seconds</label><input id="seconds" type="number" value="0" step="1"></div></div>
+        <div id="duration-output" class="status" data-kind="success"></div>
+        <p class="note" data-i18n="durationNote">Years and months use calendar arithmetic. For example, adding one month to January 31 follows JavaScript Date overflow rules.</p>
+      </div>
+    </section>
+    <section class="pane learn">
+      <div class="pane-head"><h2 class="pane-title" data-i18n="learnTitle">Learn more</h2><div class="language-switch"><button class="button button-small" data-learn-lang="en" aria-pressed="true" type="button">English</button><button class="button button-small" data-learn-lang="ko" aria-pressed="false" type="button">한국어</button></div></div>
+      <div id="learn-en" class="pane-content learn-copy"><p><strong>Unix timestamp:</strong> Unix time counts from 1970-01-01T00:00:00Z. Seconds are common in APIs; JavaScript <code>Date</code> uses milliseconds.</p><p><strong>FILETIME and .NET Ticks:</strong> Windows FILETIME counts 100-nanosecond intervals from 1601-01-01. .NET Ticks use the same 100-nanosecond unit but start at 0001-01-01.</p><p><strong>Time zones:</strong> ISO values ending in <code>Z</code> are UTC. A date-time without an offset is interpreted as local time by the browser. The result shows both UTC and local representations.</p></div>
+      <div id="learn-ko" class="pane-content learn-copy" hidden><p><strong>Unix timestamp:</strong> Unix time은 1970-01-01T00:00:00Z부터의 시간을 셉니다. API에서는 초 단위를 자주 사용하고 JavaScript <code>Date</code>는 밀리초를 사용합니다.</p><p><strong>FILETIME과 .NET Ticks:</strong> Windows FILETIME은 1601-01-01부터 100나노초 단위를 셉니다. .NET Ticks도 100나노초 단위지만 시작점은 0001-01-01입니다.</p><p><strong>Time zone:</strong> <code>Z</code>로 끝나는 ISO 값은 UTC입니다. offset이 없는 날짜·시간은 브라우저의 local time으로 해석됩니다. 결과에는 UTC와 local 표현을 함께 표시합니다.</p></div>
+    </section>
+    <footer class="footer"><p class="footer-note" data-i18n="privacy">All processing happens in this browser. No input is uploaded or stored.</p><p class="footer-note" data-i18n="engine">Uses the browser's Date and Intl APIs.</p></footer>
+  </main>
+  <script>
+    'use strict';
+    const el = id => document.getElementById(id);
+    const constants = { unix: Date.UTC(1970, 0, 1), filetime: Date.UTC(1601, 0, 1), ticks: -62135596800000 };
+    const text = {
+      en: { eyebrow: 'Time & date', intro: 'Convert timestamps between common developer formats and calculate dates by adding or subtracting a calendar duration.', convertTitle: 'Convert a timestamp', inputLabel: 'Value', inputHint: 'Enter an ISO date, Unix timestamp, FILETIME, or .NET Ticks.', kindLabel: 'Interpret as', now: 'Use current time', examples: 'Load example', clear: 'Clear', resultsTitle: 'Converted values', durationTitle: 'Add or subtract a duration', baseLabel: 'Base date and time', operationLabel: 'Operation', years: 'Years', months: 'Months', days: 'Days', hours: 'Hours', minutes: 'Minutes', seconds: 'Seconds', durationNote: 'Years and months use calendar arithmetic. For example, adding one month to January 31 follows JavaScript Date overflow rules.', learnTitle: 'Learn more', privacy: 'All processing happens in this browser. No input is uploaded or stored.', engine: "Uses the browser's Date and Intl APIs.", valid: 'Valid date.', invalid: 'Enter a valid date or timestamp.', detected: 'Detected as', durationResult: 'Result', copy: 'Copy', utc: 'UTC ISO 8601', local: 'Local time', unixSeconds: 'Unix seconds', unixMilliseconds: 'Unix milliseconds', unixMicroseconds: 'Unix microseconds', unixNanoseconds: 'Unix nanoseconds', filetime: 'Windows FILETIME', ticks: '.NET Ticks', add: 'Add (+)', subtract: 'Subtract (-)', copied: 'Copied.' },
+      ko: { eyebrow: '시간·날짜', intro: '개발에서 자주 사용하는 timestamp 형식 사이를 변환하고 calendar duration을 더하거나 뺍니다.', convertTitle: 'Timestamp 변환', inputLabel: '값', inputHint: 'ISO 날짜, Unix timestamp, FILETIME 또는 .NET Ticks를 입력하세요.', kindLabel: '해석 방법', now: '현재 시간 사용', examples: '예제 불러오기', clear: '지우기', resultsTitle: '변환 결과', durationTitle: '기간 더하기·빼기', baseLabel: '기준 날짜·시간', operationLabel: '연산', years: '년', months: '개월', days: '일', hours: '시간', minutes: '분', seconds: '초', durationNote: '년과 월은 calendar arithmetic으로 계산합니다. 예를 들어 1월 31일에 한 달을 더하면 JavaScript Date의 overflow 규칙이 적용됩니다.', learnTitle: '더 알아보기', privacy: '모든 처리는 브라우저에서 이루어집니다. 입력값은 업로드하지 않습니다.', engine: '브라우저의 Date·Intl API를 사용합니다.', valid: '유효한 날짜입니다.', invalid: '유효한 날짜 또는 timestamp를 입력하세요.', detected: '감지 형식', durationResult: '결과', copy: '복사', utc: 'UTC ISO 8601', local: '현지 시간', unixSeconds: 'Unix 초', unixMilliseconds: 'Unix 밀리초', unixMicroseconds: 'Unix 마이크로초', unixNanoseconds: 'Unix 나노초', filetime: 'Windows FILETIME', ticks: '.NET Ticks', add: '더하기 (+)', subtract: '빼기 (-)', copied: '복사했습니다.' }
+    };
+    let language = 'en';
+    const examples = ['2026-10-19T12:34:56.789Z', '1760877296', '134053508967890000', '0'];
+
+    function t(key) { return text[language][key] || text.en[key] || key; }
+    function setStatus(message, kind) { el('status').textContent = message; el('status').dataset.kind = kind; }
+    function dateFromValue(value, kind) {
+      const input = value.trim();
+      if (!input) return null;
+      if (kind === 'iso') { const date = new Date(input); return Number.isNaN(date.getTime()) ? null : date; }
+      if (kind === 'filetime' || kind === 'ticks' || ['seconds', 'milliseconds', 'microseconds', 'nanoseconds'].includes(kind)) return numericDate(input, kind);
+      if (/^[+-]?\d+(?:\.\d+)?$/.test(input)) {
+        const length = input.replace(/^[+-]/, '').split('.')[0].length;
+        if (length <= 10) return numericDate(input, 'seconds');
+        if (length <= 13) return numericDate(input, 'milliseconds');
+        if (length <= 16) return numericDate(input, 'microseconds');
+        return numericDate(input, 'nanoseconds');
+      }
+      const date = new Date(input);
+      return Number.isNaN(date.getTime()) ? null : date;
+    }
+    function numericDate(input, kind) {
+      const number = Number(input);
+      if (!Number.isFinite(number)) return null;
+      let milliseconds;
+      if (kind === 'seconds') milliseconds = number * 1000;
+      if (kind === 'milliseconds') milliseconds = number;
+      if (kind === 'microseconds') milliseconds = number / 1000;
+      if (kind === 'nanoseconds') milliseconds = number / 1000000;
+      if (kind === 'filetime') milliseconds = (number / 10000) + constants.filetime;
+      if (kind === 'ticks') milliseconds = (number / 10000) + constants.ticks;
+      const date = new Date(milliseconds);
+      return Number.isNaN(date.getTime()) ? null : date;
+    }
+    function formatNumber(number) { return Number.isSafeInteger(number) ? String(number) : number.toLocaleString('en-US', { useGrouping: false, maximumFractionDigits: 6 }); }
+    function formatLocal(date) { return new Intl.DateTimeFormat(language === 'ko' ? 'ko-KR' : 'en-US', { dateStyle: 'medium', timeStyle: 'long' }).format(date); }
+    function valuesFor(date) {
+      const milliseconds = date.getTime();
+      return [[t('utc'), date.toISOString()], [t('local'), formatLocal(date)], [t('unixSeconds'), formatNumber(milliseconds / 1000)], [t('unixMilliseconds'), formatNumber(milliseconds)], [t('unixMicroseconds'), formatNumber((milliseconds - constants.unix) * 1000)], [t('unixNanoseconds'), formatNumber((milliseconds - constants.unix) * 1000000)], [t('filetime'), formatNumber((milliseconds - constants.filetime) * 10000)], [t('ticks'), formatNumber((milliseconds - constants.ticks) * 10000)]];
+    }
+    function renderResults(date) {
+      const container = el('results');
+      container.replaceChildren();
+      valuesFor(date).forEach(([label, value]) => {
+        const row = document.createElement('div');
+        row.className = 'result-row';
+        const valueNode = document.createElement('div');
+        valueNode.className = 'result-value mono';
+        valueNode.textContent = value;
+        const copy = document.createElement('button');
+        copy.className = 'button copy-button';
+        copy.type = 'button';
+        copy.textContent = t('copy');
+        copy.addEventListener('click', () => navigator.clipboard?.writeText(value).then(() => setStatus(t('copied'), 'success')));
+        row.append(document.createElement('div'), valueNode, copy);
+        row.firstChild.className = 'result-label';
+        row.firstChild.textContent = label;
+        container.appendChild(row);
+      });
+    }
+    function render() {
+      const kind = el('input-kind').value;
+      const date = dateFromValue(el('input-value').value, kind);
+      if (!date) { el('results').replaceChildren(); setStatus(t('invalid'), 'error'); return; }
+      renderResults(date);
+      setStatus(t('valid') + ' ' + t('detected') + ': ' + (kind === 'auto' ? 'auto' : kind) + '.', 'success');
+    }
+    function localInputValue(date) {
+      const pad = value => String(value).padStart(2, '0');
+      return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate()) + 'T' + pad(date.getHours()) + ':' + pad(date.getMinutes()) + ':' + pad(date.getSeconds());
+    }
+    function renderDuration() {
+      const base = new Date(el('duration-base').value);
+      if (Number.isNaN(base.getTime())) { el('duration-local-preview').textContent = ''; el('duration-output').textContent = t('invalid'); el('duration-output').dataset.kind = 'error'; return; }
+      el('duration-local-preview').textContent = (language === 'ko' ? '선택한 값: ' : 'Selected value: ') + formatLocal(base);
+      const sign = el('duration-operation').value === 'subtract' ? -1 : 1;
+      const result = new Date(base.getTime());
+      const years = Number(el('years').value) || 0;
+      const months = Number(el('months').value) || 0;
+      const days = Number(el('days').value) || 0;
+      const hours = Number(el('hours').value) || 0;
+      const minutes = Number(el('minutes').value) || 0;
+      const seconds = Number(el('seconds').value) || 0;
+      result.setFullYear(result.getFullYear() + sign * years);
+      result.setMonth(result.getMonth() + sign * months);
+      result.setDate(result.getDate() + sign * days);
+      result.setHours(result.getHours() + sign * hours);
+      result.setMinutes(result.getMinutes() + sign * minutes);
+      result.setSeconds(result.getSeconds() + sign * seconds);
+      el('duration-output').textContent = t('durationResult') + ': ' + result.toISOString() + ' · ' + formatLocal(result);
+      el('duration-output').dataset.kind = 'success';
+    }
+    function setLanguage(next) {
+      language = next === 'ko' ? 'ko' : 'en';
+      document.documentElement.lang = language;
+      document.querySelectorAll('[data-i18n]').forEach(item => { item.innerHTML = t(item.dataset.i18n); });
+      document.querySelectorAll('[data-lang]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.lang === language)));
+      document.querySelectorAll('[data-learn-lang]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.learnLang === language)));
+      document.querySelectorAll('#input-kind option').forEach((option, index) => { option.textContent = (language === 'ko' ? ['자동 감지', 'ISO 8601 / 날짜 text', 'Unix 초', 'Unix 밀리초', 'Unix 마이크로초', 'Unix 나노초', 'Windows FILETIME', '.NET Ticks'] : ['Auto detect', 'ISO 8601 / date text', 'Unix seconds', 'Unix milliseconds', 'Unix microseconds', 'Unix nanoseconds', 'Windows FILETIME', '.NET Ticks'])[index]; });
+      document.querySelectorAll('#duration-operation option').forEach((option, index) => { option.textContent = language === 'ko' ? ['더하기 (+)', '빼기 (-)'][index] : ['Add (+)', 'Subtract (-)'][index]; });
+      render();
+      renderDuration();
+      try { localStorage.setItem('dh-devutil-timestamp-lang', language); } catch (error) { /* storage is optional */ }
+    }
+    el('input-value').addEventListener('input', render);
+    el('input-kind').addEventListener('change', render);
+    el('now').addEventListener('click', () => { el('input-value').value = new Date().toISOString(); el('input-kind').value = 'iso'; render(); });
+    el('examples').addEventListener('click', () => { const next = examples[(examples.indexOf(el('input-value').value) + 1) % examples.length]; el('input-value').value = next; el('input-kind').value = 'auto'; render(); });
+    el('clear').addEventListener('click', () => { el('input-value').value = ''; render(); });
+    ['duration-base', 'duration-operation', 'years', 'months', 'days', 'hours', 'minutes', 'seconds'].forEach(id => el(id).addEventListener('input', renderDuration));
+    el('duration-operation').addEventListener('change', renderDuration);
+    document.querySelectorAll('[data-lang]').forEach(button => button.addEventListener('click', () => setLanguage(button.dataset.lang)));
+    document.querySelectorAll('[data-learn-lang]').forEach(button => button.addEventListener('click', button => { const lang = button.currentTarget.dataset.learnLang; el('learn-en').hidden = lang !== 'en'; el('learn-ko').hidden = lang !== 'ko'; document.querySelectorAll('[data-learn-lang]').forEach(item => item.setAttribute('aria-pressed', String(item.dataset.learnLang === lang))); }));
+    let initialLanguage = 'en';
+    try { initialLanguage = localStorage.getItem('dh-devutil-timestamp-lang') || (navigator.language.toLowerCase().startsWith('ko') ? 'ko' : 'en'); } catch (error) { /* storage is optional */ }
+    const initialDate = new Date();
+    el('duration-base').value = localInputValue(initialDate);
+    setLanguage(initialLanguage);
+    renderDuration();
+  </script>
+</body>
+</html>
