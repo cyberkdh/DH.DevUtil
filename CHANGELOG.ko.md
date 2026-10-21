@@ -8,7 +8,18 @@ DH.DevUtil의 주요 변경 사항을 기록합니다. 최신 변경이 위에 �
 
 ### 추가
 
+- TOTP/HOTP Simulator, UUID/ULID Inspector, URL/Query Parser, Cron Explainer, Asymmetric Cryptography Simulator, generic API Request Signing Simulator를 독립 실행형 local HTML 도구로 추가하고 영문/한국어 안내 문서를 제공했습니다.
+- File Hash Calculator에 기존 형식 호환용 legacy algorithm인 RIPEMD-160을 추가했습니다.
+- PEM · ASN.1 · X.509 Viewer에 PEM/DER 인증서 파일 선택과 editor 직접 drag-and-drop을 추가하고 버튼 hover/focus 대비를 보강했습니다.
+- JKS certificate chain의 첫 인증서 추출과 PKCS#12/PFX 외부 ASN.1 구조 검사를 추가했으며 private-key material은 표시하지 않습니다.
+
 - IPv4 네트워크·마스크·호스트 범위·이진수·서브넷 분할을 계산하는 CIDR Calculator와 English·한국어 UI를 추가했습니다.
+- salt, PBKDF2, 반복 횟수, 키 길이, 비밀번호 검증을 브라우저에서 학습하는 Password Hashing Lab과 영문·한국어 안내 문서를 추가했습니다.
+- Content-Type 파싱, 매개변수·suffix·charset·확장자 힌트를 확인하는 MIME · Content-Type Inspector와 영문·한국어 안내 문서를 추가했습니다.
+- 일반적인 설정용 YAML·JSON 변환, 샘플, 영문·한국어 UI를 제공하는 YAML · JSON Converter와 안내 문서를 추가했습니다.
+- YAML·JSON 샘플을 변환 전 원본으로 별도 표시하도록 개선했습니다.
+- PEM·DER 파싱, ASN.1 트리, 주요 인증서 필드를 제공하는 PEM · ASN.1 · X.509 Viewer와 영문·한국어 안내 문서를 추가했습니다.
+- Password Hashing Lab에 두 비밀번호 입력란을 표시하는 `비밀번호 표시` 옵션을 추가했습니다.
 
 - 일반 텍스트·JSON 줄 비교, JSON 형식화, 색상별 추가·삭제 표시, 영문·한국어 UI와 화면 미리보기를 제공하는 Text · JSON Diff를 추가했습니다.
 - Text · JSON Diff에 기본 텍스트, API JSON, 설정 JSON, Markdown, 로그 샘플과 로컬 file1/file2 drag-and-drop 불러오기를 추가했습니다.
@@ -38,6 +49,7 @@ DH.DevUtil의 주요 변경 사항을 기록합니다. 최신 변경이 위에 �
 
 ### 개선
 
+- YAML · JSON Converter 버튼의 hover 대비와 active 피드백을 개선했습니다.
 - Color Converter의 대비 미리보기를 한 문장에서 제목·본문·링크·버튼·입력창을 포함한 작은 실제 UI 미리보기로 확장했습니다.
 - 데스크톱에서 Color Converter의 WCAG 입력·결과를 왼쪽, 미리보기를 오른쪽에 배치하고 작은 글자·본문·큰 글자·제목 샘플을 추가했습니다.
 - 위에서 선택한 색상을 WCAG 전경색·배경색에 적용하거나 두 대비 색상을 교체하는 버튼을 추가했습니다.

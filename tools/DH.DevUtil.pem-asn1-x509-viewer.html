@@ -1,0 +1,214 @@
+<!--
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//	Projects		: DH.DevUtil
+//	Author			: CYBERKDH
+//	Module			: PEM · ASN.1 · X.509 Viewer
+//	History			: 2026-10-20 Initial implementation (local DER and certificate inspection)
+//	Copyrights		: Copyright (C)CYBERKDH. All Rights Reserved.
+//////////////////////////////////////////////////////////////////////////////////////////////////
+-->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light">
+  <title>PEM · ASN.1 · X.509 Viewer | DH.DevUtil</title>
+  <style>
+    :root { color-scheme: light; --ink:#182230; --muted:#5d6b7a; --line:#d9e1e8; --surface:#fff; --canvas:#f3f6f9; --blue:#155eef; --blue-soft:#eff4ff; --green-bg:#ecfdf3; --green-line:#a6f4c5; --red-bg:#fef3f2; --red-line:#fecdca; font-family:"Segoe UI",Arial,sans-serif; }
+    * { box-sizing:border-box; } body { margin:0; color:var(--ink); background:var(--canvas); } button,select,textarea { font:inherit; } .shell { max-width:1440px; margin:0 auto; padding:24px; }
+    .topbar,.intro,.toolbar,.pane-head,.button-row { display:flex; gap:10px; } .topbar,.intro { justify-content:space-between; align-items:end; } .topbar { align-items:center; margin-bottom:28px; } .brand { display:inline-flex; gap:10px; align-items:center; color:var(--ink); font-weight:700; text-decoration:none; } .brand-mark { display:grid; width:34px; height:34px; place-items:center; border-radius:9px; color:#fff; background:var(--blue); } .language-switch,.button-row { flex-wrap:wrap; }
+    .button { min-height:36px; padding:7px 11px; border:1px solid #c9d2dc; border-radius:7px; color:var(--ink); background:#fff; cursor:pointer; font-weight:650; } .button:hover { background:#f3f6f9; } .button-primary,.language-switch button[aria-pressed="true"] { border-color:var(--blue); color:#fff; background:var(--blue); } .button-small { min-height:30px; padding:4px 9px; font-size:.78rem; }
+    .eyebrow { margin:0 0 8px; color:var(--blue); font-size:.78rem; font-weight:700; letter-spacing:.09em; text-transform:uppercase; } h1 { margin:0; font-size:clamp(1.8rem,4vw,2.5rem); letter-spacing:-.04em; } h2,h3 { margin:0; } .intro-copy,.hint,.footer-note { color:var(--muted); } .intro-copy { max-width:700px; margin:0; line-height:1.55; }
+    .pane { overflow:hidden; border:1px solid var(--line); border-radius:12px; background:var(--surface); box-shadow:0 2px 6px #1822300a; } .pane+.pane { margin-top:16px; } .pane-head { min-height:64px; justify-content:space-between; align-items:center; padding:14px 18px; border-bottom:1px solid var(--line); } .pane-index { color:var(--muted); font-size:.75rem; font-weight:700; } .pane-content { display:grid; gap:16px; padding:18px; }
+    .toolbar { align-items:end; flex-wrap:wrap; padding:14px 16px; border:1px solid var(--line); border-radius:10px; background:#fff; } label { display:grid; gap:6px; font-weight:700; } textarea,select { border:1px solid #bdcad8; border-radius:7px; color:var(--ink); background:#fbfcfd; } select { min-height:38px; padding:7px 10px; } textarea { width:100%; min-height:300px; resize:vertical; padding:12px; font-family:Consolas,monospace; line-height:1.5; } textarea:focus,select:focus,button:focus-visible { outline:3px solid #9ab8ff; outline-offset:1px; }
+    .field { min-width:210px; } .field.wide { flex:1 1 600px; } .status { padding:10px 12px; border:1px solid var(--green-line); border-radius:7px; color:#067647; background:var(--green-bg); } .status[data-kind="error"] { border-color:var(--red-line); color:#b42318; background:var(--red-bg); } .hint { margin:0; font-size:.88rem; line-height:1.55; }
+    .result-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; } .card { padding:13px; border:1px solid var(--line); border-radius:8px; background:#fbfcfd; } .card span { display:block; margin-bottom:6px; color:var(--muted); font-size:.82rem; } .card strong { font-family:Consolas,monospace; font-size:.95rem; overflow-wrap:anywhere; }
+    .tree { max-height:620px; overflow:auto; padding:12px; border:1px solid var(--line); border-radius:8px; background:#fbfcfd; font-family:Consolas,monospace; font-size:.86rem; line-height:1.55; } .tree details { margin-left:14px; } .tree summary { cursor:pointer; } .tree-leaf { margin-left:20px; white-space:pre-wrap; overflow-wrap:anywhere; } .tree-tag { color:#155eef; } .learn { line-height:1.6; } .learn p,.learn ul { margin:0; }
+    @media (max-width:760px) { .shell { padding:16px; } .topbar,.intro { align-items:flex-start; flex-direction:column; } .result-grid { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar"><a class="brand" href="#"><span class="brand-mark">DH</span><span>DH.DevUtil</span></a><div class="language-switch"><button class="button button-small" data-lang="en" aria-pressed="true" type="button">English</button><button class="button button-small" data-lang="ko" aria-pressed="false" type="button">한국어</button></div></header>
+    <section class="intro"><div><p class="eyebrow" data-i18n="eyebrow">SECURITY & CERTIFICATES</p><h1 data-i18n="title">PEM · ASN.1 · X.509 Viewer</h1></div><p class="intro-copy" data-i18n="intro">Inspect PEM or DER certificate structure locally. See ASN.1 tags and common X.509 fields without uploading the certificate.</p></section>
+    <section class="pane"><div class="pane-head"><h2 data-i18n="inputTitle">Certificate input</h2><span class="pane-index">01</span></div><div class="pane-content"><div class="toolbar"><label><span data-i18n="formatLabel">Input format</span><select id="format"><option value="pem">PEM</option><option value="hex">DER hex</option></select></label><button id="example" class="button" type="button" data-i18n="example">Load ASN.1 sample</button><button id="inspect" class="button button-primary" type="button" data-i18n="inspect">Inspect</button><button id="clear" class="button" type="button" data-i18n="clear">Clear</button></div><textarea id="input" spellcheck="false" placeholder="-----BEGIN CERTIFICATE-----"></textarea><div id="status" class="status"></div></div></section>
+    <section class="pane"><div class="pane-head"><h2 data-i18n="summaryTitle">Certificate summary</h2><span class="pane-index">02</span></div><div class="pane-content"><div id="cards" class="result-grid"></div><div class="button-row"><button id="copy" class="button" type="button" data-i18n="copy">Copy summary</button></div></div></section>
+    <section class="pane"><div class="pane-head"><h2 data-i18n="treeTitle">ASN.1 structure</h2><span class="pane-index">03</span></div><div class="pane-content"><div id="tree" class="tree"></div></div></section>
+    <section class="pane"><div class="pane-head"><h2 data-i18n="learnTitle">Learn more</h2><span class="pane-index">04</span></div><div class="pane-content learn"><p data-i18n="learnText">PEM is a text container around Base64 DER bytes. ASN.1 defines the data structure, and X.509 defines the certificate profile.</p><ul><li data-i18n="learnOne">A certificate signature proves that the issuer signed the certificate; it does not make the certificate trusted by itself.</li><li data-i18n="learnTwo">Issuer, Subject, Validity, Subject Alternative Name, and Key Usage are common fields to inspect.</li><li data-i18n="learnThree">This viewer parses structure locally and is not a complete certificate path validator.</li></ul></div></section>
+    <p class="footer-note" data-i18n="footer">No value is uploaded. This is a standalone HTML tool.</p>
+  </main>
+  <script>
+    const translations = {
+      en: { eyebrow:'SECURITY & CERTIFICATES', title:'PEM · ASN.1 · X.509 Viewer', intro:'Inspect PEM or DER certificate structure locally. See ASN.1 tags and common X.509 fields without uploading the certificate.', inputTitle:'Certificate input', formatLabel:'Input format', example:'Load ASN.1 sample', inspect:'Inspect', clear:'Clear', summaryTitle:'Certificate summary', copy:'Copy summary', treeTitle:'ASN.1 structure', learnTitle:'Learn more', learnText:'PEM is a text container around Base64 DER bytes. ASN.1 defines the data structure, and X.509 defines the certificate profile.', learnOne:'A certificate signature proves that the issuer signed the certificate; it does not make the certificate trusted by itself.', learnTwo:'Issuer, Subject, Validity, Subject Alternative Name, and Key Usage are common fields to inspect.', learnThree:'This viewer parses structure locally and is not a complete certificate path validator.', footer:'No value is uploaded. This is a standalone HTML tool.', ready:'Ready', invalid:'Enter PEM or DER hexadecimal data.', certificate:'Certificate', serial:'Serial number', issuer:'Issuer', subject:'Subject', validFrom:'Valid from', validTo:'Valid to', signature:'Signature algorithm', publicKey:'Public key algorithm', tag:'Tag', length:'Length', value:'Value', unknown:'Unknown', copied:'Copied' },
+      ko: { eyebrow:'보안·인증서', title:'PEM · ASN.1 · X.509 Viewer', intro:'PEM 또는 DER 인증서 구조를 로컬에서 확인합니다. 인증서를 외부로 전송하지 않고 ASN.1 태그와 주요 X.509 필드를 확인하세요.', inputTitle:'인증서 입력', formatLabel:'입력 형식', example:'ASN.1 샘플 불러오기', inspect:'검사', clear:'지우기', summaryTitle:'인증서 요약', copy:'요약 복사', treeTitle:'ASN.1 구조', learnTitle:'학습 가이드', learnText:'PEM은 Base64 DER 바이트를 감싸는 텍스트 컨테이너입니다. ASN.1은 데이터 구조를 정의하고 X.509는 인증서 프로파일을 정의합니다.', learnOne:'인증서 서명은 발급자가 인증서에 서명했음을 증명하지만, 그 자체로 인증서를 신뢰할 수 있게 만들지는 않습니다.', learnTwo:'Issuer, Subject, Validity, Subject Alternative Name, Key Usage는 확인할 가치가 있는 주요 필드입니다.', learnThree:'이 뷰어는 구조를 로컬에서 파싱하며 완전한 인증서 체인 검증기는 아닙니다.', footer:'값을 외부로 전송하지 않습니다. 독립 실행형 HTML 도구입니다.', ready:'준비됨', invalid:'PEM 또는 DER 16진수 데이터를 입력하세요.', certificate:'인증서', serial:'Serial number', issuer:'Issuer', subject:'Subject', validFrom:'유효 시작', validTo:'유효 종료', signature:'서명 알고리즘', publicKey:'공개 키 알고리즘', tag:'Tag', length:'길이', value:'값', unknown:'알 수 없음', copied:'복사됨' }
+    };
+    let language = localStorage.getItem('dhdevutil-language') || 'en'; const el = id => document.getElementById(id); const t = key => translations[language][key]; let currentSummary = null;
+    function setLanguage(next) { language = next; localStorage.setItem('dhdevutil-language', language); document.documentElement.lang = language; document.querySelectorAll('[data-i18n]').forEach(node => { node.textContent = t(node.dataset.i18n); }); document.querySelectorAll('[data-lang]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.lang === language))); }
+    function hex(bytes) { return [...bytes].map(byte => byte.toString(16).padStart(2,'0')).join(''); }
+    function decodeInput() { if (el('format').value === 'pem') { const match = el('input').value.match(/-----BEGIN [^-]+-----([\s\S]*?)-----END [^-]+-----/); if (!match) throw new Error(t('invalid')); const binary = atob(match[1].replace(/\s/g,'')); return Uint8Array.from(binary, char => char.charCodeAt(0)); } const text = el('input').value.replace(/\s/g,''); if (!/^(?:[0-9a-f]{2})+$/i.test(text)) throw new Error(t('invalid')); return Uint8Array.from(text.match(/../g), pair => parseInt(pair,16)); }
+    function oid(bytes) { let output = []; if (!bytes.length) return ''; output.push(Math.floor(bytes[0]/40), bytes[0]%40); let value = 0; for (let index=1; index<bytes.length; index+=1) { value = (value << 7) | (bytes[index] & 127); if (!(bytes[index] & 128)) { output.push(value); value=0; } } return output.join('.'); }
+    const oidNames = { '1.2.840.113549.1.1.1':'rsaEncryption', '1.2.840.113549.1.1.5':'sha1WithRSAEncryption', '1.2.840.113549.1.1.11':'sha256WithRSAEncryption', '1.2.840.10045.2.1':'ecPublicKey', '1.2.840.10045.4.3.2':'ecdsa-with-SHA256', '1.3.101.112':'Ed25519', '2.5.4.3':'commonName', '2.5.4.6':'countryName', '2.5.4.10':'organizationName', '2.5.4.11':'organizationalUnitName' };
+    function readNode(bytes, offset, depth = 0) { const start = offset, tag = bytes[offset++], tagClass = tag >> 6, constructed = Boolean(tag & 32); let tagNumber = tag & 31; if (tagNumber === 31) { tagNumber = 0; while (bytes[offset] & 128) tagNumber = (tagNumber << 7) | (bytes[offset++] & 127); tagNumber = (tagNumber << 7) | bytes[offset++]; } let length = bytes[offset++]; if (length & 128) { const count = length & 127; length = 0; for (let index=0; index<count; index+=1) length = length * 256 + bytes[offset++]; } const valueStart=offset, end=valueStart+length; if (end > bytes.length) throw new Error('ASN.1 length exceeds input.'); const node={start,tag,tagClass,tagNumber,constructed,length,valueStart,end,children:[]}; if (constructed) { while (offset < end) { const child=readNode(bytes,offset,depth+1); node.children.push(child); offset=child.end; } } return node; }
+    function tagName(node) { const names={0:'EOC',1:'BOOLEAN',2:'INTEGER',3:'BIT STRING',4:'OCTET STRING',5:'NULL',6:'OBJECT IDENTIFIER',12:'UTF8String',16:'SEQUENCE',17:'SET',18:'NumericString',19:'PrintableString',20:'TeletexString',22:'IA5String',23:'UTCTime',24:'GeneralizedTime'}; if (node.tagClass===2) return `[${node.tagNumber}]`; return names[node.tagNumber] || `TAG ${node.tagNumber}`; }
+    function nodeValue(node, bytes) { const data=bytes.slice(node.valueStart,node.end); if (node.tagNumber===6 && node.tagClass===0) return `${oid(data)}${oidNames[oid(data)] ? ` (${oidNames[oid(data)]})` : ''}`; if ([12,18,19,20,22].includes(node.tagNumber)) return new TextDecoder().decode(data); if ([23,24].includes(node.tagNumber)) return new TextDecoder().decode(data); if (node.tagNumber===2) return `0x${hex(data)}`; if (!node.constructed && data.length <= 32) return `0x${hex(data)}`; return `${data.length} bytes`; }
+    function leafStrings(node, bytes, result=[]) { if (node.constructed) node.children.forEach(child => leafStrings(child,bytes,result)); else if ([12,18,19,20,22].includes(node.tagNumber)) result.push(nodeValue(node,bytes)); return result; }
+    function nameValue(node, bytes) { const values=leafStrings(node,bytes); return values.length ? values.join(', ') : t('unknown'); }
+    function summary(root, bytes) { const tbs=root.children[0], signature=root.children[1], fields=tbs && tbs.children ? [...tbs.children] : []; if (fields[0] && fields[0].tagClass===2) fields.shift(); const serial=fields[0], tbsAlg=fields[1], issuer=fields[2], validity=fields[3], subject=fields[4], spki=fields[5]; const times=validity && validity.children ? validity.children : []; const alg=tbsAlg && tbsAlg.children && tbsAlg.children[0]; const spkiAlg=spki && spki.children && spki.children[0] && spki.children[0].children && spki.children[0].children[0]; return { certificate:'X.509', serial:serial ? nodeValue(serial,bytes) : t('unknown'), issuer:issuer ? nameValue(issuer,bytes) : t('unknown'), subject:subject ? nameValue(subject,bytes) : t('unknown'), validFrom:times[0] ? nodeValue(times[0],bytes) : t('unknown'), validTo:times[1] ? nodeValue(times[1],bytes) : t('unknown'), signature:alg && alg.children[0] ? nodeValue(alg.children[0],bytes) : t('unknown'), publicKey:spkiAlg ? nodeValue(spkiAlg,bytes) : t('unknown') }; }
+    function treeHtml(node, bytes) { const label=`<span class="tree-tag">${tagName(node)}</span> · ${t('length')} ${node.length}`; if (node.constructed) return `<details open><summary>${label}</summary>${node.children.map(child=>treeHtml(child,bytes)).join('')}</details>`; return `<div class="tree-leaf">${label} · ${escapeHtml(nodeValue(node,bytes))}</div>`; }
+    function escapeHtml(value) { return String(value).replace(/[&<>"']/g, character => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character])); }
+    function card(label,value) { return `<div class="card"><span>${label}</span><strong>${escapeHtml(value)}</strong></div>`; }
+    function inspect() { try { const bytes=decodeInput(), root=readNode(bytes,0); if (root.end !== bytes.length) throw new Error('Trailing bytes after ASN.1 root.'); currentSummary=summary(root,bytes); el('cards').innerHTML=[card(t('certificate'),currentSummary.certificate),card(t('serial'),currentSummary.serial),card(t('issuer'),currentSummary.issuer),card(t('subject'),currentSummary.subject),card(t('validFrom'),currentSummary.validFrom),card(t('validTo'),currentSummary.validTo),card(t('signature'),currentSummary.signature),card(t('publicKey'),currentSummary.publicKey)].join(''); el('tree').innerHTML=treeHtml(root,bytes); el('status').textContent=`${t('ready')} · ${bytes.length} bytes`; el('status').dataset.kind='success'; } catch(error) { currentSummary=null; el('cards').innerHTML=''; el('tree').textContent=''; el('status').textContent=error.message; el('status').dataset.kind='error'; } }
+    const demoHex='30060201010401ff'; document.querySelectorAll('[data-lang]').forEach(button=>button.addEventListener('click',()=>setLanguage(button.dataset.lang))); el('inspect').addEventListener('click',inspect); el('format').addEventListener('change',()=>{el('input').value='';}); el('example').addEventListener('click',()=>{el('format').value='hex';el('input').value=demoHex;inspect();}); el('clear').addEventListener('click',()=>{el('input').value='';el('cards').innerHTML='';el('tree').innerHTML='';el('status').textContent='';}); el('copy').addEventListener('click',async()=>{if(!currentSummary)return;await navigator.clipboard.writeText(JSON.stringify(currentSummary,null,2));const button=el('copy');button.textContent=t('copied');setTimeout(()=>button.textContent=t('copy'),1200);}); setLanguage(language);
+  </script>
+  <script>
+    (() => {
+      const input = document.getElementById('input');
+      const inputPane = input.closest('.pane-content');
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = '.pem,.crt,.cer,.der,application/x-pem-file,application/pkix-cert';
+      fileInput.hidden = true;
+      fileInput.id = 'certificate-file-input';
+      const fileButton = document.createElement('button');
+      fileButton.type = 'button';
+      fileButton.className = 'button';
+      fileButton.id = 'certificate-file-button';
+      function updateFileLabels() {
+        const korean = document.documentElement.lang === 'ko';
+        fileButton.textContent = korean ? '인증서 파일 선택' : 'Choose certificate file';
+        dropZone.innerHTML = korean ? '<strong>PEM 또는 DER 인증서를 여기에 놓으세요</strong><span>또는 인증서 파일 선택을 사용하세요</span>' : '<strong>Drop PEM or DER certificate here</strong><span>or use Choose certificate file</span>';
+      }
+      fileButton.textContent = 'Choose certificate file';
+      fileButton.addEventListener('click', () => fileInput.click());
+      const dropZone = document.createElement('div');
+      dropZone.className = 'certificate-drop-zone';
+      dropZone.setAttribute('role', 'button');
+      dropZone.tabIndex = 0;
+      dropZone.innerHTML = '<strong>Drop PEM or DER certificate here</strong><span>or use Choose certificate file</span>';
+      inputPane.insertBefore(dropZone, input);
+      inputPane.insertBefore(fileButton, input);
+      inputPane.appendChild(fileInput);
+      updateFileLabels();
+      document.querySelectorAll('[data-lang]').forEach(button => button.addEventListener('click', () => setTimeout(updateFileLabels, 0)));
+      const style = document.createElement('style');
+      style.textContent = '.button:hover,.button:focus-visible{color:#fff!important;background:#0d47c5!important;border-color:#0d47c5!important;box-shadow:0 0 0 2px #dbe7ff}.button-primary:hover{background:#083b9f!important;border-color:#083b9f!important}.certificate-drop-zone{display:grid;gap:4px;place-items:center;padding:18px;border:2px dashed #8aa9dc;border-radius:10px;color:#173b78;background:#f5f8ff;text-align:center;cursor:pointer}.certificate-drop-zone span{color:#52657c;font-size:.88rem}.certificate-drop-zone.drag-active,.certificate-drop-zone:hover{border-color:#155eef;color:#fff;background:#155eef}.certificate-drop-zone:hover span{color:#e6efff}';
+      document.head.appendChild(style);
+      async function loadCertificateFile(file) {
+        const isDer = /\.(der|cer)$/i.test(file.name) || file.type === 'application/pkix-cert';
+        if (isDer) {
+          const bytes = new Uint8Array(await file.arrayBuffer());
+          document.getElementById('format').value = 'hex';
+          input.value = Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
+        } else {
+          document.getElementById('format').value = 'pem';
+          input.value = await file.text();
+        }
+        document.getElementById('status').textContent = `${file.name} loaded locally · ${file.size} bytes`;
+        document.getElementById('status').dataset.kind = 'success';
+      }
+      fileInput.addEventListener('change', event => { const file = event.target.files[0]; if (file) loadCertificateFile(file); event.target.value = ''; });
+      dropZone.addEventListener('click', () => fileInput.click());
+      dropZone.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); fileInput.click(); } });
+      for (const target of [dropZone, input]) {
+        target.addEventListener('dragover', event => { event.preventDefault(); dropZone.classList.add('drag-active'); });
+        target.addEventListener('dragleave', event => { if (event.target === target) dropZone.classList.remove('drag-active'); });
+        target.addEventListener('drop', event => { event.preventDefault(); dropZone.classList.remove('drag-active'); const file = event.dataTransfer.files[0]; if (file) loadCertificateFile(file); });
+      }
+    })();
+  </script>
+  <script>
+    (() => {
+      const fileInput = document.getElementById('certificate-file-input');
+      const dropZone = document.querySelector('.certificate-drop-zone');
+      const editor = document.getElementById('input');
+      const format = document.getElementById('format');
+      const status = document.getElementById('status');
+      fileInput.accept += ',.jks,.p12,.pfx,application/x-java-keystore,application/x-pkcs12';
+      const readU32 = (bytes, offset) => (bytes[offset] * 0x1000000 + bytes[offset + 1] * 0x10000 + bytes[offset + 2] * 0x100 + bytes[offset + 3]) >>> 0;
+      const readU16 = (bytes, offset) => bytes[offset] * 256 + bytes[offset + 1];
+      function readJksUtf(bytes, state) {
+        const length = readU16(bytes, state.offset); state.offset += 2;
+        const value = new TextDecoder().decode(bytes.slice(state.offset, state.offset + length)); state.offset += length; return value;
+      }
+      function extractJksCertificate(bytes) {
+        if (bytes.length < 12 || readU32(bytes, 0) !== 0xfeedfeed) throw new Error('Not a JKS keystore.');
+        const state = { offset: 12 }, entries = readU32(bytes, 8), certificates = [];
+        for (let entry = 0; entry < entries; entry += 1) {
+          const tag = readU32(bytes, state.offset); state.offset += 4; readJksUtf(bytes, state); state.offset += 8;
+          if (tag === 2) {
+            const chainLength = readU32(bytes, state.offset); state.offset += 4;
+            for (let index = 0; index < chainLength; index += 1) { readJksUtf(bytes, state); const length = readU32(bytes, state.offset); state.offset += 4; const certificate = bytes.slice(state.offset, state.offset + length); state.offset += length; if (certificate.length) certificates.push(certificate); }
+          } else if (tag === 1) {
+            const encryptedKeyLength = readU32(bytes, state.offset); state.offset += 4 + encryptedKeyLength; const chainLength = readU32(bytes, state.offset); state.offset += 4;
+            for (let index = 0; index < chainLength; index += 1) { readJksUtf(bytes, state); const length = readU32(bytes, state.offset); state.offset += 4; const certificate = bytes.slice(state.offset, state.offset + length); state.offset += length; if (certificate.length) certificates.push(certificate); }
+          } else throw new Error(`Unsupported JKS entry type: ${tag}`);
+        }
+        if (!certificates.length) throw new Error('No X.509 certificate chain found in JKS.');
+        return certificates[0];
+      }
+      function showKeystoreFile(file) {
+        return file.arrayBuffer().then(buffer => {
+          const bytes = new Uint8Array(buffer), lower = file.name.toLowerCase();
+          if (lower.endsWith('.jks') || (bytes.length >= 4 && readU32(bytes, 0) === 0xfeedfeed)) {
+            const certificate = extractJksCertificate(bytes), binary = String.fromCharCode(...certificate);
+            format.value = 'pem'; editor.value = `-----BEGIN CERTIFICATE-----\n${btoa(binary).match(/.{1,64}/g).join('\n')}\n-----END CERTIFICATE-----`;
+            inspect(); status.textContent = `${file.name} · JKS certificate extracted locally`; status.dataset.kind = 'success'; return true;
+          }
+          if (lower.endsWith('.p12') || lower.endsWith('.pfx')) {
+            format.value = 'hex'; editor.value = hex(bytes); inspect(); status.textContent = `${file.name} · PKCS#12/PFX ASN.1 loaded locally; encrypted contents are not decrypted`; status.dataset.kind = 'success'; return true;
+          }
+          return false;
+        });
+      }
+      async function handleKeystore(event) {
+        const file = event.dataTransfer?.files?.[0] || event.target?.files?.[0]; if (!file) return;
+        const isKeystore = /\.(jks|p12|pfx)$/i.test(file.name) || /java-keystore|pkcs12/i.test(file.type);
+        if (!isKeystore) return;
+        event.preventDefault(); event.stopImmediatePropagation(); await showKeystoreFile(file); if (event.target?.value !== undefined) event.target.value = '';
+      }
+      fileInput.addEventListener('change', handleKeystore, true);
+      dropZone.addEventListener('drop', handleKeystore, true);
+      editor.addEventListener('drop', handleKeystore, true);
+      async function handleAnyDrop(event) {
+        const target = event.target.closest?.('#input,.certificate-drop-zone');
+        const file = event.dataTransfer?.files?.[0];
+        if (!target || !file) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        const isKeystore = /\.(jks|p12|pfx)$/i.test(file.name) || /java-keystore|pkcs12/i.test(file.type);
+        if (isKeystore) {
+          await showKeystoreFile(file);
+          return;
+        }
+        const isDer = /\.(der|cer)$/i.test(file.name) || file.type === 'application/pkix-cert';
+        if (isDer) {
+          const bytes = new Uint8Array(await file.arrayBuffer());
+          format.value = 'hex';
+          editor.value = hex(bytes);
+        } else {
+          format.value = 'pem';
+          editor.value = await file.text();
+        }
+        status.textContent = `${file.name} loaded locally · ${file.size} bytes`;
+        status.dataset.kind = 'success';
+      }
+      document.addEventListener('dragover', event => {
+        if (event.target.closest?.('#input,.certificate-drop-zone')) event.preventDefault();
+      }, true);
+      document.addEventListener('drop', handleAnyDrop, true);
+    })();
+  </script>
+  <script>
+    (() => {
+      const button = document.getElementById('certificate-file-button');
+      const zone = document.querySelector('.certificate-drop-zone');
+      function updateKeystoreLabels() {
+        const korean = document.documentElement.lang === 'ko';
+        button.textContent = korean ? '\uC778\uC99D\uC11C \uD30C\uC77C \uC120\uD0DD' : 'Choose certificate file';
+        zone.innerHTML = korean ? '<strong>PEM \uB610\uB294 DER \uC778\uC99D\uC11C\uB97C \uC5EC\uAE30\uC5D0 \uB193\uC73C\uC138\uC694</strong><span>\uB610\uB294 \uC778\uC99D\uC11C \uD30C\uC77C \uC120\uD0DD\uC744 \uC0AC\uC6A9\uD558\uC138\uC694</span>' : '<strong>Drop PEM or DER certificate here</strong><span>or use Choose certificate file</span>';
+      }
+      updateKeystoreLabels();
+      document.querySelectorAll('[data-lang]').forEach(languageButton => languageButton.addEventListener('click', () => setTimeout(updateKeystoreLabels, 0)));
+    })();
+  </script>
+</body>
+</html>

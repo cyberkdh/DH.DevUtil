@@ -4,6 +4,8 @@
 
 [English](./HASH_ALGORITHMS.md)
 
+RIPEMD-160도 선택할 수 있습니다. 기존 시스템·파일 형식과의 호환성이 필요한 경우에만 사용하고, 새로운 보안 설계에는 SHA-256 이상을 사용하세요.
+
 ![File Hash Calculator](./images/file-hash-calculator.png)
 
 ## 암호학적 해시 및 XOF

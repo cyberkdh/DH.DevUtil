@@ -8,7 +8,18 @@ Notable changes to DH.DevUtil are listed here. The newest changes appear first.
 
 ### Added
 
+- Add TOTP/HOTP Simulator, UUID/ULID Inspector, URL/Query Parser, Cron Explainer, Asymmetric Cryptography Simulator, and generic API Request Signing Simulator as standalone local HTML tools with English/Korean guides.
+- Add RIPEMD-160 to File Hash Calculator as a legacy compatibility algorithm.
+- Add PEM/DER certificate file picker and editor drag-and-drop loading to PEM · ASN.1 · X.509 Viewer, with stronger button hover/focus contrast.
+- Add JKS certificate-chain extraction and PKCS#12/PFX outer ASN.1 inspection without displaying private-key material.
+
 - Add CIDR Calculator for local IPv4 network, mask, host-range, binary, and subnet-split calculations with English and Korean UI.
+- Add Password Hashing Lab for browser-local PBKDF2 learning with salt, iterations, key length, verification, English/Korean UI, and a guide.
+- Add MIME · Content-Type Inspector for local media type parsing, parameters, suffixes, charset, extension hints, English/Korean UI, and a guide.
+- Add YAML · JSON Converter for common configuration-style conversion, samples, English/Korean UI, and a guide.
+- Show the selected YAML/JSON sample source before conversion.
+- Add PEM · ASN.1 · X.509 Viewer for local PEM/DER parsing, ASN.1 trees, common certificate fields, English/Korean UI, and a guide.
+- Add a Show passwords option to Password Hashing Lab for both password inputs.
 
 - Add Text · JSON Diff for local line-based text comparison, JSON formatting, color-coded additions/removals, English/Korean UI, and a screenshot.
 - Add multiple Text · JSON Diff samples and local file1/file2 drag-and-drop loading.
@@ -38,6 +49,7 @@ Notable changes to DH.DevUtil are listed here. The newest changes appear first.
 
 ### Improved
 
+- Improve YAML · JSON Converter button hover contrast and active feedback.
 - Expand the Color Converter contrast preview from one sample sentence to a small interface preview with heading, paragraph, link, button, and input styles.
 - Place the Color Converter WCAG controls/results beside the preview on desktop and add small, body, large, and heading text samples.
 - Add buttons to apply the selected color to the WCAG foreground or background, and to swap the two contrast colors.

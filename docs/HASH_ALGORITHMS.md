@@ -28,10 +28,11 @@ SHAKE is an extendable-output function (XOF). This tool fixes each output length
 | Algorithm | Output | Intended use |
 |---|---:|---|
 | SHA-1 | 160 bit | Compatibility with legacy systems and file formats |
+| RIPEMD-160 | 160 bit | Legacy compatibility with older systems and file formats |
 | MD4 | 128 bit | Legacy compatibility |
 | MD5 | 128 bit | Legacy compatibility |
 
-SHA-1, MD4, and MD5 are cryptographically weak and do not provide reliable collision resistance. Do not use them for new security designs, signatures, password storage, or file integrity against an attacker. The tool separates them as legacy/insecure algorithms.
+SHA-1, RIPEMD-160, MD4, and MD5 are legacy algorithms and should not be used for new security designs, signatures, password storage, or file integrity against an attacker. RIPEMD-160 remains useful only when compatibility with an existing format is required.
 
 ## Checksums and Non-Cryptographic Hashes
 

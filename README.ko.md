@@ -19,9 +19,19 @@ DH.DevUtil은 일상적인 개발 작업에 사용하는 가벼운 유틸리티 
 | Color Converter | HEX, RGB, HSL, HSV, OKLCH 변환, 색상 조합 미리보기, WCAG 대비율 확인 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.color-converter.html) | [소스 보기](./tools/DH.DevUtil.color-converter.html) | [사용 안내](./docs/COLOR_CONVERTER.ko.md) |
 | Text · JSON Diff | 일반 텍스트와 형식화된 JSON을 로컬에서 비교하고 추가·삭제 줄 확인 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.text-json-diff.html) | [소스 보기](./tools/DH.DevUtil.text-json-diff.html) | [사용 안내](./docs/TEXT_JSON_DIFF.ko.md) |
 | CIDR Calculator | IPv4 네트워크 범위, 마스크, 호스트 수, 이진수, 서브넷 분할 계산 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.cidr-calculator.html) | [소스 보기](./tools/DH.DevUtil.cidr-calculator.html) | [사용 안내](./docs/CIDR_CALCULATOR.ko.md) |
+| Password Hashing Lab | Web Crypto API로 salt, PBKDF2, 반복 횟수, 파생 키 길이, 비밀번호 검증 학습 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.password-hashing-lab.html) | [소스 보기](./tools/DH.DevUtil.password-hashing-lab.html) | [사용 안내](./docs/PASSWORD_HASHING_LAB.ko.md) |
+| MIME · Content-Type Inspector | Content-Type 파싱, 매개변수·suffix 확인, 파일명 확장자 비교 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.mime-content-type-inspector.html) | [소스 보기](./tools/DH.DevUtil.mime-content-type-inspector.html) | [사용 안내](./docs/MIME_CONTENT_TYPE_INSPECTOR.ko.md) |
+| YAML · JSON Converter | 일반적인 설정용 YAML과 JSON을 로컬에서 변환하고 형식화된 출력 확인 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.yaml-json-converter.html) | [소스 보기](./tools/DH.DevUtil.yaml-json-converter.html) | [사용 안내](./docs/YAML_JSON_CONVERTER.ko.md) |
+| PEM · ASN.1 · X.509 Viewer | PEM·DER 디코딩, JKS 인증서 추출, PKCS#12/PFX ASN.1 구조 확인 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.pem-asn1-x509-viewer.html) | [소스 보기](./tools/DH.DevUtil.pem-asn1-x509-viewer.html) | [사용 안내](./docs/PEM_ASN1_X509_VIEWER.ko.md) |
 | Symmetric Encryption Simulator (Base) | AES, ARIA, 3DES, DES(ECB/CBC)와 padding 선택, 공유 Key/IV, 고정 IV로 같은 결과를 재현하며 대칭 암호화 학습 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.symmetric-encryption-simulator-base.html) | [소스 보기](./tools/DH.DevUtil.symmetric-encryption-simulator-base.html) | [사용 안내](./docs/SYMMETRIC_ENCRYPTION_SIMULATOR_BASE.ko.md) |
 | Symmetric Encryption Simulator | AES-GCM/CBC/CTR 암복호화와 CBC padding 비교 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.symmetric-encryption-simulator.html) | [소스 보기](./tools/DH.DevUtil.symmetric-encryption-simulator.html) | [사용 안내](./docs/SYMMETRIC_ENCRYPTION_SIMULATOR.ko.md) |
 | Unicode · Encoding Inspector | 코드 포인트, UTF-8/UTF-16/CP949 바이트, NFC/NFD 정규화, 폭 없는 공백·양방향 제어 문자 같은 숨은 문자, 글자 깨짐(mojibake)을 확인하고 16진수·Base64 바이트를 디코딩 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.unicode-inspector.html) | [소스 보기](./tools/DH.DevUtil.unicode-inspector.html) | [사용 안내](./docs/UNICODE_ENCODING_INSPECTOR.ko.md) |
+| TOTP / HOTP Simulator | Base32 secret과 HMAC으로 TOTP/HOTP를 로컬 생성·검사 | [실행](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.totp-hotp.html) | [소스](./tools/DH.DevUtil.totp-hotp.html) | [안내](./docs/TOTP_HOTP_SIMULATOR.ko.md) |
+| UUID / ULID Inspector | UUID v4/v7과 ULID 생성, format·version·variant·timestamp 검사 | [실행](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.uuid-ulid.html) | [소스](./tools/DH.DevUtil.uuid-ulid.html) | [안내](./docs/UUID_ULID_INSPECTOR.ko.md) |
+| URL / Query Parser | URL 구성 요소와 query parameter를 로컬에서 검사·수정 | [실행](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.url-query.html) | [소스](./tools/DH.DevUtil.url-query.html) | [안내](./docs/URL_QUERY_PARSER.ko.md) |
+| Cron Explainer | 5-field Unix cron 문법 설명과 다음 실행 시각 계산 | [실행](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.cron.html) | [소스](./tools/DH.DevUtil.cron.html) | [안내](./docs/CRON_EXPLAINER.ko.md) |
+| Asymmetric Cryptography Simulator | RSA-OAEP, ECDSA, ECDH, Ed25519 공개키·개인키 연산 학습 | [실행](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.asymmetric.html) | [소스](./tools/DH.DevUtil.asymmetric.html) | [안내](./docs/ASYMMETRIC_SIMULATOR.ko.md) |
+| API Request Signing Simulator | generic canonical request를 만들고 HMAC-SHA-256으로 로컬 서명 | [실행](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.api-signing.html) | [소스](./tools/DH.DevUtil.api-signing.html) | [안내](./docs/API_REQUEST_SIGNING.ko.md) |
 | DH.MarkDown.Flow | Source·WYSIWYG·Split 편집, Mermaid 다이어그램, Markdown/HTML/PDF/Word 내보내기를 지원하는 로컬 우선 Markdown 편집기 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.MarkDown.Flow/index.html)<br>[오프라인 버전 다운로드 (우클릭 → 다른 이름으로 링크 저장)](https://raw.githubusercontent.com/cyberkdh/DH.DevUtil/main/tools/DH.MarkDown.Flow/index_local.html) | [파일 보기](./tools/DH.MarkDown.Flow/) | [사용 안내](./docs/MARKDOWN_FLOW.ko.md) |
 
 온라인 데모는 GitHub Pages에서 정적 HTML 도구를 실행합니다. 소스 링크는 GitHub에서 HTML 코드를 보여줄 뿐 도구를 실행하지 않습니다. 오프라인으로 사용하려면 저장소를 clone하거나 도구 HTML 파일을 내려받아 브라우저에서 여세요. DH.MarkDown.Flow는 `index_local.html`을 여세요. `index.html`은 웹 서버가 필요합니다.
@@ -76,6 +86,30 @@ IPv4 네트워크 범위, 마스크, 호스트 수, 이진수, 서브넷 분할�
 
 ![CIDR Calculator 화면 미리보기](./docs/images/DH.DevUtil.cidr-calculator.png)
 
+## Password Hashing Lab 미리보기
+
+PBKDF2가 salt, 반복 횟수, 키 길이를 사용하는 방식을 학습하고 Web Crypto API로 비밀번호를 로컬 검증합니다. 보안 안내와 사용 방법은 [Password Hashing Lab 안내](./docs/PASSWORD_HASHING_LAB.ko.md)를 참고하세요.
+
+![Password Hashing Lab 화면 미리보기](./docs/images/DH.DevUtil.password-hashing-lab.png)
+
+## MIME · Content-Type Inspector 미리보기
+
+Content-Type 헤더를 파싱하고 매개변수·구조화 suffix를 확인하며 파일명 확장자를 로컬에서 비교합니다. 자세한 기능과 사용 방법은 [MIME · Content-Type Inspector 안내](./docs/MIME_CONTENT_TYPE_INSPECTOR.ko.md)를 참고하세요.
+
+![MIME · Content-Type Inspector 화면 미리보기](./docs/images/DH.DevUtil.mime-content-type-inspector.png)
+
+## YAML · JSON Converter 미리보기
+
+일반적인 설정용 YAML과 JSON을 로컬에서 변환하고 형식화된 출력과 mapping·sequence 샘플을 확인합니다. 지원 문법과 제한 사항은 [YAML · JSON Converter 안내](./docs/YAML_JSON_CONVERTER.ko.md)를 참고하세요.
+
+![YAML · JSON Converter 화면 미리보기](./docs/images/DH.DevUtil.yaml-json-converter.png)
+
+## PEM · ASN.1 · X.509 Viewer 미리보기
+
+PEM·DER를 로컬에서 디코딩하고 중첩 ASN.1 tag와 주요 X.509 인증서 필드를 확인합니다. 사용 방법과 검증 제한은 [PEM · ASN.1 · X.509 Viewer 안내](./docs/PEM_ASN1_X509_VIEWER.ko.md)를 참고하세요.
+
+![PEM · ASN.1 · X.509 Viewer 화면 미리보기](./docs/images/DH.DevUtil.pem-asn1-x509-viewer.png)
+
 ## Symmetric Encryption Simulator (Base) 미리보기
 
 가운데의 공유 키·IV 하나로 Encrypt와 Decrypt를 수행하고, ECB와 CBC를 블록 단위로 비교할 수 있습니다. 자세한 기능과 사용 방법은 [Symmetric Encryption Simulator (Base) 안내](./docs/SYMMETRIC_ENCRYPTION_SIMULATOR_BASE.ko.md)를 참고하세요.
@@ -93,6 +127,42 @@ AES-GCM, AES-CBC, AES-CTR로 암호화하고, 키를 제외한 JSON 패키지를
 모든 코드 포인트를 UTF-8, UTF-16, CP949 바이트와 함께 보고, 숨은 문자와 NFC/NFD 차이를 찾고, 글자 깨짐을 미리 볼 수 있습니다. 자세한 기능과 사용 방법은 [Unicode · Encoding Inspector 안내](./docs/UNICODE_ENCODING_INSPECTOR.ko.md)를 참고하세요.
 
 ![Unicode · Encoding Inspector 화면 미리보기](./docs/images/DH.DevUtil.unicode-inspector.png)
+
+## TOTP / HOTP Simulator 미리보기
+
+일회용 비밀번호와 counter, period, HMAC 상세를 로컬에서 확인합니다. 자세한 내용은 [TOTP / HOTP Simulator 안내](./docs/TOTP_HOTP_SIMULATOR.ko.md)를 참고하세요.
+
+![TOTP / HOTP Simulator 화면 미리보기](./docs/images/DH.DevUtil.totp-hotp.png)
+
+## UUID / ULID Inspector 미리보기
+
+UUID v4/v7과 ULID를 생성하고 검사합니다. 자세한 내용은 [UUID / ULID Inspector 안내](./docs/UUID_ULID_INSPECTOR.ko.md)를 참고하세요.
+
+![UUID / ULID Inspector 화면 미리보기](./docs/images/DH.DevUtil.uuid-ulid.png)
+
+## URL / Query Parser 미리보기
+
+URL 구성 요소와 query parameter를 로컬에서 검사·수정합니다. 자세한 내용은 [URL / Query Parser 안내](./docs/URL_QUERY_PARSER.ko.md)를 참고하세요.
+
+![URL / Query Parser 화면 미리보기](./docs/images/DH.DevUtil.url-query.png)
+
+## Cron Explainer 미리보기
+
+일반적인 Unix cron 필드를 설명하고 다음 실행 시각을 계산합니다. 자세한 내용은 [Cron Explainer 안내](./docs/CRON_EXPLAINER.ko.md)를 참고하세요.
+
+![Cron Explainer 화면 미리보기](./docs/images/DH.DevUtil.cron.png)
+
+## Asymmetric Cryptography Simulator 미리보기
+
+RSA-OAEP, ECDSA, ECDH, Ed25519 연산을 로컬에서 학습합니다. 자세한 내용은 [Asymmetric Cryptography Simulator 안내](./docs/ASYMMETRIC_SIMULATOR.ko.md)를 참고하세요.
+
+![Asymmetric Cryptography Simulator 화면 미리보기](./docs/images/DH.DevUtil.asymmetric.png)
+
+## API Request Signing Simulator 미리보기
+
+generic canonical request를 만들고 HMAC-SHA-256으로 서명합니다. 자세한 내용은 [API Request Signing Simulator 안내](./docs/API_REQUEST_SIGNING.ko.md)를 참고하세요.
+
+![API Request Signing Simulator 화면 미리보기](./docs/images/DH.DevUtil.api-signing.png)
 
 ## DH.MarkDown.Flow 미리보기
 
