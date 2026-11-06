@@ -1,0 +1,797 @@
+<!--
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// Projects   : DH.DevUtil
+// Author     : CYBERKDH
+// Module     : Log Analyzer
+// History    : 2026-11-06 Initial implementation
+// Copyrights : Copyright (C)CYBERKDH. All Rights Reserved.
+//////////////////////////////////////////////////////////////////////////////////////////////////
+-->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light">
+<title>Log Analyzer | DH.DevUtil</title>
+<style>
+:root{--ink:#182230;--muted:#5d6b7a;--line:#d9e1e8;--blue:#155eef;--canvas:#f3f6f9;font-family:'Segoe UI',Arial,sans-serif;color:var(--ink);background:var(--canvas)}*{box-sizing:border-box}body{margin:0}.shell{max-width:1440px;margin:auto;padding:24px}.top,.intro,.head,.bar,.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.top,.head{justify-content:space-between}.brand{font-weight:700;text-decoration:none;color:var(--ink)}.mark{display:inline-grid;place-items:center;background:var(--blue);color:white;width:34px;height:34px;border-radius:9px;margin-right:10px}.intro{justify-content:space-between;margin:32px 0 20px}.intro h1{margin:0;font-size:2.4rem}.intro p{max-width:670px;color:var(--muted)}.pane{background:white;border:1px solid var(--line);border-radius:12px;margin-bottom:16px;overflow:hidden;box-shadow:0 2px 6px #1822300a}.head{padding:16px 18px;border-bottom:1px solid var(--line)}h2,h3{margin:0}.body{padding:18px}.bar{margin-bottom:14px}.inputs,.stats{display:grid;grid-template-columns:1fr 1fr;gap:14px}.stats{grid-template-columns:repeat(4,1fr);margin-bottom:16px}.stat{background:#f8fafc;padding:12px;border:1px solid var(--line);border-radius:8px}.stat small{display:block;color:var(--muted)}.stat strong{font-size:1.2rem}label{font-weight:600}textarea,input,select,button{font:inherit}textarea,input,select{border:1px solid #bdcad8;border-radius:7px;padding:9px;color:var(--ink);background:white}textarea{width:100%;height:180px;resize:vertical;font:13px/1.5 Consolas,monospace;margin-top:6px}textarea.drag{outline:3px solid #8baaff;background:#eff4ff}button,.filebutton{border:1px solid #bdcad8;border-radius:7px;padding:8px 12px;background:white;color:var(--ink);font-weight:600;cursor:pointer}button:hover,.filebutton:hover{background:#e8efff;border-color:#779df0;color:#0b3c9e}.primary,button[aria-pressed=true]{background:var(--blue);border-color:var(--blue);color:white}.primary:hover,button[aria-pressed=true]:hover{background:#0d47c5;color:white}.hint,.status{color:var(--muted);font-size:.88rem;line-height:1.5}.status{margin-top:8px}.filebutton input{display:none}.groups details{border:1px solid var(--line);border-radius:8px;margin:8px 0;overflow:hidden}.groups summary{cursor:pointer;padding:12px;background:#f8fafc;font-weight:600;overflow-wrap:anywhere}.groups summary:hover{background:#eff4ff}.groupbody{padding:10px}.groupbody pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:220px;overflow:auto;background:#f8fafc;padding:10px;font:12px/1.6 Consolas,monospace}.badge{color:var(--muted);font-size:.85rem;font-weight:400}.diff{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:8px;overflow:hidden}.diffpane{min-width:0}.diffpane+ .diffpane{border-left:1px solid var(--line)}.diffhead{padding:10px;background:#f8fafc;font-weight:700}.scroll{height:420px;overflow:auto;font:12px/22px Consolas,monospace}.diffrow{height:22px;white-space:pre;min-width:max-content;padding:0 8px;border-bottom:1px solid #edf0f3}.diffrow.add{background:#e8f9ee}.diffrow.del{background:#fff0ef}.diffrow.change{background:#fff6da}.diffrow.empty{background:#f2f4f7}.diffrow.selected{outline:2px solid #155eef;outline-offset:-2px}.number{display:inline-block;width:48px;color:#718096;user-select:none}.warning{color:#8a5700}footer{color:var(--muted);font-size:.85rem;margin:20px 0} @media(max-width:760px){.shell{padding:14px}.inputs{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.intro h1{font-size:1.9rem}.diff{grid-template-columns:1fr}.diffpane+.diffpane{border-left:0;border-top:1px solid var(--line)}.scroll{height:250px}}
+/* Log viewer is the primary workspace; severity and diff colors have separate roles. */
+.shell{max-width:1600px}.intro{margin:22px 0 16px}.intro h1{font-size:2.1rem}.pane{box-shadow:0 3px 12px #1822300b}.head{gap:12px}.pane-heading{display:flex;align-items:center;gap:10px}.section-number{display:grid;place-items:center;width:27px;height:27px;border-radius:7px;color:#155eef;background:#eff4ff;font-size:.78rem;font-weight:700}.input-toggle{font-size:.83rem}.input-body[hidden]{display:none}.viewer-pane{border-color:#b9c9dd}.viewer-header{background:#fff}.viewer-title{display:flex;align-items:center;gap:12px}.viewer-title p{margin:3px 0 0;color:#5d6b7a;font-size:.83rem;font-weight:400}.viewer-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 16px;background:#f8fafc;border-bottom:1px solid var(--line)}.viewer-bar label{display:flex;align-items:center;gap:7px;font-size:.85rem}.viewer-bar input[type=search]{width:min(270px,60vw)}.viewer-bar .viewer-count{margin-left:auto;color:#5d6b7a;font-size:.83rem}.log-screen{height:clamp(420px,62vh,900px);overflow:auto;background:#101b2b;color:#e5ebf4;font:13px/23px Consolas,'Courier New',monospace;tab-size:4}.log-row{display:flex;min-width:max-content;min-height:23px;border-bottom:1px solid #ffffff0c}.log-row:hover{background:#ffffff0b}.log-line-number{flex:0 0 58px;text-align:right;padding-right:14px;color:#9aaec7;user-select:none;border-right:1px solid #304257}.log-text{white-space:pre;padding:0 14px}.log-row.level-error{background:#4c202a}.log-row.level-warn{background:#493b1e}.log-row.level-info{background:#132b40}.log-row.level-debug{background:#202b3d}.token-time{color:#b7cae0}.token-error{color:#ffb4b1;font-weight:700}.token-warn{color:#ffdf80;font-weight:700}.token-info{color:#91d4ff;font-weight:700}.token-debug{color:#ced4e2;font-weight:700}.viewer-empty{padding:30px;color:#bdcbe0}.legend{display:flex;gap:14px;flex-wrap:wrap;padding:9px 16px;background:#f8fafc;color:#526174;font-size:.78rem}.legend span::before{content:'';display:inline-block;width:9px;height:9px;margin-right:6px;border-radius:50%;background:var(--dot)}.groups{max-height:420px;overflow:auto}.diff .scroll{height:clamp(420px,55vh,850px);font-size:13px;line-height:24px}.diffrow{height:24px}.diffrow .level-label{font-weight:700}.diffrow .level-error{color:#a32424}.diffrow .level-warn{color:#815300}.diffrow .level-info{color:#075a96}.diffrow .level-debug{color:#5b6070}#pattern{max-width:min(360px,70vw)}.filebutton:focus-within{outline:3px solid #9ab8ff;outline-offset:2px}button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #9ab8ff;outline-offset:2px}@media(max-width:760px){.viewer-bar .viewer-count{margin-left:0;width:100%}.log-screen{height:55vh;min-height:320px}.diff .scroll{height:300px;min-height:0}.intro{margin:18px 0}.viewer-title p{display:none}}
+.workspace-grid{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:start}.workspace-grid .viewer-pane{min-width:0}.analysis-drawer{width:min(390px,35vw);max-height:calc(100vh - 35px);overflow:auto}.analysis-drawer[hidden],.legacy-hidden{display:none!important}.analysis-drawer .stats{grid-template-columns:1fr 1fr}.analysis-drawer .bar{align-items:stretch;flex-direction:column}.analysis-drawer .bar label{display:flex;justify-content:space-between;gap:8px}.analysis-drawer .groups{max-height:none}.log-screen.drop-active{outline:3px solid #75a7ff;outline-offset:-3px}.single-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 16px;background:#fff;border-bottom:1px solid var(--line)}.single-filename{color:#5d6b7a;font-size:.85rem;overflow-wrap:anywhere}.selection-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 16px;background:#f8fafc;border-bottom:1px solid var(--line)}.selection-bar .range-status{font-size:.82rem;color:#526174}.log-row.range-a{box-shadow:inset 4px 0 #5ba2ff}.log-row.range-b{box-shadow:inset 4px 0 #ffbe61}.log-row.pickable{cursor:crosshair}.block-dialog{width:min(1500px,96vw);max-width:none;max-height:94vh;border:1px solid #b8c8dc;border-radius:12px;padding:0;color:#182230;box-shadow:0 18px 70px #0006}.block-dialog::backdrop{background:#0b1522b3}.dialog-head,.dialog-tools{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:12px 16px}.dialog-head{border-bottom:1px solid var(--line)}.dialog-tools{justify-content:flex-start;background:#f8fafc}.block-headers,.block-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.block-headers{font-weight:700;background:#e9f0fa}.block-headers>*{padding:9px 12px}.block-scroll{height:min(65vh,720px);overflow:auto;background:#101b2b;color:#e5ebf4;font:13px/23px Consolas,monospace}.block-cell{min-width:0;overflow:auto;white-space:pre;padding:2px 9px;border-right:1px solid #344259;border-bottom:1px solid #ffffff0c}.block-cell.add{background:#155636}.block-cell.del{background:#652b30}.block-cell.change{background:#5b481f}.block-cell.empty{background:#1b2634}.block-cell small{display:inline-block;width:50px;color:#a8b7c9}.block-note{padding:8px 16px;color:#5d6b7a;font-size:.83rem}@media(max-width:760px){.workspace-grid{display:block}.analysis-drawer{width:100%;max-height:60vh}.single-toolbar{align-items:stretch}.single-filename{width:100%}.block-dialog{width:98vw}.block-headers,.block-row{grid-template-columns:minmax(220px,1fr) minmax(220px,1fr)}.block-scroll{overflow:auto}.block-headers{overflow:hidden}}
+.log-screen{background:#1e1e1e;color:#e7e7e7;font-size:13px;line-height:20px}.log-row{min-height:20px;border-bottom:0}.log-row.level-info,.log-row.level-debug{background:transparent}.log-row.level-error{background:#4b2529}.log-row.level-warn{background:#493a20}.log-line-number{color:#51b5d5;border-color:#383838}.log-text{padding-left:14px}.log-screen .token-time{color:#86d76e}.log-screen .token-id,.log-screen .token-number{color:#71b9ff}.log-screen .token-function{color:#dcd4a3}.log-screen .token-url{color:#83cfff;text-decoration:underline;text-underline-offset:2px}.log-screen .token-error{color:#ff9b8e}.log-screen .token-warn{color:#ffcf78}.log-screen .token-info{color:#9bd9ff}.log-screen .token-debug{color:#c9c9dd}.log-row.current-line{outline:1px solid #60758e;outline-offset:-1px;background:#ffffff12}.log-row.current-line.level-error{background:#5d3035}.log-row.current-line.level-warn{background:#584623}
+.log-viewport{position:relative}.log-screen{position:relative;contain:strict}.log-spacer{position:relative;min-width:100%}.virtual-rows{position:absolute;left:0;top:0;min-width:100%}.log-row{height:20px;min-height:20px;box-sizing:border-box}.search-mark{background:#805d15;color:#fff0b0;border-radius:2px}.search-mark.active{background:#ffbd45;color:#1e1e1e;outline:1px solid #ffe08a}.search-map{position:absolute;right:15px;top:0;bottom:0;width:12px;height:100%;cursor:pointer;background:#ffffff0b}.search-nav{display:flex;align-items:center;gap:4px}.search-nav button{padding:4px 8px;min-width:30px}.search-count{font-size:.8rem;color:#5d6b7a;min-width:54px;text-align:center}
+.fold-marker{border:0;padding:0 3px;background:transparent;color:#9fc5e7;cursor:pointer;font:14px/18px Consolas,monospace}.fold-marker:hover{background:#37516e;color:white}.fold-badge{color:#b8c6d8;background:#394759;border-radius:4px;margin-left:8px;padding:0 5px;font:11px/18px 'Segoe UI',sans-serif}.pattern-editor{margin-bottom:16px;padding:13px;border:1px solid #cbd8e8;border-radius:9px;background:#f6f9ff}.pattern-editor h3{margin:0 0 9px}.pattern-fields{display:grid;gap:8px}.pattern-fields label{display:grid;gap:3px;font-size:.82rem}.pattern-fields input[type=text]{width:100%;min-width:0}.pattern-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}.pattern-actions button{font-size:.8rem;padding:6px 8px}.pattern-list{display:grid;gap:5px;margin-top:10px}.pattern-entry{display:flex;align-items:center;justify-content:space-between;gap:5px;padding:7px;border:1px solid #d9e1e8;border-radius:6px;background:white}.pattern-entry span{overflow-wrap:anywhere;min-width:0}.pattern-entry button{padding:4px 6px;font-size:.75rem}.pattern-message{font-size:.8rem;color:#596a80;white-space:pre-wrap;margin:8px 0 0}
+.fold-navigation{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:9px 16px;background:#eef4fc;border-bottom:1px solid #cbd8e8;font-size:.83rem}.fold-navigation label{display:flex;gap:6px;align-items:center}.fold-navigation select{max-width:210px;padding:5px}.fold-navigation button{padding:5px 8px;font-size:.8rem}.fold-navigation .fold-position{min-width:55px;text-align:center;color:#405776}.log-line-number{flex-basis:78px;padding-right:8px}.fold-marker{display:inline-flex;justify-content:center;align-items:center;width:21px;height:18px;margin-right:3px;border:1px solid #6487a7;border-radius:3px;color:#e2f0ff;background:#354a61;font-size:14px}.fold-marker:hover{background:#496d93}.fold-marker:disabled{opacity:.6;cursor:default}.fold-start{box-shadow:inset 3px 0 #6daeff}.fold-start .log-text::before{content:'◆';color:#9cc8ff;font-size:10px;margin-right:6px}
+.fold-start .log-text::before{content:none}.fold-end-marker{display:inline-flex;justify-content:center;align-items:center;width:21px;height:18px;margin-right:3px;color:#9cc8ff;font:15px/18px Consolas,monospace}.analysis-tabs{display:flex;gap:6px;margin-bottom:12px;border-bottom:1px solid #d9e1e8;padding-bottom:9px}.analysis-tabs button{flex:1;padding:7px 8px;font-size:.83rem}.analysis-tabs button[aria-selected=true]{background:#155eef;color:#fff;border-color:#155eef}.analysis-tabs button[aria-selected=true]:hover{background:#0d47c5;color:#fff}.analysis-panel-content[hidden]{display:none}
+.log-line-number{position:relative;padding-left:30px}.fold-marker,.fold-end-marker{position:absolute;left:8px;top:1px;z-index:1}.fold-start:not(.fold-collapsed) .log-line-number::before,.fold-body .log-line-number::before,.fold-end .log-line-number::before{content:'';position:absolute;left:18px;width:1px;background:#80add8}.fold-start:not(.fold-collapsed) .log-line-number::before{top:10px;bottom:0}.fold-body .log-line-number::before{top:0;bottom:0}.fold-end .log-line-number::before{top:0;bottom:10px}.fold-end-marker{background:#1e1e1e}
+.pattern-editor{background:#fff;border:0;padding:0;margin:0}.pattern-editor h3{font-size:.9rem;margin:0}.pattern-heading{display:flex;align-items:center;justify-content:space-between;gap:8px}.pattern-list{margin:8px 0}.pattern-entry{align-items:center;background:#f8fafc}.pattern-entry .entry-actions{display:flex;gap:4px;flex-wrap:nowrap}.pattern-entry .entry-name{font-size:.83rem;font-weight:600}.pattern-entry button{white-space:nowrap}.pattern-navigation-panel{display:flex;align-items:center;gap:5px;padding:8px;background:#eff4ff;border:1px solid #d1e0fa;border-radius:7px;margin:10px 0}.pattern-navigation-panel .pattern-current{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.8rem;color:#405776}.pattern-navigation-panel button{white-space:nowrap;padding:6px 8px;font-size:.78rem}.pattern-detail{border:1px solid #d9e1e8;border-radius:7px;margin-top:9px;background:#f8fafc}.pattern-detail>summary{cursor:pointer;font-weight:650;font-size:.83rem;padding:10px}.pattern-detail-content{padding:0 10px 10px}.pattern-fields input[type=text]{background:white}.pattern-template-bar{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.pattern-template-bar button{font-size:.8rem;padding:6px 8px}.pattern-empty{color:#68778b;font-size:.8rem;padding:8px 0}.pattern-message{line-height:1.5}.pattern-detail .pattern-actions{margin-top:9px}
+.occurrence-panel{margin:10px 0;padding:10px;border:1px solid #cbd8e8;border-radius:8px;background:#f8fafc}.occurrence-panel[hidden]{display:none}.occurrence-head{display:flex;justify-content:space-between;align-items:center;gap:8px}.occurrence-title{font-size:.88rem;font-weight:700;overflow-wrap:anywhere}.occurrence-filter{display:flex;gap:6px;align-items:center;font-size:.8rem;margin:8px 0}.occurrence-summary{font-size:.78rem;color:#526174;margin:6px 0;line-height:1.4}.occurrence-list{display:grid;gap:6px;max-height:380px;overflow:auto}.occurrence-row{padding:8px;border:1px solid #d9e1e8;border-radius:7px;background:white}.occurrence-row.is-base{border-color:#7ca4f8;background:#f0f5ff}.occurrence-line{display:flex;align-items:center;justify-content:space-between;gap:5px}.occurrence-go{border:0;background:transparent;padding:0;color:#1249bd;text-align:left;font-size:.82rem}.occurrence-go:hover{background:transparent;text-decoration:underline}.occurrence-state{font-size:.77rem;color:#526174;margin:4px 0;overflow-wrap:anywhere}.occurrence-actions{display:flex;gap:5px}.occurrence-actions button,.occurrence-more{font-size:.75rem;padding:4px 7px}.block-changed-word{background:#bd7040;color:white;border-radius:2px}.block-cell.diff-selected{outline:2px solid #ffd36d;outline-offset:-2px}.diff-count{font-size:.82rem;color:#526174}.dialog-tools button{padding:6px 9px}
+.pattern-entry{display:grid;grid-template-columns:minmax(0,1fr);gap:7px}.pattern-entry-head{display:flex;align-items:center;justify-content:space-between;gap:8px}.pattern-entry-head .entry-name{min-width:0;overflow-wrap:anywhere}.pattern-entry-conditions{display:grid;grid-template-columns:auto minmax(0,1fr);gap:3px 7px;font-size:.77rem;line-height:1.4}.pattern-entry-conditions dt{color:#526174;font-weight:600}.pattern-entry-conditions dd{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font-family:Consolas,monospace;color:#182230}.pattern-entry-case{font-size:.74rem;color:#526174}.pattern-editor #manual-editor:focus-within{border-color:#8daff3;box-shadow:0 0 0 2px #e3ecff}
+.pattern-entry.is-selected{border-color:#8aaff5;background:#f5f8ff}.pattern-entry .pattern-navigation-panel{margin:1px 0 0;padding:7px;background:#e9f1ff}.pattern-entry .pattern-navigation-panel .pattern-current{font-weight:600}.pattern-navigation-panel[hidden]{display:none}.pattern-entry-conditions{padding:7px 8px;background:#fff;border:1px solid #e1e8f1;border-radius:6px}.pattern-entry .entry-actions button:disabled{color:#788496;background:#eef1f5;cursor:not-allowed}
+.workspace-grid .viewer-pane{display:flex;flex-direction:column;height:var(--workspace-height,70vh);margin-bottom:0}.viewer-pane>.viewer-header,.viewer-pane>.single-toolbar,.viewer-pane>.viewer-bar,.viewer-pane>.fold-navigation,.viewer-pane>.selection-bar,.viewer-pane>.legend{flex:0 0 auto}.viewer-pane>.log-viewport{flex:1 1 auto;min-height:140px}.viewer-pane .log-screen{height:100%;min-height:0}.workspace-grid .analysis-drawer{height:var(--workspace-height,70vh);max-height:none;overflow:auto;margin-bottom:0}@media(max-width:760px){.workspace-grid .analysis-drawer{margin-top:14px}}
+.shell{max-width:none;width:100%}
+.block-scroll{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);height:min(65vh,720px);overflow:hidden}.block-column{min-width:0;height:100%;overflow:scroll;overscroll-behavior:contain;scrollbar-color:#637387 #1b293a}.block-column+.block-column{border-left:1px solid #344259}.block-cell{height:28px;min-width:100%;width:max-content;overflow:visible;white-space:pre;box-sizing:border-box;line-height:23px}.block-cell small{width:50px}.block-headers>div{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}@media(max-width:760px){.block-scroll{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.block-headers{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.block-detection{padding:7px 16px;border-bottom:1px solid #d9e1e8;background:#f2f6fc;color:#405776;font-size:.8rem;line-height:1.4}.block-detection.warning{background:#fff8e8;color:#785215}
+.block-diff-dialog[open]{display:grid;grid-template-rows:auto auto auto auto minmax(120px,1fr) auto;width:calc(100vw - 24px);height:calc(100vh - 24px);height:calc(100dvh - 24px);max-width:none;max-height:none;overflow:auto}.block-diff-dialog .block-scroll{height:auto;min-height:120px}.block-diff-dialog .block-column{min-height:0}
+</style></head>
+<body><main class="shell"><header class="top"><a class="brand" href="../README.md"><span class="mark">DH</span>DH.DevUtil</a><div><button id="en" aria-pressed="true">English</button> <button id="ko" aria-pressed="false">한국어</button></div></header>
+<section class="intro"><div><div style="color:#155eef;font-weight:700;font-size:.8rem">COMPARE &amp; INSPECT</div><h1>Log Analyzer</h1></div><p data-i="intro">Inspect logs locally, group similar messages, and compare two files side by side.</p></section>
+<section class="pane"><div class="head"><h2 data-i="input">Log input</h2><span>01</span></div><div class="body"><div class="bar"><label><span data-i="format">Format</span> <select id="format"><option value="auto">Auto detect</option><option value="access">Apache / Nginx access</option><option value="iis">IIS W3C</option><option value="json">JSON Lines</option><option value="kv">key=value</option><option value="text">Plain text</option></select></label><label><span data-i="sample">Sample</span> <select id="sample"><option value="app">Application</option><option value="access">Apache / Nginx</option><option value="iis">IIS W3C</option><option value="json">JSON Lines</option><option value="kv">key=value</option><option value="stack">Stack trace</option></select></label><button id="load" data-i="load">Load sample</button><button id="analyze" class="primary" data-i="analyze">Analyze logs</button><button id="clear" data-i="clear">Clear</button></div><div class="inputs"><div><label for="a" data-i="original">File 1 / Original</label> <label class="filebutton"><span data-i="choose">Choose file</span><input id="fileA" type="file" accept=".log,.txt,.json,.jsonl,.csv"></label><textarea id="a" spellcheck="false" data-placeholder="drop" placeholder="Paste text or drop a file here"></textarea><div id="nameA" class="hint"></div></div><div><label for="b" data-i="changed">File 2 / Changed</label> <label class="filebutton"><span data-i="choose">Choose file</span><input id="fileB" type="file" accept=".log,.txt,.json,.jsonl,.csv"></label><textarea id="b" spellcheck="false" data-placeholder="drop" placeholder="Paste text or drop a file here"></textarea><div id="nameB" class="hint"></div></div></div><div class="status" id="status" aria-live="polite"></div></div></section>
+<section class="pane"><div class="head"><h2 data-i="summary">Summary and patterns</h2><span>02</span></div><div class="body"><div class="stats"><div class="stat"><small data-i="lines">Lines (file 1 / 2)</small><strong id="lineCount">0 / 0</strong></div><div class="stat"><small data-i="patterns">Patterns</small><strong id="patternCount">0</strong></div><div class="stat"><small>ERROR (file 1 / 2)</small><strong id="errorCount">0 / 0</strong></div><div class="stat"><small data-i="unparsed">Unparsed (file 1 / 2)</small><strong id="unparsedCount">0 / 0</strong></div></div><div class="bar"><label><span data-i="search">Search</span> <input id="search" type="search"></label><label>Level <select id="level"><option>All</option><option>ERROR</option><option>WARN</option><option>INFO</option><option>DEBUG</option><option>OTHER</option></select></label><label><input type="checkbox" id="changedOnly"> <span data-i="changedOnly">Changed patterns only</span></label><button id="expand" data-i="expand">Expand all</button><button id="collapse" data-i="collapse">Collapse all</button></div><p class="hint" data-i="heuristic">Patterns are grouped heuristically after replacing timestamps, IPs, UUIDs and numbers. Different messages may be grouped together.</p><div id="groups" class="groups"></div></div></section>
+<section class="pane" id="comparison"><div class="head"><h2 data-i="diff">Pattern diff</h2><span>03</span></div><div class="body"><div class="bar"><label><span data-i="selected">Selected pattern</span> <select id="pattern"><option value="">All lines</option></select></label><label><span data-i="mode">Compare</span> <select id="mode"><option value="raw">Raw</option><option value="normalized">Normalized</option><option value="fields">Fields</option></select></label><label><input type="checkbox" id="sync" checked> <span data-i="sync">Synchronize scrolling</span></label><button id="save" data-i="save">Save diff</button></div><p class="hint" id="diffStatus"></p><div class="diff"><div class="diffpane"><div class="diffhead">File 1</div><div class="scroll" id="left"></div></div><div class="diffpane"><div class="diffhead">File 2</div><div class="scroll" id="right"></div></div></div></div></section><footer data-i="privacy">All processing happens locally in your browser. Logs are not uploaded.</footer></main>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const translations = {en:{intro:'Inspect logs locally, group similar messages, and compare two files side by side.',input:'Log input',format:'Format',sample:'Sample',load:'Load sample',analyze:'Analyze logs',clear:'Clear',original:'File 1 / Original',changed:'File 2 / Changed',choose:'Choose file',drop:'Paste text or drop a file here',summary:'Summary and patterns',lines:'Lines (file 1 / 2)',patterns:'Patterns',unparsed:'Unparsed (file 1 / 2)',search:'Search',changedOnly:'Changed patterns only',expand:'Expand all',collapse:'Collapse all',heuristic:'Patterns are grouped heuristically after replacing timestamps, IPs, UUIDs and numbers. Different messages may be grouped together.',diff:'Pattern diff',selected:'Selected pattern',mode:'Compare',sync:'Synchronize scrolling',save:'Save diff',privacy:'All processing happens locally in your browser. Logs are not uploaded.',compare:'Compare',none:'No matching patterns.',ready:'Analysis complete',large:'Large comparison: alignment skipped; rows are paired by position.',all:'All lines',readError:'Could not read file'},ko:{intro:'로그를 브라우저에서 분석하고 비슷한 메시지를 묶어 두 파일을 좌우 비교합니다.',input:'로그 입력',format:'형식',sample:'샘플',load:'샘플 불러오기',analyze:'로그 분석',clear:'지우기',original:'파일 1 / 원본',changed:'파일 2 / 변경',choose:'파일 선택',drop:'텍스트를 붙여넣거나 파일을 여기에 놓으세요',summary:'요약 및 패턴',lines:'줄 수 (파일 1 / 2)',patterns:'패턴',unparsed:'해석 실패 (파일 1 / 2)',search:'검색',changedOnly:'변경된 패턴만',expand:'모두 펼치기',collapse:'모두 접기',heuristic:'날짜, IP, UUID, 숫자를 치환해 유사 패턴을 추정합니다. 서로 다른 메시지가 같은 그룹에 묶일 수 있습니다.',diff:'패턴 비교',selected:'선택한 패턴',mode:'비교 방식',sync:'스크롤 동기화',save:'비교 결과 저장',privacy:'모든 처리는 브라우저에서 이루어지며 로그를 업로드하지 않습니다.',compare:'비교',none:'조건에 맞는 패턴이 없습니다.',ready:'분석 완료',large:'비교 대상이 커서 줄 순서대로 정렬합니다.',all:'전체 줄',readError:'파일을 읽을 수 없습니다'}};
+let lang='en'; try{lang=localStorage.getItem('dhdevutil-language')==='ko'?'ko':'en'}catch(e){} let records=[[],[]],groups=new Map(), rows=[];
+let manualFolds=[], closedFolds=new Set(), foldingEnabled=true;
+function tr(k){return translations[lang][k]||k} function setLang(v){lang=v;document.documentElement.lang=v;try{localStorage.setItem('dhdevutil-language',v)}catch(e){} document.querySelectorAll('[data-i]').forEach(e=>e.textContent=tr(e.dataset.i));document.querySelectorAll('[data-placeholder]').forEach(e=>e.placeholder=tr(e.dataset.placeholder));$('en').setAttribute('aria-pressed',String(v==='en'));$('ko').setAttribute('aria-pressed',String(v==='ko'));renderGroups();renderDiff()}
+const samples={app:['2026-11-06 10:20:01 INFO user=kim id=101 login success\n2026-11-06 10:21:02 ERROR user=lee id=102 database timeout\n2026-11-06 10:22:03 ERROR user=park id=103 database timeout','2026-11-06 11:20:01 INFO user=kim id=201 login success\n2026-11-06 11:21:02 ERROR user=lee id=202 database timeout\n2026-11-06 11:23:03 WARN user=park id=203 retry failed'],access:['127.0.0.1 - - [06/Nov/2026:10:20:01 +0900] "GET /api/users/101 HTTP/1.1" 200 120\n127.0.0.1 - - [06/Nov/2026:10:20:02 +0900] "GET /api/users/102 HTTP/1.1" 404 20','127.0.0.1 - - [06/Nov/2026:11:20:01 +0900] "GET /api/users/201 HTTP/1.1" 200 120\n127.0.0.1 - - [06/Nov/2026:11:20:02 +0900] "GET /api/users/202 HTTP/1.1" 500 20'],iis:['#Fields: date time c-ip cs-method cs-uri-stem sc-status time-taken\n2026-11-06 10:20:00 127.0.0.1 GET /api/users 200 20',' #Fields: date time c-ip cs-method cs-uri-stem sc-status time-taken\n2026-11-06 10:20:01 127.0.0.1 GET /api/users 500 300'],json:['{"time":"2026-11-06T10:00:00Z","level":"INFO","message":"request complete","status":200}\n{"time":"2026-11-06T10:01:00Z","level":"ERROR","message":"database timeout","status":500}','{"time":"2026-11-06T11:00:00Z","level":"INFO","message":"request complete","status":200}\n{"time":"2026-11-06T11:01:00Z","level":"ERROR","message":"database timeout","status":503}'],kv:['time=2026-11-06T10:00:00Z level=INFO user=kim action=login\ntime=2026-11-06T10:01:00Z level=ERROR code=500 message=timeout','time=2026-11-06T11:00:00Z level=INFO user=lee action=login\ntime=2026-11-06T11:01:00Z level=ERROR code=503 message=timeout'],stack:['2026-11-06 ERROR java.lang.IllegalStateException: failed\n  at example.Service.run(Service.java:42)\n  at example.Main.main(Main.java:12)','2026-11-06 ERROR java.lang.IllegalStateException: failed\n  at example.Service.run(Service.java:43)\n  at example.Main.main(Main.java:12)']};
+function normalize(s){return s.replace(/\b\d{4}-\d\d-\d\d(?:[T ]\d\d:\d\d:\d\d(?:\.\d+)?(?:Z|[+-]\d\d:?\d\d)?)?/g,'{timestamp}').replace(/\[[0-9]{1,2}\/[A-Za-z]{3}\/\d{4}:[^\]]+\]/g,'{timestamp}').replace(/\b[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}\b/gi,'{uuid}').replace(/\b(?:\d{1,3}\.){3}\d{1,3}\b/g,'{ip}').replace(/\b\d+(?:\.\d+)?\b/g,'{number}');}
+function parse(text,format){let fields=[];return text.replace(/^\uFEFF/,'').split(/\r\n|\n|\r/).filter((s,i,a)=>s.length||i<a.length-1).map((raw,i)=>{let obj={},parsed=false,kind=format;if(/^\s*#Fields:/i.test(raw)){fields=raw.trim().replace(/^#Fields:\s*/i,'').split(/\s+/);return {raw,line:i+1,level:'OTHER',fields:{directive:raw},key:normalize(raw),parsed:true}} if(kind==='auto'){kind=raw.trim().startsWith('{')?'json':fields.length?'iis':/"(?:GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)\s/.test(raw)?'access':/\b\w+=/.test(raw)?'kv':'text'} try{if(kind==='json'){obj=JSON.parse(raw);if(!obj||Array.isArray(obj)||typeof obj!=='object')throw Error();parsed=true}else if(kind==='iis'){const vals=raw.trim().split(/\s+/);if(fields.length&&vals.length===fields.length){fields.forEach((f,n)=>obj[f]=vals[n]);parsed=true}}else if(kind==='access'){const m=raw.match(/^(\S+)\s+\S+\s+\S+\s+\[([^\]]+)\]\s+"(\S+)\s+(\S+)\s+[^\"]+"\s+(\d{3})\s+(\S+)/);if(m){obj={ip:m[1],time:m[2],method:m[3],path:m[4],status:m[5],bytes:m[6]};parsed=true}}else if(kind==='kv'){for(const m of raw.matchAll(/([\w.-]+)=("[^"]*"|'[^']*'|\S+)/g))obj[m[1]]=m[2];parsed=Object.keys(obj).length>0}else{obj={message:raw};parsed=true}}catch(e){} const val=String(obj.level||obj.severity||raw.match(/\b(ERROR|WARN(?:ING)?|INFO|DEBUG|FATAL)\b/i)?.[0]||'OTHER').toUpperCase();const level=/ERROR|FATAL/.test(val)?'ERROR':/WARN/.test(val)?'WARN':/INFO/.test(val)?'INFO':/DEBUG/.test(val)?'DEBUG':'OTHER';let key;if(kind==='access'||kind==='iis'){key=normalize([obj.method||obj['cs-method']||'',obj.path||obj['cs-uri-stem']||'',obj.status||obj['sc-status']||''].join(' '))}else if(kind==='json'){const clone={...obj};for(const k of Object.keys(clone)){if(/^(time|timestamp|date|id|requestid)$/i.test(k))delete clone[k]}key=normalize(JSON.stringify(clone))}else key=normalize(raw);return {raw,line:i+1,level,fields:obj,key,parsed}})}
+function analyze(){records=[parse($('a').value,$('format').value),parse($('b').value,$('format').value)];groups=new Map();records.forEach((list,side)=>list.forEach(r=>{if(!groups.has(r.key))groups.set(r.key,[[],[]]);groups.get(r.key)[side].push(r)}));$('lineCount').textContent=records.map(x=>x.length).join(' / ');$('patternCount').textContent=groups.size;$('errorCount').textContent=records.map(x=>x.filter(r=>r.level==='ERROR').length).join(' / ');$('unparsedCount').textContent=records.map(x=>x.filter(r=>!r.parsed).length).join(' / ');$('status').textContent=tr('ready');const sel=$('pattern');sel.replaceChildren(new Option(tr('all'),''));if(!$('comparison').classList.contains('legacy-hidden')){let n=0;for(const key of groups.keys()){const opt=new Option(key.slice(0,120),String(n++));sel.add(opt)}}renderGroups();renderDiff()}
+function renderGroups(){const container=$('groups');container.replaceChildren();const q=$('search').value.toLowerCase(),level=$('level').value;let count=0;for(const [key,pair] of groups){const both=pair.flat();if(q&&!both.some(r=>r.raw.toLowerCase().includes(q))&&!key.toLowerCase().includes(q))continue;if(level!=='All'&&!both.some(r=>r.level===level))continue;if($('changedOnly').checked&&pair[0].length===pair[1].length&&pair[0].every((r,i)=>r.raw===pair[1][i].raw))continue;count++;const d=document.createElement('details');d.open=both.some(r=>r.level==='ERROR'||r.level==='WARN')||!!q;const s=document.createElement('summary');s.textContent=key+'  ';const badge=document.createElement('span');badge.className='badge';badge.textContent=`file 1: ${pair[0].length} · file 2: ${pair[1].length}`;s.append(badge);const body=document.createElement('div');body.className='groupbody';const button=document.createElement('button');button.textContent=tr('compare');button.onclick=()=>{ $('pattern').value=String([...groups.keys()].indexOf(key));renderDiff();$('comparison').scrollIntoView({behavior:'smooth'})};const pre=document.createElement('pre');pre.textContent=pair.map((list,i)=>`File ${i+1}:\n`+list.slice(0,30).map(r=>`${r.line}  ${r.raw}`).join('\n')+(list.length>30?'\n…':'' )).join('\n\n');body.append(button,pre);d.append(s,body);container.append(d)}if(!count){const p=document.createElement('p');p.className='hint';p.textContent=tr('none');container.append(p)}}
+function align(a,b){if(a.length*b.length>1000000){return {large:true,rows:Array.from({length:Math.max(a.length,b.length)},(_,i)=>[a[i]||null,b[i]||null])}}const same=(x,y)=>(x.key??x.value)===(y.key??y.value);const width=b.length+1,dp=new Uint32Array((a.length+1)*width);for(let i=a.length-1;i>=0;i--)for(let j=b.length-1;j>=0;j--)dp[i*width+j]=same(a[i],b[j])?1+dp[(i+1)*width+j+1]:Math.max(dp[(i+1)*width+j],dp[i*width+j+1]);const out=[];let i=0,j=0;while(i<a.length||j<b.length){if(i<a.length&&j<b.length&&same(a[i],b[j])){out.push([a[i++],b[j++]]);continue}const del=[],add=[];while(i<a.length||j<b.length){if(i<a.length&&j<b.length&&same(a[i],b[j]))break;if(j<b.length&&(i===a.length||dp[i*width+j+1]>dp[(i+1)*width+j]))add.push(b[j++]);else if(i<a.length)del.push(a[i++]);else break}for(let k=0;k<Math.max(del.length,add.length);k++)out.push([del[k]||null,add[k]||null])}return {large:false,rows:out}}
+function renderDiff(){const value=$('pattern').value,key=value===''?null:[...groups.keys()][Number(value)],pair=key===null?records:(groups.get(key)||[[],[]]),mode=$('mode').value;const converted=pair.map(list=>list.map(r=>({line:r.line,value:mode==='normalized'?normalize(r.raw):mode==='fields'?JSON.stringify(r.fields,Object.keys(r.fields).sort()):r.raw})));const result=align(converted[0],converted[1]);rows=result.rows;$('diffStatus').textContent=result.large?tr('large'):`${rows.length} aligned rows`;$('diffStatus').className=result.large?'hint warning':'hint';for(const [side,id] of [[0,'left'],[1,'right']]){const panel=$(id);panel.replaceChildren();const fragment=document.createDocumentFragment();rows.forEach((pair,index)=>{const item=pair[side],other=pair[1-side],row=document.createElement('div');row.className='diffrow '+(!item?'empty':!other?(side?'add':'del'):item.value!==other.value?'change':'');const num=document.createElement('span');num.className='number';num.textContent=item?item.line:'';row.append(num,document.createTextNode(item?item.value:''));row.onclick=()=>{document.querySelectorAll('.diffrow.selected').forEach(e=>e.classList.remove('selected'));for(const panelId of ['left','right'])$(panelId).children[index]?.classList.add('selected')};fragment.append(row)});panel.append(fragment)}}
+let syncing=false;for(const [from,to] of [['left','right'],['right','left']])$(from).addEventListener('scroll',()=>{if(!$('sync').checked||syncing)return;syncing=true;$(to).scrollTop=$(from).scrollTop;$(to).scrollLeft=$(from).scrollLeft;requestAnimationFrame(()=>syncing=false)});
+for(const [area,file,name] of [['a','fileA','nameA'],['b','fileB','nameB']]){async function loadFile(f){try{$(area).value=await f.text();$(name).textContent=f.name+' · '+f.size+' bytes'}catch(e){$('status').textContent=tr('readError')}}$(file).addEventListener('change',e=>{if(e.target.files[0])loadFile(e.target.files[0]);e.target.value=''});$(area).addEventListener('dragover',e=>{e.preventDefault();$(area).classList.add('drag')});$(area).addEventListener('dragleave',()=>$(area).classList.remove('drag'));$(area).addEventListener('drop',e=>{e.preventDefault();$(area).classList.remove('drag');if(e.dataTransfer.files[0])loadFile(e.dataTransfer.files[0])})}
+$('load').onclick=()=>{const s=samples[$('sample').value];$('a').value=s[0];$('b').value=s[1];$('format').value='auto';$('nameA').textContent='';$('nameB').textContent='';analyze()};$('analyze').onclick=analyze;$('clear').onclick=()=>{$('a').value='';$('b').value='';$('nameA').textContent='';$('nameB').textContent='';analyze()};for(const id of ['search','level','changedOnly'])$(id).addEventListener('input',renderGroups);$('pattern').onchange=renderDiff;$('mode').onchange=renderDiff;$('expand').onclick=()=>document.querySelectorAll('#groups details').forEach(d=>d.open=true);$('collapse').onclick=()=>document.querySelectorAll('#groups details').forEach(d=>d.open=false);$('en').onclick=()=>setLang('en');$('ko').onclick=()=>setLang('ko');$('save').onclick=()=>{const output=rows.map(([a,b])=>`${a?a.line+' '+a.value:''}\t|\t${b?b.line+' '+b.value:''}`).join('\n');const url=URL.createObjectURL(new Blob([output],{type:'text/plain;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='log-diff.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};setLang(lang);$('load').click();
+</script>
+<script>
+(() => {
+  const inputPane = $('a').closest('.pane');
+  const inputBody = inputPane.querySelector('.body');
+  const inputHead = inputPane.querySelector('.head');
+  const toggle = document.createElement('button');
+  toggle.type = 'button';
+  toggle.className = 'input-toggle';
+  toggle.setAttribute('aria-controls', 'log-input-body');
+  inputBody.id = 'log-input-body';
+  inputHead.lastElementChild.replaceWith(toggle);
+
+  const viewer = document.createElement('section');
+  viewer.className = 'pane viewer-pane';
+  viewer.setAttribute('aria-labelledby', 'viewer-title');
+  viewer.innerHTML = '<div class="head viewer-header"><div class="viewer-title"><span class="section-number">02</span><div><h2 id="viewer-title"></h2><p id="viewer-subtitle"></p></div></div><button type="button" id="show-input"></button></div><div class="viewer-bar"><label><span id="source-label"></span><select id="viewer-source"><option value="0">File 1</option><option value="1">File 2</option></select></label><label><span id="viewer-level-label">Level</span><select id="viewer-level"><option value="All">All</option><option>ERROR</option><option>WARN</option><option>INFO</option><option>DEBUG</option><option>OTHER</option></select></label><label><span id="viewer-search-label"></span><input id="viewer-search" type="search"></label><span class="viewer-count" id="viewer-count" role="status"></span></div><div id="log-screen" class="log-screen" role="region" tabindex="0" aria-labelledby="viewer-title"></div><div class="legend"><span style="--dot:#db6262">ERROR / FATAL</span><span style="--dot:#c28a16">WARN</span><span style="--dot:#3186bd">INFO</span><span style="--dot:#738198">DEBUG</span></div>';
+  inputPane.after(viewer);
+  const viewerScreen = $('log-screen');
+  const viewport = document.createElement('div');
+  viewport.className = 'log-viewport';
+  viewerScreen.before(viewport);
+  viewport.append(viewerScreen);
+  const searchMap = document.createElement('canvas');
+  searchMap.className = 'search-map';
+  searchMap.setAttribute('aria-hidden', 'true');
+  viewport.append(searchMap);
+  const foldLegend=document.createElement('span');foldLegend.style.setProperty('--dot','#6daeff');foldLegend.textContent='Folding';viewer.querySelector('.legend').append(foldLegend);
+  const searchNav = document.createElement('span');
+  searchNav.className = 'search-nav';
+  searchNav.innerHTML = '<button type="button" id="search-prev" aria-label="Previous match">↑</button><span id="search-count" class="search-count" aria-live="polite"></span><button type="button" id="search-next" aria-label="Next match">↓</button>';
+  $('viewer-search').closest('label').after(searchNav);
+  const strings = {
+    en: {open:'Show input',close:'Hide input',title:'Log viewer',subtitle:'Browse the original log with severity highlighting',source:'Source',search:'Search',shown:'shown',empty:'No log lines match the current filters.',edit:'Edit input'},
+    ko: {open:'입력 펼치기',close:'입력 접기',title:'로그 뷰어',subtitle:'원본 로그를 심각도별 색상으로 확인합니다',source:'파일',search:'검색',shown:'줄 표시',empty:'필터에 맞는 로그가 없습니다.',edit:'로그 입력'}
+  };
+  function uiText() {
+    const s = strings[lang];
+    toggle.textContent = inputBody.hidden ? s.open : s.close;
+    toggle.setAttribute('aria-expanded', String(!inputBody.hidden));
+    $('viewer-title').textContent = s.title;
+    $('viewer-subtitle').textContent = s.subtitle;
+    $('source-label').textContent = s.source;
+    $('viewer-search-label').textContent = s.search;
+    foldLegend.textContent = lang === 'ko' ? '접기 구간' : 'Folding';
+    searchMap.title = lang === 'ko' ? '파랑: 접기 구간 · 노랑: 검색 결과' : 'Blue: folding blocks · yellow: search matches';
+    $('search-prev').setAttribute('aria-label', lang === 'ko' ? '이전 검색 결과' : 'Previous match');
+    $('search-next').setAttribute('aria-label', lang === 'ko' ? '다음 검색 결과' : 'Next match');
+    $('show-input').textContent = s.edit;
+  }
+  function setInputOpen(open) {
+    inputBody.hidden = !open;
+    uiText();
+  }
+  toggle.addEventListener('click', () => setInputOpen(inputBody.hidden));
+  $('show-input').addEventListener('click', () => { setInputOpen(true); inputPane.scrollIntoView({behavior:'smooth',block:'start'}); });
+
+  function appendColoredText(parent, value) {
+    const re = /(?<url>https?:\/\/[^\s<>"']+)|(?<time>\b\d{4}-\d{2}-\d{2}(?:[,T ]+\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})?)?)|(?<id>\[\d{3,}\])|(?<fn>\[[A-Za-z_][\w.:/-]*\])|(?<level>\b(?:ERROR|FATAL|WARN(?:ING)?|INFO|DEBUG|TRACE)\b)|(?<number>\b(?:0x[0-9a-f]+|\d+(?:\.\d+)?)\b)/gi;
+    let last = 0;
+    for (const match of value.matchAll(re)) {
+      parent.append(document.createTextNode(value.slice(last, match.index)));
+      const token = document.createElement('span');
+      const level = (match.groups.level || '').toUpperCase();
+      const kind = level ? (/ERROR|FATAL/.test(level) ? 'error' : /WARN/.test(level) ? 'warn' : level === 'INFO' ? 'info' : 'debug') : Object.keys(match.groups).find(key => match.groups[key] !== undefined);
+      token.className = 'token-' + (kind === 'fn' ? 'function' : kind);
+      token.textContent = match[0];
+      parent.append(token);
+      last = match.index + match[0].length;
+    }
+    parent.append(document.createTextNode(value.slice(last)));
+  }
+  let visibleRecords = [], matches = [], activeMatch = -1, query = '', searchTimer = null, selectedLine = null;
+  const lineHeight = 20;
+  const spacer = document.createElement('div'); spacer.className = 'log-spacer';
+  const visibleRows = document.createElement('div'); visibleRows.className = 'virtual-rows';
+  spacer.append(visibleRows); viewerScreen.append(spacer);
+  function highlightText(container, needle, activeOffset) {
+    if (!needle) return;
+    const full = container.textContent.toLowerCase(), ranges = [];
+    let position = 0;
+    while ((position = full.indexOf(needle, position)) !== -1) { ranges.push([position,position+needle.length]); position += needle.length; }
+    const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+    const nodes = []; while (walker.nextNode()) nodes.push(walker.currentNode);
+    let offset = 0;
+    for (const node of nodes) {
+      const text = node.nodeValue, end = offset + text.length;
+      const overlaps = ranges.filter(range => range[0] < end && range[1] > offset);
+      if (!overlaps.length) { offset = end; continue; }
+      let from = 0;
+      const fragment = document.createDocumentFragment();
+      for (const range of overlaps) {
+        const start = Math.max(0,range[0]-offset), stop = Math.min(text.length,range[1]-offset);
+        fragment.append(document.createTextNode(text.slice(from,start)));
+        const mark = document.createElement('mark'); mark.className = 'search-mark' + (range[0] === activeOffset ? ' active' : ''); mark.textContent = text.slice(start,stop); fragment.append(mark);
+        from = stop;
+      }
+      fragment.append(document.createTextNode(text.slice(from))); node.replaceWith(fragment); offset = end;
+    }
+  }
+  function paintMap() {
+    const height = Math.max(1, viewerScreen.clientHeight), ratio = window.devicePixelRatio || 1;
+    searchMap.width = Math.ceil(12 * ratio); searchMap.height = Math.ceil(height * ratio);
+    const ctx = searchMap.getContext('2d'); ctx.scale(ratio,ratio); ctx.clearRect(0,0,12,height);
+    if(Number($('viewer-source').value)===0 && foldingEnabled){
+      const lowerBound=line=>{let low=0,high=visibleRecords.length;while(low<high){const middle=(low+high)>>1;if(visibleRecords[middle].line<line)low=middle+1;else high=middle}return low};
+      ctx.fillStyle='#6daeff';
+      for(const fold of manualFolds){const start=lowerBound(fold.start),end=lowerBound(fold.end+1)-1;if(start>=visibleRecords.length||end<start)continue;const top=Math.floor(start/Math.max(1,visibleRecords.length)*height),bottom=Math.ceil((end+1)/Math.max(1,visibleRecords.length)*height);ctx.fillRect(1,Math.min(height-3,top),4,Math.max(3,bottom-top));}
+    }
+    ctx.fillStyle = '#d5a44d';
+    for (const match of matches) ctx.fillRect(6,Math.min(height - 3, Math.floor(match.row / Math.max(1,visibleRecords.length) * height)),5,3);
+    if (activeMatch >= 0 && matches[activeMatch]) { ctx.fillStyle='#ffdf8a'; ctx.fillRect(5,Math.min(height-4,Math.floor(matches[activeMatch].row / Math.max(1,visibleRecords.length) * height)),7,4); }
+  }
+  function paintRows() {
+    const first = Math.max(0, Math.floor(viewerScreen.scrollTop / lineHeight) - 12);
+    const end = Math.min(visibleRecords.length, Math.ceil((viewerScreen.scrollTop + viewerScreen.clientHeight) / lineHeight) + 12);
+    visibleRows.style.transform = `translateY(${first * lineHeight}px)`;
+    const fragment = document.createDocumentFragment();
+    for (let i = first; i < end; i++) {
+      const record=visibleRecords[i], row=document.createElement('div');
+      const collapsed=record.fold && closedFolds.has(record.fold.id) && !query && $('viewer-level').value==='All';
+      row.className='log-row level-'+record.level.toLowerCase()+(record.line===selectedLine?' current-line':'')+(record.fold?' fold-start':'')+(collapsed?' fold-collapsed':'')+(record.foldInside?' fold-body':'')+(record.foldEnd?' fold-end':'');
+      row.dataset.line=String(record.line);
+      const number=document.createElement('span');number.className='log-line-number';
+      if (record.fold) {
+        const forced=Boolean(query)||$('viewer-level').value!=='All';
+        const button=document.createElement('button');button.type='button';button.className='fold-marker';button.disabled=forced;button.textContent=!forced&&closedFolds.has(record.fold.id)?'▸':'▾';button.setAttribute('aria-label',(!forced&&closedFolds.has(record.fold.id)?'Expand ':'Collapse ')+record.fold.name);button.title=forced?(lang==='ko'?'검색이나 레벨 필터를 해제하면 접을 수 있습니다.':'Clear search or level filter to fold.'):record.fold.name;button.addEventListener('click',event=>{event.stopPropagation();if(closedFolds.has(record.fold.id))closedFolds.delete(record.fold.id);else closedFolds.add(record.fold.id);renderViewer()});number.append(button);
+      } else if (record.foldEnd) {
+        const marker=document.createElement('span');marker.className='fold-end-marker';marker.textContent='└';marker.title=(lang==='ko'?'패턴 끝: ':'Pattern end: ')+record.foldEnd.name;marker.setAttribute('aria-label',marker.title);number.append(marker);
+      }
+      number.append(document.createTextNode(String(record.line)));
+      const content=document.createElement('span');content.className='log-text';appendColoredText(content,record.raw);
+      const active=matches[activeMatch];highlightText(content,query,active && active.row===i ? active.offset : -1);
+      if(record.fold){const badge=document.createElement('span');badge.className='fold-badge';badge.textContent=` ${record.fold.name} · ${record.fold.start}–${record.fold.end}`+(closedFolds.has(record.fold.id)&&!query&&$('viewer-level').value==='All'?` · ${record.fold.end-record.fold.start} ${lang==='ko'?'줄 접힘':'lines folded'}`:'');content.append(badge)}
+      row.append(number,content);fragment.append(row);
+    }
+    visibleRows.replaceChildren(fragment);
+    viewerScreen.dispatchEvent(new CustomEvent('viewer-rendered'));
+  }
+  function renderViewer() {
+    const source=Number($('viewer-source').value), level=$('viewer-level').value;
+    query=$('viewer-search').value.toLowerCase();
+    visibleRecords=level==='All'?records[source]:records[source].filter(record=>record.level===level);
+    if (foldingEnabled && source===0 && manualFolds.length) {
+      const byStart=new Map(manualFolds.map(fold=>[fold.start,fold])), byEnd=new Map(manualFolds.map(fold=>[fold.end,fold])), folded=[];let foldIndex=0;
+      for(let i=0;i<visibleRecords.length;i++){
+        const record=visibleRecords[i], fold=byStart.get(record.line);
+        while(foldIndex<manualFolds.length && manualFolds[foldIndex].end<record.line)foldIndex++;
+        if(!fold){const foldEnd=byEnd.get(record.line),inside=manualFolds[foldIndex]&&record.line>manualFolds[foldIndex].start&&record.line<manualFolds[foldIndex].end;folded.push(foldEnd?{...record,foldEnd}:inside?{...record,foldInside:true}:record);continue}
+        folded.push({...record,fold});
+        if(level==='All' && !query && closedFolds.has(fold.id)) while(i+1<visibleRecords.length && visibleRecords[i+1].line<=fold.end)i++;
+      }
+      visibleRecords=folded;
+    }
+    matches=[];activeMatch=-1;let longest=0;
+    visibleRecords.forEach((record,row)=>{longest=Math.max(longest,record.raw.length);if(!query)return;const text=record.raw.toLowerCase();let offset=0;while((offset=text.indexOf(query,offset))!==-1){matches.push({row,offset});offset+=query.length}});
+    $('viewer-count').textContent=`${visibleRecords.length} / ${records[source].length} ${strings[lang].shown}`;
+    $('search-count').textContent=matches.length ? `0 / ${matches.length}` : '0 / 0';
+    $('search-prev').disabled=!matches.length;$('search-next').disabled=!matches.length;
+    spacer.style.height=`${Math.max(viewerScreen.clientHeight,visibleRecords.length*lineHeight)}px`;
+    spacer.style.width=`max(100%, ${Math.min(200000,Math.max(0,longest*8+80))}px)`;
+    if (!visibleRecords.length) { visibleRows.textContent=strings[lang].empty;visibleRows.className='virtual-rows viewer-empty'; } else {visibleRows.className='virtual-rows';paintRows();}
+    paintMap();
+  }
+  function moveMatch(index) {
+    if (!matches.length) return;
+    activeMatch=(index+matches.length)%matches.length;
+    viewerScreen.scrollTop=Math.max(0,matches[activeMatch].row*lineHeight-viewerScreen.clientHeight/2);
+    $('search-count').textContent=`${activeMatch+1} / ${matches.length}`; paintRows(); paintMap();
+  }
+  $('search-prev').onclick=()=>moveMatch(activeMatch<0?matches.length-1:activeMatch-1);
+  $('search-next').onclick=()=>moveMatch(activeMatch+1);
+  $('viewer-search').addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();moveMatch(activeMatch+(event.shiftKey?-1:1));}});
+  searchMap.addEventListener('click',event=>{if(!visibleRecords.length)return;const rect=searchMap.getBoundingClientRect();const target=(event.clientY-rect.top)/rect.height*visibleRecords.length;if(event.clientX-rect.left<5 && manualFolds.length){const targetLine=visibleRecords[Math.min(visibleRecords.length-1,Math.max(0,Math.floor(target)))].line;let nearest=manualFolds[0];for(const fold of manualFolds)if(Math.abs(fold.start-targetLine)<Math.abs(nearest.start-targetLine))nearest=fold;window.dispatchEvent(new CustomEvent('manual-fold-navigate',{detail:{line:nearest.start}}));return}let nearest=-1,distance=Infinity;matches.forEach((match,i)=>{const d=Math.abs(match.row-target);if(d<distance){distance=d;nearest=i}});if(nearest>=0)moveMatch(nearest)});
+  viewerScreen.addEventListener('scroll',()=>requestAnimationFrame(paintRows));
+  viewerScreen.addEventListener('click',event=>{const row=event.target.closest('.log-row');if(row)selectedLine=Number(row.dataset.line)});
+  window.addEventListener('resize',()=>{paintRows();paintMap()});
+  if (typeof ResizeObserver !== 'undefined') new ResizeObserver(()=>{spacer.style.height=`${Math.max(viewerScreen.clientHeight,visibleRecords.length*lineHeight)}px`;paintRows();paintMap()}).observe(viewerScreen);
+  window.addEventListener('manual-fold-changed',renderViewer);
+  window.addEventListener('manual-fold-navigate',event=>{
+    const line=event.detail.line;
+    if($('viewer-level').value!=='All'){$('viewer-level').value='All';renderViewer()}
+    const index=visibleRecords.findIndex(record=>record.line===line);
+    if(index<0)return;
+    selectedLine=line;viewerScreen.scrollTop=Math.max(0,index*lineHeight-viewerScreen.clientHeight/3);paintRows();if(!event.detail.keepFocus)viewerScreen.focus({preventScroll:true});
+  });
+  for (const id of ['viewer-source', 'viewer-level']) $(id).addEventListener('input', renderViewer);
+  $('viewer-search').addEventListener('input',()=>{clearTimeout(searchTimer);searchTimer=setTimeout(renderViewer,120)});
+
+  const originalAnalyze = analyze;
+  analyze = function() {
+    originalAnalyze();
+    selectedLine = null;
+    viewerScreen.scrollTop = 0;
+    renderViewer();
+    setInputOpen(false);
+  };
+  $('analyze').onclick = analyze;
+  const originalLanguage = setLang;
+  setLang = function(value) {
+    originalLanguage(value);
+    uiText();
+    renderViewer();
+    colorDiff();
+  };
+  $('en').onclick = () => setLang('en');
+  $('ko').onclick = () => setLang('ko');
+
+  function colorDiff() {
+    for (const row of document.querySelectorAll('.diffrow')) {
+      const text = row.lastChild;
+      if (!text || text.nodeType !== Node.TEXT_NODE) continue;
+      const span = document.createElement('span');
+      appendColoredText(span, text.textContent);
+      for (const token of span.querySelectorAll('[class^="token-"]')) {
+        token.className = token.className.replace('token-', 'level-') + ' level-label';
+      }
+      text.replaceWith(span);
+    }
+  }
+  const originalDiff = renderDiff;
+  renderDiff = function() { originalDiff(); colorDiff(); };
+  $('pattern').onchange = renderDiff;
+  $('mode').onchange = renderDiff;
+  uiText();
+  renderViewer();
+  colorDiff();
+  setInputOpen(false);
+})();
+</script>
+<script>
+(() => {
+  const viewer = document.querySelector('.viewer-pane');
+  const inputPane = $('a').closest('.pane');
+  const summaryPane = $('groups').closest('.pane');
+  const comparison = $('comparison');
+  const screen = $('log-screen');
+  inputPane.classList.add('legacy-hidden');
+  comparison.classList.add('legacy-hidden');
+  const hiddenDiff = renderDiff;
+  renderDiff = function() { if (!comparison.classList.contains('legacy-hidden')) hiddenDiff(); };
+  $('show-input').hidden = true;
+  $('viewer-source').closest('label').hidden = true;
+  viewer.querySelector('.section-number').textContent = '01';
+  const workspace = document.createElement('div');
+  workspace.className = 'workspace-grid';
+  viewer.before(workspace);
+  workspace.append(viewer, summaryPane);
+  summaryPane.classList.add('analysis-drawer');
+  summaryPane.hidden = false;
+  $('changedOnly').closest('label').hidden = true;
+  const toolbar = document.createElement('div');
+  toolbar.className = 'single-toolbar';
+  toolbar.innerHTML = '<button type="button" id="open-single"></button><input id="single-file" type="file" hidden accept=".log,.txt,.json,.jsonl,.csv"><button type="button" id="paste-single"></button><button type="button" id="sample-single"></button><button type="button" id="analysis-toggle" aria-expanded="true" aria-controls="analysis-panel"></button><span class="single-filename" id="single-name"></span>';
+  const nativeSampleButton = document.createElement('button');
+  nativeSampleButton.type = 'button';
+  nativeSampleButton.id = 'native-sample';
+  toolbar.querySelector('#sample-single').after(nativeSampleButton);
+  const encodingField = document.createElement('label');
+  encodingField.style.display = 'inline-flex';
+  encodingField.style.alignItems = 'center';
+  encodingField.style.gap = '6px';
+  encodingField.innerHTML = '<span id="encoding-label">Encoding</span><select id="encoding"><option value="auto">Auto (BOM / UTF-8 / CP949)</option><option value="utf-8">UTF-8</option><option value="euc-kr">CP949 / EUC-KR</option><option value="utf-16le">UTF-16 LE</option><option value="utf-16be">UTF-16 BE</option><option value="windows-1252">Windows-1252</option></select>';
+  toolbar.querySelector('#open-single').after(encodingField);
+  viewer.querySelector('.viewer-bar').before(toolbar);
+  summaryPane.id = 'analysis-panel';
+  const patternEditor=document.createElement('section');
+  patternEditor.className='pattern-editor';
+  patternEditor.innerHTML='<div class="pattern-heading"><h3 id="manual-title"></h3><button type="button" id="manual-new"></button></div><div class="pattern-list" id="manual-list"></div><div class="pattern-navigation-panel"><span class="pattern-current" id="manual-current" role="status"></span><button type="button" id="manual-prev"></button><button type="button" id="manual-next"></button></div><details id="manual-editor" class="pattern-detail" open><summary id="manual-editor-title"></summary><div class="pattern-detail-content"><div class="pattern-fields"><label><span id="pattern-name-label"></span><input id="manual-name" type="text" maxlength="100"></label><label><span id="pattern-start-label"></span><input id="manual-start" type="text" maxlength="1000"></label><label><span id="pattern-end-label"></span><input id="manual-end" type="text" maxlength="1000"></label><label><span><input id="manual-case" type="checkbox" checked> <span id="pattern-case-label"></span></span></label></div><div class="pattern-actions"><button type="button" class="primary" id="manual-add"></button></div></div></details><details class="pattern-detail"><summary id="manual-tools-title"></summary><div class="pattern-detail-content"><div class="pattern-actions"><button type="button" id="manual-analyze"></button><button type="button" id="manual-collapse"></button><button type="button" id="manual-expand"></button></div></div></details><div class="pattern-template-bar"><button type="button" id="manual-export"></button><button type="button" id="manual-import"></button><input type="file" id="manual-file" accept=".json,application/json" hidden></div><p class="pattern-message" id="manual-message" role="status"></p>';
+  const patternNavigationPanel=patternEditor.querySelector('.pattern-navigation-panel');
+  patternNavigationPanel.hidden=true;
+  const occurrencePanel=document.createElement('section');occurrencePanel.className='occurrence-panel';occurrencePanel.id='occurrence-panel';occurrencePanel.hidden=true;
+  occurrencePanel.innerHTML='<div class="occurrence-head"><span id="occurrence-title" class="occurrence-title"></span></div><label class="occurrence-filter"><input type="checkbox" id="occurrence-changed"><span id="occurrence-filter-label"></span></label><div id="occurrence-summary" class="occurrence-summary" role="status"></div><div id="occurrence-list" class="occurrence-list"></div><button type="button" id="occurrence-more" class="occurrence-more"></button>';
+  patternEditor.querySelector('.pattern-navigation-panel').after(occurrencePanel);
+  const analysisBody=summaryPane.querySelector('.body');
+  const automaticPanel=document.createElement('div');automaticPanel.className='analysis-panel-content';automaticPanel.id='automatic-panel';automaticPanel.hidden=true;automaticPanel.setAttribute('role','tabpanel');automaticPanel.setAttribute('aria-labelledby','tab-auto');
+  while(analysisBody.firstChild) automaticPanel.append(analysisBody.firstChild);
+  patternEditor.id='manual-panel';patternEditor.setAttribute('role','tabpanel');patternEditor.setAttribute('aria-labelledby','tab-manual');
+  const tabs=document.createElement('div');tabs.className='analysis-tabs';tabs.setAttribute('role','tablist');
+  tabs.innerHTML='<button type="button" id="tab-manual" role="tab" aria-controls="manual-panel" aria-selected="true"></button><button type="button" id="tab-auto" role="tab" aria-controls="automatic-panel" aria-selected="false"></button>';
+  analysisBody.append(tabs,patternEditor,automaticPanel);
+  function setAnalysisTab(tab) {
+    const manual=tab==='manual';patternEditor.hidden=!manual;automaticPanel.hidden=manual;
+    $('tab-manual').setAttribute('aria-selected',String(manual));$('tab-auto').setAttribute('aria-selected',String(!manual));
+    if(!manual&&!summaryPane.hidden)renderGroups();
+  }
+  $('tab-manual').onclick=()=>setAnalysisTab('manual');$('tab-auto').onclick=()=>setAnalysisTab('auto');
+  const selection = document.createElement('div');
+  selection.className = 'selection-bar';
+  selection.innerHTML = '<button type="button" id="pick-a" aria-pressed="false"></button><button type="button" id="pick-b" aria-pressed="false"></button><button type="button" id="open-block-diff" disabled></button><button type="button" id="clear-blocks"></button><span class="range-status" id="range-status" aria-live="polite"></span>';
+  viewer.querySelector('.log-viewport').before(selection);
+  const foldNavigation=document.createElement('div');foldNavigation.className='fold-navigation';
+  foldNavigation.innerHTML='<label><span id="fold-nav-label"></span><select id="fold-nav-select"></select></label><button type="button" id="fold-prev">↑</button><span class="fold-position" id="fold-position" role="status"></span><button type="button" id="fold-next">↓</button><button type="button" id="fold-all"></button><button type="button" id="unfold-all"></button><span id="fold-nav-help" class="hint"></span>';
+  selection.before(foldNavigation);
+  const dialog = document.createElement('dialog');
+  dialog.className = 'block-dialog block-diff-dialog';
+  dialog.innerHTML = '<div class="dialog-head"><h2 id="block-title"></h2><button type="button" id="close-block"></button></div><div class="dialog-tools"><label><span id="block-display-label"></span> <select id="block-display"><option value="full"></option><option value="prefix"></option><option value="normalized"></option></select></label><label><input type="checkbox" id="block-ignore-prefix" checked> <span id="block-ignore-label"></span></label><label><input type="checkbox" id="block-changed-only"> <span id="block-changed-label"></span></label><button type="button" id="diff-prev"></button><span id="diff-position" class="diff-count" role="status"></span><button type="button" id="diff-next"></button><button type="button" id="save-block"></button><span id="block-warning" class="warning"></span></div><div id="block-detection" class="block-detection" role="status"></div><div class="block-headers"><div id="block-header-a"></div><div id="block-header-b"></div></div><div class="block-scroll" id="block-scroll"><div class="block-column" id="block-left" tabindex="0" aria-labelledby="block-header-a"></div><div class="block-column" id="block-right" tabindex="0" aria-labelledby="block-header-b"></div></div><div class="block-note" id="block-note"></div>';
+  document.body.append(dialog);
+  const pasteDialog = document.createElement('dialog');
+  pasteDialog.className = 'block-dialog';
+  pasteDialog.style.maxWidth = '850px';
+  pasteDialog.innerHTML = '<div class="dialog-head"><h2 id="paste-title"></h2><button type="button" id="close-paste"></button></div><div class="body"><textarea id="single-text" spellcheck="false"></textarea><button type="button" class="primary" id="apply-paste"></button></div>';
+  document.body.append(pasteDialog);
+  const labels = {
+    en:{open:'Open log',paste:'Paste log',sample:'Load sample',panel:'Summary & patterns',hide:'Hide analysis',none:'No file loaded',pickA:'Select block A',pickB:'Select block B',diff:'Compare blocks',clear:'Clear blocks',select:'Choose a block, then click its first and last log lines.',end:'Click the last line of the selected block.',range:'lines',title:'Block diff',close:'Close',raw:'Show full log lines',save:'Save comparison',note:'Blocks come from the same log. Matching ignores timestamps and numeric IDs when normalized.',apply:'Analyze',pasteTitle:'Paste log text',readError:'Could not read file',needTwo:'Select two lines for each block.',large:'Large comparison: aligned by position.',a:'Block A',b:'Block B',summary:'Summary & patterns',intro:'Open a log, inspect its colored lines, and compare two selected blocks locally.'},
+    ko:{open:'로그 열기',paste:'로그 붙여넣기',sample:'샘플 불러오기',panel:'요약 · 패턴',hide:'분석 패널 닫기',none:'불러온 파일 없음',pickA:'블록 A 선택',pickB:'블록 B 선택',diff:'블록 비교',clear:'선택 지우기',select:'블록을 선택한 뒤 로그의 첫 줄과 마지막 줄을 차례로 클릭하세요.',end:'선택한 블록의 마지막 줄을 클릭하세요.',range:'줄',title:'블록 비교',close:'닫기',raw:'원본 로그 전체 표시',save:'비교 결과 저장',note:'같은 로그에서 선택한 블록을 비교합니다. 정규화 비교는 시간과 숫자 ID를 치환합니다.',apply:'분석',pasteTitle:'로그 텍스트 붙여넣기',readError:'파일을 읽을 수 없습니다',needTwo:'각 블록의 시작과 끝 줄을 선택하세요.',large:'비교 대상이 커서 줄 순서대로 정렬합니다.',a:'블록 A',b:'블록 B',summary:'요약 · 패턴',intro:'로그 파일 하나를 열어 색상으로 확인하고, 선택한 두 구간을 로컬에서 비교합니다.'}
+  };
+  const block = { a:null, b:null, active:null, start:null };
+  let manualPatterns = [];
+  let editingPattern = -1;
+  let foldNotice = '';
+  let activeFold = -1;
+  let currentFile = '';
+  let currentFileObject = null;
+  let loadGeneration = 0;
+  let blockRows = [];
+  let occurrencePattern = null, baseFoldId = null, occurrenceLimit = 50, diffPositions = [], activeDiff = -1;
+  function label(key) { return labels[lang][key]; }
+  function manualText(en,ko) { return lang==='ko' ? ko : en; }
+  function updateManualLabels() {
+    $('tab-manual').textContent=manualText('Manual patterns','수동 패턴');
+    $('tab-auto').textContent=manualText('Auto analysis','자동 분석');
+    $('manual-title').textContent=manualText('Named patterns','이름별 패턴');
+    $('manual-editor-title').textContent=manualText(editingPattern<0?'Add a pattern':'Edit pattern',editingPattern<0?'패턴 추가':'패턴 수정');
+    $('manual-tools-title').textContent=manualText('Analysis and folding','분석 및 접기');
+    $('manual-prev').textContent=manualText('↑ Previous','↑ 이전');
+    $('manual-next').textContent=manualText('↓ Next','↓ 다음');
+    $('pattern-name-label').textContent=manualText('Pattern name','패턴 이름');
+    $('pattern-start-label').textContent=manualText('Start text','시작 문구');
+    $('pattern-end-label').textContent=manualText('End text','끝 문구');
+    $('pattern-case-label').textContent=manualText('Ignore case','대소문자 무시');
+    $('manual-add').textContent=manualText(editingPattern<0?'Add pattern':'Save changes',editingPattern<0?'패턴 추가':'변경 저장');
+    $('manual-new').textContent=manualText('+ New','+ 새 패턴');
+    $('manual-analyze').textContent='Reanalyze';
+    $('manual-collapse').textContent=manualText('Fold all','모두 접기');
+    $('manual-expand').textContent=manualText('Expand all','모두 펼치기');
+    $('manual-export').textContent=manualText('Save template','템플릿 저장');
+    $('manual-import').textContent=manualText('Load template','템플릿 불러오기');
+    $('manual-message').textContent=foldNotice || manualText('Plain-text matching. Start and end lines are included. Search and level filters temporarily expand folds.','문구 그대로 검색하며 시작·끝 줄을 포함합니다. 검색 또는 레벨 필터 사용 중에는 접힌 구간이 임시로 펼쳐집니다.');
+    renderManualList();
+    updateFoldNavigation();
+  }
+  function updateFoldNavigation() {
+    const select=$('fold-nav-select'),previous=select.value;
+    select.replaceChildren(new Option(manualText('All patterns','모든 패턴'),''));
+    manualPatterns.forEach((pattern,index)=>select.add(new Option(pattern.name,String(index))));
+    if([...select.options].some(option=>option.value===previous))select.value=previous;
+    $('fold-nav-label').textContent=manualText('Pattern navigation','패턴 찾기');
+    $('fold-prev').setAttribute('aria-label',manualText('Previous pattern block','이전 패턴 구간'));
+    $('fold-next').setAttribute('aria-label',manualText('Next pattern block','다음 패턴 구간'));
+    $('fold-all').textContent=manualText('Fold all','모두 접기');$('unfold-all').textContent=manualText('Expand all','모두 펼치기');
+    $('fold-nav-help').textContent=manualText('Click ▾ beside a line to fold.','줄 번호 옆 ▾를 눌러 접습니다.');
+    const list=matchingFolds();if(activeFold>=list.length)activeFold=-1;
+    $('fold-position').textContent=`${activeFold<0?0:activeFold+1} / ${list.length}`;
+    $('fold-prev').disabled=!list.length;$('fold-next').disabled=!list.length;$('fold-all').disabled=!manualFolds.length;$('unfold-all').disabled=!manualFolds.length;
+    const selected=select.value===''?manualText('All patterns','모든 패턴'):(manualPatterns[Number(select.value)]?.name||'');
+    $('manual-current').textContent=`${selected} · ${activeFold<0?0:activeFold+1} / ${list.length}`;
+    $('manual-current').title=$('manual-current').textContent;
+    $('manual-prev').disabled=!list.length;$('manual-next').disabled=!list.length;
+    const cards=$('manual-list').querySelectorAll('.pattern-entry');
+    cards.forEach(card=>card.classList.toggle('is-selected',select.value!==''&&card.dataset.patternIndex===select.value));
+    const selectedCard=select.value===''?null:[...cards].find(card=>card.dataset.patternIndex===select.value);
+    if(selectedCard){selectedCard.append(patternNavigationPanel);patternNavigationPanel.hidden=false}else{patternNavigationPanel.hidden=true;patternEditor.insertBefore(patternNavigationPanel,$('manual-editor'))}
+    placeOccurrences();
+  }
+  function placeOccurrences() {
+    const cards=$('manual-list').querySelectorAll('.pattern-entry');
+    const target=occurrencePattern===null||occurrencePanel.hidden?null:[...cards].find(card=>Number(card.dataset.patternIndex)===occurrencePattern);
+    if(target)target.append(occurrencePanel);else patternEditor.insertBefore(occurrencePanel,$('manual-editor'));
+    for(const card of cards){const button=card.querySelector('.pattern-find');if(!button)continue;const expanded=target===card;button.textContent=expanded?manualText('Hide','접기'):manualText('Find','찾기');button.setAttribute('aria-expanded',String(expanded));}
+  }
+  function matchingFolds() { const value=$('fold-nav-select').value;return value===''?manualFolds:manualFolds.filter(fold=>fold.patternIndex===Number(value)); }
+  function foldRecords(fold) { return records[0].slice(fold.start-1,fold.end); }
+  function compareOccurrences(base,target) {
+    if(base.id===target.id)return {type:'base',label:manualText('Base','기준')};
+    if((base.end-base.start+1)+(target.end-target.start+1)>20000)return {type:'uncomputed',label:manualText('Too large to summarize; compare manually','크기가 커서 요약 생략 · 직접 비교')};
+    const left=foldRecords(base).map(record=>record.raw),right=foldRecords(target).map(record=>record.raw);
+    if(left.length===right.length && left.every((line,index)=>line===right[index]))return {type:'same',label:manualText('Identical','원본 동일')};
+    const a=left.map(value=>({value:splitLogPrefix(value).hidden})),b=right.map(value=>({value:splitLogPrefix(value).hidden}));
+    if(a.length===b.length && a.every((item,index)=>item.value===b[index].value))return {type:'normalized',label:manualText('Same ignoring leading timestamp / IDs; raw differs','앞부분 시간 / ID 무시 시 동일 · 원본 다름')};
+    if(a.length*b.length>50000)return {type:'uncomputed',label:manualText('Too large to summarize; compare manually','크기가 커서 요약 생략 · 직접 비교')};
+    const aligned=align(a,b).rows;let added=0,removed=0,changed=0;
+    for(const [x,y] of aligned){if(!x)added++;else if(!y)removed++;else if(x.value!==y.value)changed++}
+    return {type:'different',label:manualText(`${changed} changed · ${added} added · ${removed} removed`,`${changed}줄 변경 · ${added}줄 추가 · ${removed}줄 삭제`)};
+  }
+  function showOccurrences(index) {
+    occurrencePattern=index;occurrenceLimit=50;const list=manualFolds.filter(fold=>fold.patternIndex===index);
+    baseFoldId=list[0]?.id||null;occurrencePanel.hidden=false;renderOccurrences();placeOccurrences();
+  }
+  function renderOccurrences() {
+    if(occurrencePattern===null||!manualPatterns[occurrencePattern]){occurrencePanel.hidden=true;return}
+    const list=manualFolds.filter(fold=>fold.patternIndex===occurrencePattern);
+    let base=list.find(fold=>fold.id===baseFoldId);if(!base){base=list[0]||null;baseFoldId=base?.id||null}
+    $('occurrence-title').textContent=`${manualPatterns[occurrencePattern].name} · ${list.length} ${manualText('blocks','개 구간')}`;
+    $('occurrence-filter-label').textContent=manualText('Differences excluding timestamp / IDs','앞부분 시간 / ID 제외 차이만');
+    const container=$('occurrence-list');container.replaceChildren();let shown=0;
+    const subset=list.slice(0,occurrenceLimit), counts={same:0,normalized:0,different:0,uncomputed:0};
+    subset.forEach((fold,index)=>{
+      const state=base?compareOccurrences(base,fold):null;if(state && state.type!=='base')counts[state.type]++;
+      if($('occurrence-changed').checked && state && ['same','normalized'].includes(state.type))return;
+      shown++;const row=document.createElement('div');row.className='occurrence-row'+(state?.type==='base'?' is-base':'');
+      const line=document.createElement('div');line.className='occurrence-line';
+      const go=document.createElement('button');go.type='button';go.className='occurrence-go';go.textContent=`#${index+1} · ${fold.start}–${fold.end} ${manualText('lines','줄')}`;
+      go.onclick=()=>{const select=$('fold-nav-select');select.value=String(occurrencePattern);const selected=matchingFolds().findIndex(item=>item.id===fold.id);activeFold=selected;updateFoldNavigation();window.dispatchEvent(new CustomEvent('manual-fold-navigate',{detail:{line:fold.start,keepFocus:true}}))};
+      const timestamp=foldRecords(fold)[0]?.raw.match(/\d{4}-\d{2}-\d{2}[^\d]*\d{2}:\d{2}:\d{2}(?:\.\d+)?/)?.[0];
+      const time=document.createElement('span');time.className='badge';time.textContent=timestamp||'';line.append(go,time);
+      const status=document.createElement('div');status.className='occurrence-state';status.textContent=state?.label||'';
+      const actions=document.createElement('div');actions.className='occurrence-actions';
+      const makeBase=document.createElement('button');makeBase.type='button';makeBase.textContent=manualText('Set base','기준 지정');makeBase.disabled=state?.type==='base';makeBase.onclick=()=>{baseFoldId=fold.id;renderOccurrences()};
+      const compare=document.createElement('button');compare.type='button';compare.textContent=manualText('Compare','비교');compare.disabled=!base||fold.id===base.id;compare.onclick=()=>{block.a=[base.start,base.end];block.b=[fold.start,fold.end];refreshSelection();updateBlockDiff();dialog.showModal()};
+      actions.append(makeBase,compare);row.append(line,status,actions);container.append(row);
+    });
+    $('occurrence-summary').textContent=manualText(`First ${subset.length} of ${list.length} · exact ${counts.same} · same excluding prefix ${counts.normalized} · different ${counts.different} · not summarized ${counts.uncomputed}`,`전체 ${list.length}개 중 ${subset.length}개 확인 · 원본 동일 ${counts.same} · 앞부분 제외 동일 ${counts.normalized} · 차이 ${counts.different} · 요약 생략 ${counts.uncomputed}`);
+    $('occurrence-more').hidden=occurrenceLimit>=list.length;$('occurrence-more').textContent=manualText('Show more','더 보기');
+    if(!shown){const empty=document.createElement('div');empty.className='pattern-empty';empty.textContent=manualText('No blocks to display.','표시할 구간이 없습니다.');container.append(empty)}
+  }
+  $('occurrence-changed').onchange=renderOccurrences;
+  $('occurrence-more').onclick=()=>{occurrenceLimit+=50;renderOccurrences()};
+  function navigateFold(step) {
+    const list=matchingFolds();if(!list.length)return;
+    activeFold=activeFold<0?(step<0?list.length-1:0):(activeFold+step+list.length)%list.length;
+    $('fold-position').textContent=`${activeFold+1} / ${list.length}`;
+    const select=$('fold-nav-select');const selected=select.value===''?manualText('All patterns','모든 패턴'):(manualPatterns[Number(select.value)]?.name||'');
+    $('manual-current').textContent=`${selected} · ${activeFold+1} / ${list.length}`;$('manual-current').title=$('manual-current').textContent;
+    window.dispatchEvent(new CustomEvent('manual-fold-navigate',{detail:{line:list[activeFold].start,keepFocus:true}}));
+  }
+  $('fold-nav-select').onchange=()=>{activeFold=-1;updateFoldNavigation();if($('fold-nav-select').value!=='')showOccurrences(Number($('fold-nav-select').value));else{occurrencePattern=null;occurrencePanel.hidden=true;placeOccurrences()}};
+  $('fold-prev').onclick=()=>navigateFold(-1);$('fold-next').onclick=()=>navigateFold(1);
+  $('manual-prev').onclick=()=>navigateFold(-1);$('manual-next').onclick=()=>navigateFold(1);
+  $('fold-all').onclick=()=>$('manual-collapse').click();$('unfold-all').onclick=()=>$('manual-expand').click();
+  function renderManualList() {
+    const list=$('manual-list');
+    if(list.contains(patternNavigationPanel)) patternEditor.insertBefore(patternNavigationPanel,$('manual-editor'));
+    if(list.contains(occurrencePanel)) patternEditor.insertBefore(occurrencePanel,$('manual-editor'));
+    list.replaceChildren();
+    if(!manualPatterns.length){const empty=document.createElement('div');empty.className='pattern-empty';empty.textContent=manualText('No patterns yet. Add one below.','등록된 패턴이 없습니다. 아래에서 추가하세요.');list.append(empty)}
+    manualPatterns.forEach((pattern,index)=>{
+      const item=document.createElement('div');item.className='pattern-entry';item.dataset.patternIndex=String(index);
+      const head=document.createElement('div');head.className='pattern-entry-head';
+      const title=document.createElement('span');title.className='entry-name';title.textContent=`${pattern.name} · ${manualFolds.filter(fold=>fold.patternIndex===index).length}`;
+      const actions=document.createElement('span');actions.className='entry-actions';
+      const edit=document.createElement('button');edit.type='button';edit.textContent=manualText('Edit','수정');
+      edit.setAttribute('aria-label',manualText(`Edit ${pattern.name}`,`${pattern.name} 수정`));
+      edit.onclick=()=>{editingPattern=index;$('manual-editor').open=true;$('manual-name').value=pattern.name;$('manual-start').value=pattern.start;$('manual-end').value=pattern.end;$('manual-case').checked=pattern.ignoreCase;updateManualLabels();$('manual-editor').scrollIntoView({block:'nearest',behavior:'smooth'});$('manual-name').focus({preventScroll:true})};
+      const remove=document.createElement('button');remove.type='button';remove.textContent=manualText('Delete','삭제');
+      remove.onclick=()=>{manualPatterns.splice(index,1);editingPattern=-1;occurrencePattern=null;occurrencePanel.hidden=true;clearPatternFields();rebuildFolds()};
+      const find=document.createElement('button');find.type='button';find.className='pattern-find';find.textContent=manualText('Find','찾기');find.disabled=!manualFolds.some(fold=>fold.patternIndex===index);find.setAttribute('aria-controls','occurrence-panel');find.setAttribute('aria-expanded','false');
+      find.onclick=()=>{if(occurrencePattern===index&&!occurrencePanel.hidden){occurrencePanel.hidden=true;occurrencePattern=null;placeOccurrences();return}$('fold-nav-select').value=String(index);activeFold=-1;updateFoldNavigation();showOccurrences(index);navigateFold(1)};
+      actions.append(find,edit,remove);head.append(title,actions);
+      const conditions=document.createElement('dl');conditions.className='pattern-entry-conditions';conditions.style.margin='0';
+      for(const [labelText,value] of [[manualText('Start','시작'),pattern.start],[manualText('End','끝'),pattern.end]]){const term=document.createElement('dt');term.textContent=labelText;const definition=document.createElement('dd');definition.textContent=value;conditions.append(term,definition)}
+      const caseInfo=document.createElement('div');caseInfo.className='pattern-entry-case';caseInfo.textContent=pattern.ignoreCase?manualText('Case-insensitive','대소문자 무시'):manualText('Case-sensitive','대소문자 구분');
+      item.append(head,conditions,caseInfo);list.append(item);
+    });
+  }
+  function clearPatternFields() { $('manual-name').value='';$('manual-start').value='';$('manual-end').value='';$('manual-case').checked=true; }
+  function rebuildFolds() {
+    const candidates=[];
+    manualPatterns.forEach((pattern,patternIndex)=>{
+      const start=pattern.ignoreCase?pattern.start.toLowerCase():pattern.start;
+      const end=pattern.ignoreCase?pattern.end.toLowerCase():pattern.end;
+      let pending=null;
+      for(const record of records[0]){
+        const text=pattern.ignoreCase?record.raw.toLowerCase():record.raw;
+        if(pending===null && text.includes(start)) pending=record.line;
+        if(pending!==null && text.includes(end)) {candidates.push({start:pending,end:record.line,name:pattern.name,patternIndex,id:`${patternIndex}:${pending}:${record.line}`});pending=null;}
+      }
+    });
+    candidates.sort((a,b)=>a.start-b.start || b.end-a.end || a.patternIndex-b.patternIndex);
+    manualFolds=[];let lastEnd=0,skipped=0;
+    for(const candidate of candidates){if(candidate.start<=lastEnd){skipped++;continue}manualFolds.push(candidate);lastEnd=candidate.end}
+    closedFolds=new Set();activeFold=-1;
+    foldNotice=manualText(`${manualFolds.length} blocks found${skipped?`; ${skipped} overlapping blocks omitted`:''}.`,`구간 ${manualFolds.length}개 발견${skipped?`, 겹치는 구간 ${skipped}개 제외`:''}.`);
+    updateManualLabels();
+    if(manualPatterns.length===1 && manualFolds.some(fold=>fold.patternIndex===0)){$('fold-nav-select').value='0';activeFold=-1;showOccurrences(0);updateFoldNavigation()}
+    else {renderOccurrences();placeOccurrences()}
+    window.dispatchEvent(new Event('manual-fold-changed'));
+  }
+  $('manual-add').onclick=()=>{
+    const pattern={name:$('manual-name').value.trim(),start:$('manual-start').value,end:$('manual-end').value,ignoreCase:$('manual-case').checked};
+    if(!pattern.name||!pattern.start.trim()||!pattern.end.trim()){foldNotice=manualText('Enter a name, start text, and end text.','이름, 시작 문구와 끝 문구를 입력하세요.');updateManualLabels();return}
+    if(manualPatterns.some((item,index)=>index!==editingPattern&&item.name.toLowerCase()===pattern.name.toLowerCase())){foldNotice=manualText('Pattern names must be unique.','패턴 이름은 중복될 수 없습니다.');updateManualLabels();return}
+    const wasEditing=editingPattern>=0;
+    if(editingPattern<0)manualPatterns.push(pattern);else manualPatterns[editingPattern]=pattern;
+    editingPattern=-1;occurrencePattern=null;occurrencePanel.hidden=true;clearPatternFields();$('manual-editor').open=false;rebuildFolds();
+    if(wasEditing){foldNotice+=' '+manualText('Save template to keep these changes in a file.','파일에 변경사항을 보관하려면 템플릿 저장을 누르세요.');updateManualLabels()}
+  };
+  $('manual-new').onclick=()=>{editingPattern=-1;clearPatternFields();$('manual-editor').open=true;foldNotice='';updateManualLabels();$('manual-name').focus()};
+  $('manual-analyze').onclick=rebuildFolds;
+  $('manual-collapse').onclick=()=>{closedFolds=new Set(manualFolds.map(fold=>fold.id));window.dispatchEvent(new Event('manual-fold-changed'))};
+  $('manual-expand').onclick=()=>{closedFolds.clear();window.dispatchEvent(new Event('manual-fold-changed'))};
+  $('manual-export').onclick=()=>{
+    const content=JSON.stringify({type:'DH.DevUtil.log-patterns',version:1,patterns:manualPatterns},null,2);
+    const url=URL.createObjectURL(new Blob([content],{type:'application/json;charset=utf-8'}));const link=document.createElement('a');link.href=url;link.download='log-patterns.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  };
+  $('manual-import').onclick=()=>$('manual-file').click();
+  $('manual-file').onchange=async event=>{
+    const file=event.target.files[0];event.target.value='';if(!file)return;
+    try{
+      if(file.size>1024*1024)throw Error('size');
+      const data=JSON.parse(await file.text());
+      if(data.type!=='DH.DevUtil.log-patterns'||data.version!==1||!Array.isArray(data.patterns)||data.patterns.length>200)throw Error('format');
+      const names=new Set();
+      const next=data.patterns.map(pattern=>{
+        if(!pattern||typeof pattern.name!=='string'||typeof pattern.start!=='string'||typeof pattern.end!=='string'||typeof pattern.ignoreCase!=='boolean'||!pattern.name.trim()||!pattern.start.trim()||!pattern.end.trim()||pattern.name.length>100||pattern.start.length>1000||pattern.end.length>1000)throw Error('pattern');
+        const name=pattern.name.trim();if(names.has(name.toLowerCase()))throw Error('duplicate');names.add(name.toLowerCase());return {name,start:pattern.start,end:pattern.end,ignoreCase:pattern.ignoreCase};
+      });
+      manualPatterns=next;editingPattern=-1;occurrencePattern=null;occurrencePanel.hidden=true;clearPatternFields();$('manual-editor').open=!next.length;rebuildFolds();foldNotice=manualText(`Loaded ${next.length} patterns.`,`패턴 ${next.length}개를 불러왔습니다.`);updateManualLabels();
+    }catch(error){foldNotice=manualText('Invalid template. Existing patterns were kept.','올바르지 않은 템플릿입니다. 기존 패턴을 유지합니다.');updateManualLabels()}
+  };
+  function syncLabels() {
+    $('open-single').textContent = label('open'); $('paste-single').textContent = label('paste'); $('sample-single').textContent = label('sample');
+    nativeSampleButton.textContent = lang === 'ko' ? '상세 로그 샘플' : 'Detailed log sample';
+    $('encoding-label').textContent = lang === 'ko' ? '인코딩' : 'Encoding';
+    $('encoding').options[0].textContent = lang === 'ko' ? '자동 (BOM / UTF-8 / CP949)' : 'Auto (BOM / UTF-8 / CP949)';
+    $('analysis-toggle').textContent = summaryPane.hidden ? label('panel') : label('hide');
+    $('pick-a').textContent = label('pickA'); $('pick-b').textContent = label('pickB'); $('open-block-diff').textContent = label('diff'); $('clear-blocks').textContent = label('clear');
+    $('block-title').textContent = label('title'); $('close-block').textContent = label('close'); $('save-block').textContent = label('save');
+    $('block-display-label').textContent=manualText('Display','표시');
+    $('block-ignore-label').textContent=manualText('Ignore leading timestamp / IDs','앞부분 시간 / ID 무시');
+    $('block-display').options[0].textContent=manualText('Original lines','원본 로그');
+    $('block-display').options[1].textContent=manualText('Hide timestamp / IDs','시간 / ID 숨김');
+    $('block-display').options[2].textContent=manualText('Normalized placeholders','정규화 치환값');
+    $('block-changed-label').textContent=manualText('Changed lines only','변경 줄만 보기');$('diff-prev').textContent=manualText('↑ Previous difference','↑ 이전 차이');$('diff-next').textContent=manualText('↓ Next difference','↓ 다음 차이');
+    $('paste-title').textContent = label('pasteTitle'); $('close-paste').textContent = label('close'); $('apply-paste').textContent = label('apply');
+    $('single-name').textContent = currentFile || label('none');
+    summaryPane.querySelector('[data-i="lines"]').textContent = lang === 'ko' ? '전체 줄' : 'Lines';
+    summaryPane.querySelector('[data-i="unparsed"]').textContent = lang === 'ko' ? '해석 실패' : 'Unparsed';
+    $('errorCount').previousElementSibling.textContent = 'ERROR';
+    document.querySelector('[data-i="intro"]').textContent = label('intro');
+    summaryPane.querySelector('h2').textContent = label('summary');
+    updateManualLabels();
+    if(!occurrencePanel.hidden)renderOccurrences();
+    refreshSelection();
+  }
+  function rangeText(range) { return range ? `${range[0]}–${range[1]}` : '—'; }
+  function refreshSelection() {
+    $('pick-a').setAttribute('aria-pressed',String(block.active === 'a')); $('pick-b').setAttribute('aria-pressed',String(block.active === 'b'));
+    $('open-block-diff').disabled = !(block.a && block.b);
+    $('range-status').textContent = `${label('a')}: ${rangeText(block.a)} · ${label('b')}: ${rangeText(block.b)} · ${block.start === null ? label('select') : label('end')}`;
+    for (const row of screen.querySelectorAll('.log-row')) {
+      const number = Number(row.dataset.line);
+      row.classList.toggle('range-a', !!block.a && number >= block.a[0] && number <= block.a[1]);
+      row.classList.toggle('range-b', !!block.b && number >= block.b[0] && number <= block.b[1]);
+      row.classList.toggle('pickable', !!block.active);
+    }
+  }
+  function resetBlocks() { block.a=null; block.b=null; block.active=null; block.start=null; refreshSelection(); }
+  $('pick-a').onclick = () => { block.active='a'; block.start=null; refreshSelection(); };
+  $('pick-b').onclick = () => { block.active='b'; block.start=null; refreshSelection(); };
+  $('clear-blocks').onclick = resetBlocks;
+  screen.addEventListener('click', event => {
+    const row = event.target.closest('.log-row');
+    if (!row) return;
+    screen.querySelector('.current-line')?.classList.remove('current-line');
+    row.classList.add('current-line');
+    if (!block.active) return;
+    const line = Number(row.dataset.line);
+    if (block.start === null) block.start = line;
+    else { block[block.active] = [Math.min(block.start,line),Math.max(block.start,line)]; block.active=null; block.start=null; }
+    refreshSelection();
+  });
+  function splitLogPrefix(raw) {
+    const bracketed=/^(\s*(?:[A-Za-z_][\w.-]*:)?)\[\d{4}-\d{2}-\d{2}[,T ]+\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})?\]((?:(?:\s*\[\d+\]){2,4}|\s*\[\d{6,}\])?)\s*:?\s*/;
+    const bracketMatch=raw.match(bracketed);
+    if(bracketMatch){const source=bracketMatch[1];return {hidden:(source?source+' ':'')+raw.slice(bracketMatch[0].length),offset:bracketMatch[0].length,source,recognized:true,timestamp:true,numericIds:(bracketMatch[2].match(/\[\d+\]/g)||[]).length}}
+    const isoMatch=raw.match(/^\s*\d{4}-\d{2}-\d{2}[,T ]+\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})?((?:(?:\s*\[\d+\]){2,4}|\s*\[\d{6,}\])?)\s*/);
+    if(isoMatch)return {hidden:raw.slice(isoMatch[0].length),offset:isoMatch[0].length,source:'',recognized:true,timestamp:true,numericIds:(isoMatch[1].match(/\[\d+\]/g)||[]).length};
+    const syslogMatch=raw.match(/^\s*(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}\s+(\S+)\s+([\w./-]+)(?:\[(\d+)\])?:\s*/i);
+    if(syslogMatch){const source=`${syslogMatch[1]} ${syslogMatch[2]}:`;return {hidden:source+' '+raw.slice(syslogMatch[0].length),offset:syslogMatch[0].length,source,recognized:true,timestamp:true,numericIds:syslogMatch[3]?1:0}}
+    return {hidden:raw,offset:0,source:'',recognized:false,timestamp:false,numericIds:0};
+  }
+  function updateBlockDiff() {
+    if (!block.a || !block.b) return;
+    const mode = $('block-display').value, ignorePrefix=$('block-ignore-prefix').checked;
+    const parts = [block.a,block.b].map(range => records[0].filter(record => record.line >= range[0] && record.line <= range[1]).map(record => {
+      const prefix=splitLogPrefix(record.raw);
+      const value=mode==='full'?record.raw:mode==='prefix'?prefix.hidden:normalize(record.raw);
+      const comparison=ignorePrefix?prefix.hidden:record.raw;
+      return {line:record.line,value,key:mode==='normalized'?normalize(comparison):comparison,prefix};
+    }));
+    const allLines=parts.flat(),timestampLines=allLines.filter(item=>item.prefix.timestamp).length,idLines=allLines.filter(item=>item.prefix.numericIds>0).length,unknownLines=allLines.length-timestampLines;
+    const detectionMode=ignorePrefix?manualText('ignored in comparison','비교에서 제외'):mode==='normalized'?manualText('normalized in comparison','비교에서 정규화'):manualText('included in comparison','비교에 포함');
+    $('block-detection').textContent=manualText(`Detected: timestamp ${timestampLines}/${allLines.length} lines · numeric header IDs ${idLines}/${allLines.length} lines · unrecognized prefix ${unknownLines} · ${detectionMode}`,`자동 감지: 시간 ${timestampLines}/${allLines.length}줄 · 숫자 헤더 ID ${idLines}/${allLines.length}줄 · 미인식 ${unknownLines}줄 · ${detectionMode}`);
+    $('block-detection').classList.toggle('warning',unknownLines>0);
+    const displayNote=mode==='full'?manualText('Original log lines are displayed.','원본 로그 줄을 표시합니다.'):mode==='prefix'?manualText('Recognized leading timestamps and IDs are hidden.','인식된 앞부분 시간과 ID를 숨깁니다.'):manualText('Normalized placeholders replace timestamps, IPs, UUIDs, and numbers.','정규화 치환값은 시간, IP, UUID, 숫자를 바꿉니다.');
+    const compareNote=mode==='normalized'?manualText('Normalized mode also replaces message numbers and IPs; leading prefixes are normalized or ignored according to the checkbox.','정규화 모드는 메시지 숫자와 IP도 치환하며, 앞부분은 체크박스에 따라 정규화하거나 무시합니다.'):ignorePrefix?manualText('Recognized leading timestamps and numeric IDs are ignored in comparison. Other numbers remain significant.','인식된 앞부분 시간과 숫자 ID는 비교에서 무시하며, 다른 숫자는 비교합니다.'):manualText('Leading timestamps and IDs are included in comparison.','앞부분 시간과 ID를 비교에 포함합니다.');
+    $('block-note').textContent=displayNote+' '+compareNote;
+    const result = align(parts[0],parts[1]); blockRows=result.rows;
+    $('block-warning').textContent = result.large ? label('large') : '';
+    $('block-header-a').textContent = `${label('a')} · ${rangeText(block.a)} ${label('range')}`;
+    $('block-header-b').textContent = `${label('b')} · ${rangeText(block.b)} ${label('range')}`;
+    const columns=[$('block-left'),$('block-right')];columns.forEach(column=>column.replaceChildren());const fragments=[document.createDocumentFragment(),document.createDocumentFragment()];diffPositions=[];activeDiff=-1;let rowIndex=0;
+    for (const pair of blockRows) {
+      const different=!pair[0]||!pair[1]||pair[0].key!==pair[1].key;
+      if($('block-changed-only').checked&&!different)continue;
+      if(different)diffPositions.push(rowIndex);
+      for (let i=0;i<2;i++) {
+        const item=pair[i], other=pair[1-i], cell=document.createElement('div');
+        cell.className='block-cell '+(!item?'empty':!other?(i?'add':'del'):different?'change':'');
+        const number=document.createElement('small'); number.textContent=item ? item.line : ''; cell.append(number);
+        if(item && other && different && item.value!==other.value){
+          const stripForHighlight=ignorePrefix&&mode==='full'&&item.prefix.recognized&&other.prefix.recognized&&item.prefix.source===other.prefix.source;
+          const itemOffset=stripForHighlight?item.prefix.offset:0,otherOffset=stripForHighlight?other.prefix.offset:0;
+          const a=item.value.slice(itemOffset),b=other.value.slice(otherOffset);
+          let prefix=0,suffix=0;while(prefix<a.length&&prefix<b.length&&a[prefix]===b[prefix])prefix++;
+          while(suffix<a.length-prefix&&suffix<b.length-prefix&&a[a.length-1-suffix]===b[b.length-1-suffix])suffix++;
+          cell.append(document.createTextNode(item.value.slice(0,itemOffset)+a.slice(0,prefix)));const mark=document.createElement('span');mark.className='block-changed-word';mark.textContent=a.slice(prefix,a.length-suffix);cell.append(mark,document.createTextNode(suffix?a.slice(-suffix):''));
+        }else cell.append(document.createTextNode(item ? item.value : ''));
+        fragments[i].append(cell);
+      }
+      rowIndex++;
+    }
+    columns.forEach((column,index)=>{column.append(fragments[index]);column.scrollTop=0;column.scrollLeft=0});
+    $('diff-position').textContent=`0 / ${diffPositions.length}`;$('diff-prev').disabled=!diffPositions.length;$('diff-next').disabled=!diffPositions.length;
+  }
+  function navigateDifference(step) {
+    if(!diffPositions.length)return;
+    activeDiff=activeDiff<0?(step<0?diffPositions.length-1:0):(activeDiff+step+diffPositions.length)%diffPositions.length;
+    for(const cell of dialog.querySelectorAll('.block-cell.diff-selected'))cell.classList.remove('diff-selected');
+    const row=diffPositions[activeDiff];
+    for(const id of ['block-left','block-right']){const column=$(id),cell=column.children[row];if(!cell)continue;cell.classList.add('diff-selected');column.scrollTop+=cell.getBoundingClientRect().top-column.getBoundingClientRect().top-column.clientHeight/2+cell.clientHeight/2}
+    $('diff-position').textContent=`${activeDiff+1} / ${diffPositions.length}`;
+  }
+  $('open-block-diff').onclick = () => { updateBlockDiff(); dialog.showModal(); };
+  $('close-block').onclick = () => dialog.close();
+  $('block-display').onchange = updateBlockDiff;
+  $('block-ignore-prefix').onchange = updateBlockDiff;
+  $('block-changed-only').onchange = updateBlockDiff;
+  $('diff-prev').onclick=()=>navigateDifference(-1);$('diff-next').onclick=()=>navigateDifference(1);
+  let blockScrollSync=false;
+  for(const [source,target] of [['block-left','block-right'],['block-right','block-left']])$(source).addEventListener('scroll',()=>{
+    if(blockScrollSync)return;blockScrollSync=true;$(target).scrollTop=$(source).scrollTop;$(target).scrollLeft=$(source).scrollLeft;requestAnimationFrame(()=>{blockScrollSync=false});
+  });
+  $('save-block').onclick = () => { const text=blockRows.map(pair=>pair.map(item=>item ? `${item.line} ${item.value}` : '').join('\t|\t')).join('\n'); const url=URL.createObjectURL(new Blob([text],{type:'text/plain;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='log-block-diff.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000); };
+  $('analysis-toggle').onclick = () => { summaryPane.hidden=!summaryPane.hidden;$('analysis-toggle').setAttribute('aria-expanded',String(!summaryPane.hidden));if (!summaryPane.hidden) renderGroups();syncLabels(); };
+  $('open-single').onclick = () => $('single-file').click();
+  function decodeLog(bytes, selected) {
+    let encoding = selected;
+    if (encoding === 'auto') {
+      if (bytes.length >= 3 && bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf) encoding = 'utf-8';
+      else if (bytes.length >= 2 && bytes[0] === 0xff && bytes[1] === 0xfe) encoding = 'utf-16le';
+      else if (bytes.length >= 2 && bytes[0] === 0xfe && bytes[1] === 0xff) encoding = 'utf-16be';
+      else {
+        try { new TextDecoder('utf-8', {fatal:true}).decode(bytes); encoding = 'utf-8'; }
+        catch (error) { encoding = 'euc-kr'; }
+      }
+    }
+    const text = new TextDecoder(encoding, {fatal:true}).decode(bytes);
+    const names = {'utf-8':'UTF-8','euc-kr':'CP949 / EUC-KR','utf-16le':'UTF-16 LE','utf-16be':'UTF-16 BE','windows-1252':'Windows-1252'};
+    return {text, encoding:names[encoding] || encoding};
+  }
+  async function loadSingle(file) {
+    const generation = ++loadGeneration;
+    currentFileObject = file;
+    try {
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      if (generation !== loadGeneration) return;
+      const decoded = decodeLog(bytes, $('encoding').value);
+      $('a').value=decoded.text; $('b').value=''; currentFileObject=file; currentFile=`${file.name} · ${decoded.encoding}`;
+      resetBlocks(); analyze(); syncLabels();
+    } catch (error) {
+      if (generation !== loadGeneration) return;
+      $('single-name').textContent=label('readError')+': '+(lang === 'ko' ? '선택한 인코딩을 확인하세요.' : 'Check the selected encoding.');
+    }
+  }
+  $('encoding').onchange = () => { if (currentFileObject) loadSingle(currentFileObject); };
+  $('single-file').onchange = event => { const file=event.target.files[0];if(file)loadSingle(file);event.target.value=''; };
+  screen.addEventListener('dragover',event=>{event.preventDefault();screen.classList.add('drop-active')});
+  screen.addEventListener('dragleave',()=>screen.classList.remove('drop-active'));
+  screen.addEventListener('drop',event=>{event.preventDefault();screen.classList.remove('drop-active');const file=event.dataTransfer.files[0];if(file)loadSingle(file)});
+  $('paste-single').onclick = () => { $('single-text').value=$('a').value;pasteDialog.showModal(); };
+  $('close-paste').onclick = () => pasteDialog.close();
+  $('apply-paste').onclick = () => { loadGeneration++;currentFileObject=null;$('a').value=$('single-text').value;$('b').value='';currentFile='';resetBlocks();analyze();syncLabels();pasteDialog.close(); };
+  $('sample-single').onclick = () => { loadGeneration++;currentFileObject=null;$('a').value=samples.app[0];$('b').value='';currentFile='Sample log';resetBlocks();analyze();syncLabels(); };
+  nativeSampleButton.onclick = () => {
+    loadGeneration++; currentFileObject=null;
+    $('a').value = [
+      'APP:[2026-11-06, 08:25:54.000][00015480][00019892]:[init_config] > name: use_cache, default: 0',
+      'APP:[2026-11-06, 08:25:54.010][00015480][00019892]:[init_config] < result: use_cache, value: 1',
+      'APP:[2026-11-06, 08:25:54.020][00015480][00019892]:[check_service] INFO connected to https://example.test/api',
+      'APP:[2026-11-06, 08:25:54.030][00015480][00019892]:[check_service] WARN retry count: 2',
+      'APP:[2026-11-06, 08:25:54.040][00015480][00019892]:[check_service] ERROR timeout, code: 0x01'
+    ].join('\n');
+    $('b').value = ''; currentFile = lang === 'ko' ? '상세 로그 샘플' : 'Detailed log sample'; resetBlocks(); analyze(); syncLabels();
+  };
+  const priorRenderGroups = renderGroups;
+  renderGroups = function() {
+    if (summaryPane.hidden || automaticPanel.hidden) return;
+    priorRenderGroups();
+    for (const detail of $('groups').querySelectorAll('details')) {
+      const summary = detail.querySelector('summary');
+      const key = summary.firstChild.textContent.trim();
+      const group = groups.get(key);
+      if (!group) continue;
+      const list = group[0];
+      summary.querySelector('.badge').textContent = `${list.length} ${lang === 'ko' ? '줄' : 'lines'}`;
+      const pre = detail.querySelector('pre');
+      pre.textContent = list.slice(0,30).map(record => `${record.line}  ${record.raw}`).join('\n') + (list.length > 30 ? '\n…' : '');
+      const button = detail.querySelector('button');
+      button.textContent = lang === 'ko' ? '첫 두 줄 비교' : 'Compare first two lines';
+      button.disabled = list.length < 2;
+      button.onclick = () => {
+        block.a=[list[0].line,list[0].line]; block.b=[list[1].line,list[1].line]; block.active=null;block.start=null;
+        refreshSelection(); updateBlockDiff(); dialog.showModal();
+      };
+    }
+  };
+  const priorAnalyze = analyze;
+  analyze = function() {
+    priorAnalyze();
+    $('lineCount').textContent=records[0].length;
+    $('errorCount').textContent=records[0].filter(record=>record.level==='ERROR').length;
+    $('unparsedCount').textContent=records[0].filter(record=>!record.parsed).length;
+    rebuildFolds();
+  };
+  const priorSetLang=setLang;
+  setLang=function(value) { priorSetLang(value);syncLabels();if(dialog.open)updateBlockDiff(); };
+  $('en').onclick=()=>setLang('en'); $('ko').onclick=()=>setLang('ko');
+  for (const id of ['viewer-search','viewer-level']) $(id).addEventListener('input',()=>requestAnimationFrame(refreshSelection));
+  screen.addEventListener('viewer-rendered',refreshSelection);
+  $('a').value=''; $('b').value=''; analyze();syncLabels();
+  let layoutFrame=0;
+  function updateWorkspaceHeight() {
+    layoutFrame=0;
+    const top=workspace.getBoundingClientRect().top+window.scrollY;
+    const overhead=[...viewer.children].filter(child=>!child.classList.contains('log-viewport')).reduce((sum,child)=>sum+child.getBoundingClientRect().height,0)+2;
+    const height=Math.ceil(Math.max(window.innerHeight-top-16,overhead+140));
+    const value=`${height}px`;
+    if(workspace.style.getPropertyValue('--workspace-height')!==value)workspace.style.setProperty('--workspace-height',value);
+  }
+  function scheduleWorkspaceHeight() { if(!layoutFrame)layoutFrame=requestAnimationFrame(updateWorkspaceHeight); }
+  window.addEventListener('resize',scheduleWorkspaceHeight);
+  if(typeof ResizeObserver!=='undefined'){
+    const observer=new ResizeObserver(scheduleWorkspaceHeight);
+    for(const element of [workspace,document.querySelector('.top'),document.querySelector('.intro'),...viewer.children])if(!element.classList.contains('log-viewport'))observer.observe(element);
+  }
+  scheduleWorkspaceHeight();
+})();
+</script></body></html>

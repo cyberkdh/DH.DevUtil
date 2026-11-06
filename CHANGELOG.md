@@ -8,6 +8,12 @@ Notable changes to DH.DevUtil are listed here. The newest changes appear first.
 
 ### Added
 
+- Add Log Analyzer as a standalone local HTML tool with English/Korean UI, samples, and a resizable log viewer and analysis panel.
+- Support UTF-8, CP949/EUC-KR, UTF-16 and Windows-1252, with automatic BOM and encoding detection.
+- Add syntax coloring, severity filtering, virtualized log rendering, search highlighting, navigation, and an overview bar.
+- Add automatic grouping and named start/end patterns with folding, block navigation, and reusable JSON templates.
+- Compare selected blocks side by side with synchronized scrolling, difference navigation, and file export. Recognized timestamp and numeric ID headers can be ignored while displaying original lines; detection counts and alternative display modes are available.
+
 - Add TOTP/HOTP Simulator, UUID/ULID Inspector, URL/Query Parser, Cron Explainer, Asymmetric Cryptography Simulator, and generic API Request Signing Simulator as standalone local HTML tools with English/Korean guides.
 - Add RIPEMD-160 to File Hash Calculator as a legacy compatibility algorithm.
 - Add PEM/DER certificate file picker and editor drag-and-drop loading to PEM · ASN.1 · X.509 Viewer, with stronger button hover/focus contrast.

@@ -8,6 +8,12 @@ DH.DevUtil의 주요 변경 사항을 기록합니다. 최신 변경이 위에 �
 
 ### 추가
 
+- 영문·한국어 UI, 샘플, 크기 조절 가능한 로그 뷰어와 분석 패널을 갖춘 독립 실행형 Log Analyzer를 추가했습니다.
+- UTF-8, CP949/EUC-KR, UTF-16, Windows-1252와 BOM·인코딩 자동 감지를 지원합니다.
+- 로그 구문 색상, 레벨 필터, 가상 렌더링, 검색 강조·이동과 위치 표시줄을 추가했습니다.
+- 자동 그룹화와 이름별 시작·끝 패턴, 접기, 블록 이동 및 JSON 템플릿 저장·불러오기를 추가했습니다.
+- 선택한 블록을 동기화 스크롤, 차이 이동, 파일 저장과 함께 좌우 비교합니다. 원본을 표시하면서 인식된 시간·숫자 ID 헤더를 무시할 수 있고 감지 줄 수와 다른 표시 방식도 제공합니다.
+
 - TOTP/HOTP Simulator, UUID/ULID Inspector, URL/Query Parser, Cron Explainer, Asymmetric Cryptography Simulator, generic API Request Signing Simulator를 독립 실행형 local HTML 도구로 추가하고 영문/한국어 안내 문서를 제공했습니다.
 - File Hash Calculator에 기존 형식 호환용 legacy algorithm인 RIPEMD-160을 추가했습니다.
 - PEM · ASN.1 · X.509 Viewer에 PEM/DER 인증서 파일 선택과 editor 직접 drag-and-drop을 추가하고 버튼 hover/focus 대비를 보강했습니다.

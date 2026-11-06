@@ -8,6 +8,7 @@ DH.DevUtil is a collection of lightweight utilities for everyday development tas
 
 | Tool | What it does | Live demo | Source | Guide |
 |---|---|---|---|---|
+| Log Analyzer | View one log locally, group patterns, and compare selected blocks side by side. | [Run (Ctrl-click for a new tab)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.log-analyzer.html) | [View source](./tools/DH.DevUtil.log-analyzer.html) | [Guide](./docs/LOG_ANALYZER.md) |
 | JSON Parser | Validate, explore, format, and minify JSON. Inspect Base64 values and preview embedded images. | [Run (Ctrl-click for a new tab)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.json.html) | [View source](./tools/DH.DevUtil.json.html) | [Guide](./docs/JSON_PARSER.md) |
 | File Hash Calculator | Calculate cryptographic hashes, checksums, and non-cryptographic hashes for local files. | [Run (Ctrl-click for a new tab)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.hash.html) | [View source](./tools/DH.DevUtil.hash.html) | [Algorithms and guide](./docs/HASH_ALGORITHMS.md) |
 | HMAC Simulator (Base) | Calculate and verify HMAC tags and explore the Client → in-transit data → Server flow. | [Run (Ctrl-click for a new tab)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.hmac-simulator-base.html) | [View source](./tools/DH.DevUtil.hmac-simulator-base.html) | [Guide](./docs/HMAC_SIMULATOR.md) |
@@ -35,6 +36,12 @@ DH.DevUtil is a collection of lightweight utilities for everyday development tas
 | DH.MarkDown.Flow | Local-first Markdown editor with Source, WYSIWYG, and Split modes, Mermaid diagrams, and Markdown/HTML/PDF/Word export. | [Run (Ctrl-click for a new tab)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.MarkDown.Flow/index.html)<br>[Download offline version (right-click ??Save link as)](https://raw.githubusercontent.com/cyberkdh/DH.DevUtil/main/tools/DH.MarkDown.Flow/index_local.html) | [View files](./tools/DH.MarkDown.Flow/) | [Guide](./docs/MARKDOWN_FLOW.md) |
 
 Live demos run the static HTML tools on GitHub Pages. The source links open the HTML files in GitHub's code viewer; they do not run the tools. To use a tool offline, clone the repository or download its HTML file, then open it in a browser. For DH.MarkDown.Flow, open `index_local.html`; `index.html` needs a web server.
+
+## Log Analyzer preview
+
+View one log, group patterns, and compare selected blocks side by side. See the [Log Analyzer guide](./docs/LOG_ANALYZER.md).
+
+![Log Analyzer preview](./docs/images/DH.DevUtil.log-analyzer.png)
 
 ## HTTP Digest Authentication Simulator preview
 

@@ -8,6 +8,7 @@ DH.DevUtil은 일상적인 개발 작업에 사용하는 가벼운 유틸리티 
 
 | 도구 | 기능 | 온라인 실행 | 소스 | 안내 |
 |---|---|---|---|---|
+| Log Analyzer | 로그 하나를 보고 자동 패턴으로 묶어 선택한 구간을 좌우 비교 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.log-analyzer.html) | [소스 보기](./tools/DH.DevUtil.log-analyzer.html) | [사용 안내](./docs/LOG_ANALYZER.ko.md) |
 | JSON Parser | JSON 검증·탐색·형식화·축약, Base64 값 확인 및 내장 이미지 미리보기 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.json.html) | [소스 보기](./tools/DH.DevUtil.json.html) | [사용 안내](./docs/JSON_PARSER.ko.md) |
 | File Hash Calculator | 로컬 파일의 암호학적 해시, 체크섬 및 비암호학 해시 계산 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.hash.html) | [소스 보기](./tools/DH.DevUtil.hash.html) | [알고리즘 및 사용 안내](./docs/HASH_ALGORITHMS.ko.md) |
 | HMAC Simulator (Base) | HMAC 태그를 계산·검증하고 Client → 전달 데이터 → Server 흐름을 확인 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.hmac-simulator-base.html) | [소스 보기](./tools/DH.DevUtil.hmac-simulator-base.html) | [사용 안내](./docs/HMAC_SIMULATOR.ko.md) |
@@ -35,6 +36,12 @@ DH.DevUtil은 일상적인 개발 작업에 사용하는 가벼운 유틸리티 
 | DH.MarkDown.Flow | Source·WYSIWYG·Split 편집, Mermaid 다이어그램, Markdown/HTML/PDF/Word 내보내기를 지원하는 로컬 우선 Markdown 편집기 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.MarkDown.Flow/index.html)<br>[오프라인 버전 다운로드 (우클릭 → 다른 이름으로 링크 저장)](https://raw.githubusercontent.com/cyberkdh/DH.DevUtil/main/tools/DH.MarkDown.Flow/index_local.html) | [파일 보기](./tools/DH.MarkDown.Flow/) | [사용 안내](./docs/MARKDOWN_FLOW.ko.md) |
 
 온라인 데모는 GitHub Pages에서 정적 HTML 도구를 실행합니다. 소스 링크는 GitHub에서 HTML 코드를 보여줄 뿐 도구를 실행하지 않습니다. 오프라인으로 사용하려면 저장소를 clone하거나 도구 HTML 파일을 내려받아 브라우저에서 여세요. DH.MarkDown.Flow는 `index_local.html`을 여세요. `index.html`은 웹 서버가 필요합니다.
+
+## Log Analyzer 미리보기
+
+로그 하나를 보고 자동 패턴으로 묶어 선택한 두 구간을 좌우 비교합니다. [Log Analyzer 안내](./docs/LOG_ANALYZER.ko.md)를 참고하세요.
+
+![Log Analyzer 미리보기](./docs/images/DH.DevUtil.log-analyzer.png)
 
 ## HTTP Digest Authentication Simulator 미리보기
 
