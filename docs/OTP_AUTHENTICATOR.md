@@ -10,7 +10,7 @@ A standalone, local TOTP authenticator for services that support standard `otpau
 
 Select **Help** in the tool for setup instructions and the distinction between the service's setup key, changing OTP, and recovery codes. The secret-key field also explains where to find the setup key.
 
-1. Open [OTP Authenticator](../tools/DH.DevUtil.otp-authenticator.html) in a supported browser and create a vault with a master password of at least 12 characters.
+1. Open [OTP Authenticator](../tools/DH.DevUtil.otp-authenticator.html) in a supported browser and create a vault with a master password of at least 8 characters.
 2. Enter the account name and Base32 secret, or apply a TOTP setup URI. A QR image can be read when the browser supports `BarcodeDetector`; otherwise use the setup URI or secret.
 3. Select the service's algorithm, digits and period. Save the account, verify its code with the service, and retain the service's recovery codes.
 4. Search, edit, delete, favorite, reorder, or copy codes. Export an encrypted backup and store it safely. Import replaces the current vault after confirmation and requires the backup's original password.

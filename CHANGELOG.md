@@ -8,6 +8,7 @@ Notable changes to DH.DevUtil are listed here. The newest changes appear first.
 
 ### Added
 
+- Allow OTP Authenticator vault creation with a master password of at least eight characters.
 - Confirm when an OTP Authenticator auto-lock setting is applied.
 - Allow OTP Authenticator users to choose an inactivity timeout or disable auto-lock; the default is 30 minutes.
 - Add OTP Authenticator with local TOTP generation, an encrypted vault and backup, account recovery-code management, and an English/Korean guide.
