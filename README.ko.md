@@ -38,6 +38,12 @@ DH.DevUtil은 일상적인 개발 작업에 사용하는 가벼운 유틸리티 
 
 온라인 데모는 GitHub Pages에서 정적 HTML 도구를 실행합니다. 소스 링크는 GitHub에서 HTML 코드를 보여줄 뿐 도구를 실행하지 않습니다. 오프라인으로 사용하려면 저장소를 clone하거나 도구 HTML 파일을 내려받아 브라우저에서 여세요. DH.MarkDown.Flow는 `index_local.html`을 여세요. `index.html`은 웹 서버가 필요합니다.
 
+## OTP Authenticator 미리보기
+
+TOTP 코드를 로컬에서 생성하고 계정과 복구 코드를 암호화 보관함에서 관리하며 암호화 백업을 저장할 수 있습니다. 설정 방법과 보안상 고려 사항은 [OTP Authenticator 안내](./docs/OTP_AUTHENTICATOR.ko.md)를 참고하세요.
+
+![OTP Authenticator 미리보기](./docs/images/DH.DevUtil.otp-authenticator.png)
+
 ## Log Analyzer 미리보기
 
 로그 하나를 보고 자동 패턴으로 묶어 선택한 두 구간을 좌우 비교합니다. [Log Analyzer 안내](./docs/LOG_ANALYZER.ko.md)를 참고하세요.

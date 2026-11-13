@@ -38,6 +38,12 @@ DH.DevUtil is a collection of lightweight utilities for everyday development tas
 
 Live demos run the static HTML tools on GitHub Pages. The source links open the HTML files in GitHub's code viewer; they do not run the tools. To use a tool offline, clone the repository or download its HTML file, then open it in a browser. For DH.MarkDown.Flow, open `index_local.html`; `index.html` needs a web server.
 
+## OTP Authenticator preview
+
+Generate TOTP codes locally, manage accounts and recovery codes in an encrypted vault, and export an encrypted backup. See the [OTP Authenticator guide](./docs/OTP_AUTHENTICATOR.md) for setup and security considerations.
+
+![OTP Authenticator preview](./docs/images/DH.DevUtil.otp-authenticator.png)
+
 ## Log Analyzer preview
 
 View one log, group patterns, and compare selected blocks side by side. See the [Log Analyzer guide](./docs/LOG_ANALYZER.md).
