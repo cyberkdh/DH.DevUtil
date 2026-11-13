@@ -17,7 +17,7 @@ Select **Help** in the tool for setup instructions and the distinction between t
 
 Optionally add recovery codes when adding or editing an account, or choose **Add or edit recovery codes** on an existing account after the service issues them. They remain hidden until opened and are included in the encrypted vault and backup. Services generally accept each recovery code only once; the tool does not track whether a code has been used. Keep a separate copy in case you lose access to the vault or its password.
 
-The vault locks after five minutes of inactivity. Browser storage is specific to the browser and origin and can be cleared or unavailable in private browsing. Keep a separate backup and test recovery before relying on the tool.
+The default auto-lock timeout is 30 minutes; choose 5, 15, 30, or 60 minutes, or disable auto-lock until the page closes or you lock it manually. A confirmation appears after the setting is applied. Activity in other applications does not reset the timer. The preference is stored separately in this browser, not in the vault backup. Disabling auto-lock leaves secrets accessible in memory while the page remains open. Browser storage is specific to the browser and origin and can be cleared or unavailable in private browsing. Keep a separate backup and test recovery before relying on the tool.
 
 ## Security and limitations
 

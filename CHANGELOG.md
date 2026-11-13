@@ -8,6 +8,8 @@ Notable changes to DH.DevUtil are listed here. The newest changes appear first.
 
 ### Added
 
+- Confirm when an OTP Authenticator auto-lock setting is applied.
+- Allow OTP Authenticator users to choose an inactivity timeout or disable auto-lock; the default is 30 minutes.
 - Add OTP Authenticator with local TOTP generation, an encrypted vault and backup, account recovery-code management, and an English/Korean guide.
 - Add Log Analyzer as a standalone local HTML tool with English/Korean UI, samples, and a resizable log viewer and analysis panel.
 - Support UTF-8, CP949/EUC-KR, UTF-16 and Windows-1252, with automatic BOM and encoding detection.
