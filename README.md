@@ -8,6 +8,7 @@ DH.DevUtil is a collection of lightweight utilities for everyday development tas
 
 | Tool | What it does | Live demo | Source | Guide |
 |---|---|---|---|---|
+| OTP Authenticator | Generate TOTP codes locally and manage an encrypted vault. | [Run (Ctrl-click for a new tab)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.otp-authenticator.html) | [View source](./tools/DH.DevUtil.otp-authenticator.html) | [Guide](./docs/OTP_AUTHENTICATOR.md) |
 | Log Analyzer | View one log locally, group patterns, and compare selected blocks side by side. | [Run (Ctrl-click for a new tab)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.log-analyzer.html) | [View source](./tools/DH.DevUtil.log-analyzer.html) | [Guide](./docs/LOG_ANALYZER.md) |
 | JSON Parser | Validate, explore, format, and minify JSON. Inspect Base64 values and preview embedded images. | [Run (Ctrl-click for a new tab)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.json.html) | [View source](./tools/DH.DevUtil.json.html) | [Guide](./docs/JSON_PARSER.md) |
 | File Hash Calculator | Calculate cryptographic hashes, checksums, and non-cryptographic hashes for local files. | [Run (Ctrl-click for a new tab)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.hash.html) | [View source](./tools/DH.DevUtil.hash.html) | [Algorithms and guide](./docs/HASH_ALGORITHMS.md) |

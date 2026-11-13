@@ -8,6 +8,7 @@ DH.DevUtil은 일상적인 개발 작업에 사용하는 가벼운 유틸리티 
 
 | 도구 | 기능 | 온라인 실행 | 소스 | 안내 |
 |---|---|---|---|---|
+| OTP Authenticator | TOTP 코드를 로컬에서 생성하고 암호화 보관함을 관리 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.otp-authenticator.html) | [소스 보기](./tools/DH.DevUtil.otp-authenticator.html) | [사용 안내](./docs/OTP_AUTHENTICATOR.ko.md) |
 | Log Analyzer | 로그 하나를 보고 자동 패턴으로 묶어 선택한 구간을 좌우 비교 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.log-analyzer.html) | [소스 보기](./tools/DH.DevUtil.log-analyzer.html) | [사용 안내](./docs/LOG_ANALYZER.ko.md) |
 | JSON Parser | JSON 검증·탐색·형식화·축약, Base64 값 확인 및 내장 이미지 미리보기 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.json.html) | [소스 보기](./tools/DH.DevUtil.json.html) | [사용 안내](./docs/JSON_PARSER.ko.md) |
 | File Hash Calculator | 로컬 파일의 암호학적 해시, 체크섬 및 비암호학 해시 계산 | [실행 (Ctrl+클릭으로 새 탭)](https://cyberkdh.github.io/DH.DevUtil/tools/DH.DevUtil.hash.html) | [소스 보기](./tools/DH.DevUtil.hash.html) | [알고리즘 및 사용 안내](./docs/HASH_ALGORITHMS.ko.md) |

@@ -8,6 +8,7 @@ Notable changes to DH.DevUtil are listed here. The newest changes appear first.
 
 ### Added
 
+- Add OTP Authenticator with local TOTP generation, an encrypted vault and backup, account recovery-code management, and an English/Korean guide.
 - Add Log Analyzer as a standalone local HTML tool with English/Korean UI, samples, and a resizable log viewer and analysis panel.
 - Support UTF-8, CP949/EUC-KR, UTF-16 and Windows-1252, with automatic BOM and encoding detection.
 - Add syntax coloring, severity filtering, virtualized log rendering, search highlighting, navigation, and an overview bar.
